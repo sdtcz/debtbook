@@ -7,6 +7,7 @@ import {
   getShop,
   softDeleteEntry,
 } from '../db/repo';
+import { useLocale } from '../hooks/useLocale';
 import type { Customer, Entry, ShopProfile } from '../lib/types';
 import {
   balanceLabel,
@@ -42,6 +43,7 @@ function fmtDue(ts: number): string {
 }
 
 export function CustomerDetailPage({ id, toast }: Props) {
+  const { t } = useLocale();
   const [shop, setShop] = useState<ShopProfile | null>(null);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]);
@@ -59,7 +61,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
         getRecentEntryForUndo(id),
       ]);
       if (!c) {
-        toast('Customer not found');
+        toast(t('customer.notFound'));
         navigate('/');
         return;
       }
@@ -88,40 +90,43 @@ export function CustomerDetailPage({ id, toast }: Props) {
       phone: customer.phone,
       balanceKobo,
     });
-    if (result === 'whatsapp') toast('Opening WhatsApp…');
-    else if (result === 'sms') toast('Opening SMS…');
-    else if (result === 'share') toast('Shared');
-    else if (result === 'clipboard') toast('Message copied');
-    else toast('Could not open WhatsApp, share, or SMS');
+    if (result === 'whatsapp') toast(t('customer.openingWhatsApp'));
+    else if (result === 'sms') toast(t('customer.openingSms'));
+    else if (result === 'share') toast(t('customer.shared'));
+    else if (result === 'clipboard') toast(t('customer.messageCopied'));
+    else toast(t('customer.couldNotRemind'));
   };
 
   const onStatement = async () => {
     if (!customer || !shop) return;
     const text = buildStatement(shop, customer, entries, balanceKobo);
-    const result = await shareOrCopyText(text, `${customer.name} statement`);
-    if (result === 'share') toast('Statement shared');
-    else if (result === 'clipboard') toast('Statement copied');
+    const result = await shareOrCopyText(
+      text,
+      t('statement.shareTitle', { name: customer.name }),
+    );
+    if (result === 'share') toast(t('customer.statementShared'));
+    else if (result === 'clipboard') toast(t('customer.statementCopied'));
     else {
       window.prompt('Copy statement:', text);
     }
   };
 
   const removeEntry = async (entryId: string) => {
-    if (!confirm('Delete this entry?')) return;
+    if (!confirm(t('customer.deleteEntryConfirm'))) return;
     await softDeleteEntry(entryId);
     notifyChanged();
-    toast('Entry deleted');
+    toast(t('customer.entryDeleted'));
   };
 
   const undoLast = async () => {
     const recent = await getRecentEntryForUndo(id);
     if (!recent) {
-      toast('Nothing to undo (only last 10 minutes)');
+      toast(t('customer.nothingToUndo'));
       return;
     }
     await softDeleteEntry(recent.id);
     notifyChanged();
-    toast('Last entry undone');
+    toast(t('customer.lastUndone'));
   };
 
   if (loading || !customer) {
@@ -131,10 +136,10 @@ export function CustomerDetailPage({ id, toast }: Props) {
           <button class="icon-btn" type="button" onClick={() => navigate('/')}>
             ←
           </button>
-          <h1>Customer</h1>
+          <h1>{t('common.customer')}</h1>
         </header>
         <main class="main">
-          <div class="empty">Loading…</div>
+          <div class="empty">{t('common.loading')}</div>
         </main>
       </div>
     );
@@ -149,7 +154,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
         <button
           class="icon-btn"
           type="button"
-          aria-label="Back"
+          aria-label={t('common.back')}
           onClick={() => navigate('/')}
         >
           ←
@@ -157,15 +162,15 @@ export function CustomerDetailPage({ id, toast }: Props) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <h1 style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {customer.name}
-            {overdue && <span class="overdue-badge">Overdue</span>}
+            {overdue && <span class="overdue-badge">{t('common.overdue')}</span>}
           </h1>
-          <div class="sub">{customer.phone || 'No phone'}</div>
+          <div class="sub">{customer.phone || t('common.noPhone')}</div>
         </div>
         <StatusBadge />
         <button
           class="icon-btn"
           type="button"
-          aria-label="Edit"
+          aria-label={t('customer.edit')}
           onClick={() => navigate(`/customers/${id}/edit`)}
         >
           ✎
@@ -178,13 +183,13 @@ export function CustomerDetailPage({ id, toast }: Props) {
           <div class="label">{balanceLabel(balanceKobo)}</div>
           {customer.dueAt && (
             <div class="hint" style={{ marginTop: 6 }}>
-              Due {fmtDue(customer.dueAt)}
-              {overdue ? ' · overdue' : ''}
+              {t('customer.due', { date: fmtDue(customer.dueAt) })}
+              {overdue ? t('customer.overdueSuffix') : ''}
             </div>
           )}
           {tone === 'credit' && (
             <div class="hint" style={{ marginTop: 6 }}>
-              Overpaid — shop owes this customer
+              {t('customer.overpaid')}
             </div>
           )}
         </div>
@@ -195,7 +200,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
             type="button"
             onClick={() => navigate(`/customers/${id}/entry/credit`)}
           >
-            + Credit sale
+            {t('customer.creditSale')}
           </button>
           <button
             class="btn btn-primary"
@@ -203,45 +208,47 @@ export function CustomerDetailPage({ id, toast }: Props) {
             style={{ background: 'var(--ok)' }}
             onClick={() => navigate(`/customers/${id}/entry/payment`)}
           >
-            − Payment
+            {t('customer.payment')}
           </button>
         </div>
 
         <div class="btn-row">
           <button class="btn btn-secondary" type="button" onClick={onRemind}>
-            Remind
+            {t('customer.remind')}
           </button>
           <button class="btn btn-ghost" type="button" onClick={onStatement}>
-            Statement
+            {t('customer.statement')}
           </button>
         </div>
 
         {canUndo && (
           <div class="btn-row" style={{ marginTop: 8 }}>
             <button class="btn btn-ghost" type="button" onClick={undoLast}>
-              Undo last entry
+              {t('customer.undoLast')}
             </button>
           </div>
         )}
 
         {customer.note && (
           <p class="muted" style={{ marginTop: 12 }}>
-            Note: {customer.note}
+            {t('customer.note', { note: customer.note })}
           </p>
         )}
 
-        <div class="section-title">History</div>
+        <div class="section-title">{t('customer.history')}</div>
         <div class="card" style={{ paddingTop: 4, paddingBottom: 4 }}>
           {entries.length === 0 ? (
             <div class="empty" style={{ padding: 20 }}>
-              No entries yet. Record a credit sale or payment.
+              {t('customer.noEntries')}
             </div>
           ) : (
             entries.map((e) => (
               <div class="entry-row" key={e.id}>
                 <div class="left">
                   <div class={`type ${e.type}`}>
-                    {e.type === 'credit' ? 'Credit sale' : 'Payment'}
+                    {e.type === 'credit'
+                      ? t('customer.creditSaleLabel')
+                      : t('customer.paymentLabel')}
                   </div>
                   <div class="when">{fmtWhen(e.occurredAt)}</div>
                   {e.note && <div class="note">{e.note}</div>}
@@ -255,7 +262,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
                     type="button"
                     class="icon-btn"
                     style={{ color: 'var(--muted)', minHeight: 36, minWidth: 36 }}
-                    aria-label="Delete entry"
+                    aria-label={t('customer.deleteEntry')}
                     onClick={() => removeEntry(e.id)}
                   >
                     ×

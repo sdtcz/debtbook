@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 /** Naira formatting helpers. Store amounts in kobo (integer). */
 
 const NGN = new Intl.NumberFormat('en-NG', {
@@ -46,9 +47,9 @@ export function parseNairaToKobo(input: string): number | null {
 
 /** Balance label: positive = customer owes, negative = shop owes */
 export function balanceLabel(kobo: number): string {
-  if (kobo > 0) return 'owes you';
-  if (kobo < 0) return 'you owe';
-  return 'settled';
+  if (kobo > 0) return t('balance.owesYou');
+  if (kobo < 0) return t('balance.youOwe');
+  return t('balance.settled');
 }
 
 export function balanceTone(kobo: number): 'debt' | 'credit' | 'zero' {

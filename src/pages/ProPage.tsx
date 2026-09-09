@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { notifyChanged } from '../components/StatusBadge';
 import { getShop, setEntitlement } from '../db/repo';
+import { useLocale } from '../hooks/useLocale';
 import { demoProEntitlement, getEntitlement, isPro } from '../lib/entitlement';
 import type { ShopProfile } from '../lib/types';
 import { navigate } from '../lib/router';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function ProPage({ toast }: Props) {
+  const { t } = useLocale();
   const [shop, setShop] = useState<ShopProfile | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -28,7 +30,7 @@ export function ProPage({ toast }: Props) {
       await setEntitlement(demoProEntitlement(30));
       notifyChanged();
       await refresh();
-      toast('Pro activated for 30 days (demo)');
+      toast(t('pro.activated'));
     } finally {
       setBusy(false);
     }
@@ -46,7 +48,7 @@ export function ProPage({ toast }: Props) {
         const body = await res.json().catch(() => ({}));
         toast(
           (body as { message?: string }).message ||
-            'Checkout not configured — use Activate Pro (demo)',
+            t('pro.checkoutNotConfigured'),
         );
         return;
       }
@@ -54,10 +56,10 @@ export function ProPage({ toast }: Props) {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        toast('No checkout URL — use demo activation');
+        toast(t('pro.noCheckoutUrl'));
       }
     } catch {
-      toast('Checkout unavailable — use Activate Pro (demo)');
+      toast(t('pro.checkoutUnavailable'));
     } finally {
       setBusy(false);
     }
@@ -72,47 +74,46 @@ export function ProPage({ toast }: Props) {
         <button
           class="icon-btn"
           type="button"
-          aria-label="Back"
+          aria-label={t('common.back')}
           onClick={() => navigate('/settings')}
         >
           ←
         </button>
-        <h1>DebtBook Pro</h1>
-        {pro && <span class="pro-badge">Pro</span>}
+        <h1>{t('pro.title')}</h1>
+        {pro && <span class="pro-badge">{t('common.pro')}</span>}
       </header>
       <main class="main settings-main">
         <section class="card">
           <div class="settings-group-label" style={{ marginTop: 0 }}>
-            Nigeria pricing
+            {t('pro.nigeriaPricing')}
           </div>
-          <p class="pro-hero-price">₦1,500/mo</p>
+          <p class="pro-hero-price">{t('pro.perMonth')}</p>
           <p class="muted" style={{ marginTop: 0, marginBottom: 12 }}>
-            or ₦12,000/year · Paystack when checkout is live
+            {t('pro.orYear')}
           </p>
 
           {pro ? (
             <div class="pro-status">
               <span aria-hidden="true">✓</span>
               <span>
-                You’re on Pro
+                {t('pro.youreOnPro')}
                 {ent.exp
-                  ? ` until ${new Date(ent.exp).toLocaleDateString('en-NG')}`
+                  ? t('pro.until', {
+                      date: new Date(ent.exp).toLocaleDateString('en-NG'),
+                    })
                   : ''}
                 {ent.source ? ` · ${ent.source}` : ''}
               </span>
             </div>
           ) : null}
 
-          <div class="settings-group-label">Included</div>
+          <div class="settings-group-label">{t('pro.included')}</div>
           <ul class="benefits">
-            <li>Encrypted cloud backup + multi-device restore (recovery code)</li>
-            <li>CSV export of customers, balances &amp; entries</li>
-            <li>Pro badge on your shop</li>
-            <li>No upgrade nag on Home</li>
-            <li>
-              Free still includes the offline ledger, remind, statement, local
-              JSON backup, and PIN
-            </li>
+            <li>{t('pro.benefitCloud')}</li>
+            <li>{t('pro.benefitCsv')}</li>
+            <li>{t('pro.benefitBadge')}</li>
+            <li>{t('pro.benefitNoNag')}</li>
+            <li>{t('pro.benefitFree')}</li>
           </ul>
 
           {!pro && (
@@ -123,7 +124,7 @@ export function ProPage({ toast }: Props) {
                 disabled={busy}
                 onClick={activateDemo}
               >
-                Try Pro free for 30 days
+                {t('pro.tryFree')}
               </button>
               <div class="btn-row">
                 <button
@@ -132,12 +133,11 @@ export function ProPage({ toast }: Props) {
                   disabled={busy}
                   onClick={tryCheckout}
                 >
-                  Pay with Paystack
+                  {t('pro.paystack')}
                 </button>
               </div>
               <p class="muted" style={{ fontSize: '0.85rem', marginBottom: 0 }}>
-                Demo unlocks Pro on this phone only. Real Paystack checkout turns
-                on when server keys are set.
+                {t('pro.demoNote')}
               </p>
             </>
           )}

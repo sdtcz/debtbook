@@ -10,6 +10,7 @@
  * ---------------------------------------------------------------------------
  */
 
+import { t } from '../i18n';
 import { formatNaira } from './money';
 
 export function buildRemindMessage(
@@ -18,13 +19,14 @@ export function buildRemindMessage(
   balanceKobo: number,
 ): string {
   const amount = formatNaira(Math.abs(balanceKobo));
+  const vars = { customer: customerName, shop: shopName, amount };
   if (balanceKobo > 0) {
-    return `Hello ${customerName}, this is a reminder from ${shopName}. Your outstanding balance is ${amount}. Please settle when you can. Thank you.`;
+    return t('remind.owes', vars);
   }
   if (balanceKobo < 0) {
-    return `Hello ${customerName}, this is ${shopName}. We owe you ${amount}. Please collect at your convenience. Thank you.`;
+    return t('remind.youOwe', vars);
   }
-  return `Hello ${customerName}, this is ${shopName}. Your account is settled. Thank you for your business.`;
+  return t('remind.settled', vars);
 }
 
 /**
@@ -85,7 +87,7 @@ export async function remindCustomer(opts: {
 
   if (typeof navigator !== 'undefined' && navigator.share) {
     try {
-      await navigator.share({ text: message, title: 'Debt reminder' });
+      await navigator.share({ text: message, title: t('remind.shareTitle') });
       return 'share';
     } catch {
       /* cancelled */

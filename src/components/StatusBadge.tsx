@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'preact/hooks';
 import { countPendingOutbox } from '../db/outbox';
+import { useLocale } from '../hooks/useLocale';
 import { useOnline } from '../hooks/useOnline';
 
 export function StatusBadge() {
   const online = useOnline();
+  const { t } = useLocale();
   const [pending, setPending] = useState(0);
 
   useEffect(() => {
@@ -28,16 +30,16 @@ export function StatusBadge() {
 
   if (!online) {
     return (
-      <span class="badge offline" title="You are offline — data stays on this phone">
-        Offline
-        {pending > 0 ? ` · ${pending} pending` : ''}
+      <span class="badge offline" title={t('status.offlineTitle')}>
+        {t('status.offline')}
+        {pending > 0 ? ` · ${t('status.pending', { n: pending })}` : ''}
       </span>
     );
   }
   if (pending > 0) {
     return (
-      <span class="badge pending" title="Changes queued for sync when a backend is connected">
-        {pending} pending sync
+      <span class="badge pending" title={t('status.pendingTitle')}>
+        {t('status.pendingSync', { n: pending })}
       </span>
     );
   }

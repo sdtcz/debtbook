@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { useLocale } from '../hooks/useLocale';
 import { verifyPin } from '../lib/pin';
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function PinLock({ salt, hash, onUnlock }: Props) {
+  const { t } = useLocale();
   const [digits, setDigits] = useState('');
   const [error, setError] = useState(false);
 
@@ -38,11 +40,11 @@ export function PinLock({ salt, hash, onUnlock }: Props) {
   const back = () => setDigits((prev) => prev.slice(0, -1));
 
   return (
-    <div class="pin-overlay" role="dialog" aria-modal="true" aria-label="Unlock DebtBook">
+    <div class="pin-overlay" role="dialog" aria-modal="true" aria-label={t('pin.unlock')}>
       <div class="pin-card">
-        <h2>Unlock DebtBook</h2>
+        <h2>{t('pin.unlock')}</h2>
         <p class="muted" style={{ margin: 0 }}>
-          Enter your 4-digit PIN
+          {t('pin.enter')}
         </p>
         <div class="pin-dots" aria-hidden="true">
           {[0, 1, 2, 3].map((i) => (
@@ -51,7 +53,7 @@ export function PinLock({ salt, hash, onUnlock }: Props) {
         </div>
         {error && (
           <p style={{ color: 'var(--danger)', margin: '0 0 10px', fontWeight: 700 }}>
-            Wrong PIN
+            {t('pin.wrong')}
           </p>
         )}
         <div class="pin-pad">
@@ -63,7 +65,7 @@ export function PinLock({ salt, hash, onUnlock }: Props) {
                 key={k}
                 type="button"
                 onClick={() => (k === '⌫' ? back() : press(k))}
-                aria-label={k === '⌫' ? 'Backspace' : k}
+                aria-label={k === '⌫' ? t('pin.backspace') : k}
               >
                 {k}
               </button>

@@ -46,6 +46,7 @@ export async function updateShopFields(
       | 'cloudBackupEnabled'
       | 'lastCloudBackupAt'
       | 'cloudBackupId'
+      | 'locale'
     >
   > & { clearPin?: boolean },
 ): Promise<ShopProfile> {
@@ -82,6 +83,12 @@ export async function setCloudBackupMeta(meta: {
   cloudBackupId?: string;
 }): Promise<ShopProfile> {
   return updateShopFields(meta);
+}
+
+export async function setShopLocale(locale: 'en' | 'ha' | 'yo'): Promise<ShopProfile | undefined> {
+  const existing = await getShop();
+  if (!existing) return undefined;
+  return updateShopFields({ locale });
 }
 
 /* ── Customers ────────────────────────────────────────── */

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { MoneyInput } from '../components/MoneyInput';
 import { notifyChanged } from '../components/StatusBadge';
 import { addEntry, getCustomer, softDeleteEntry } from '../db/repo';
+import { useLocale } from '../hooks/useLocale';
 import type { EntryType } from '../lib/types';
 import { parseNairaToKobo } from '../lib/money';
 import { navigate } from '../lib/router';
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function EntryFormPage({ customerId, initialType, toast }: Props) {
+  const { t } = useLocale();
   const [type, setType] = useState<EntryType>(initialType || 'credit');
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
@@ -24,7 +26,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
   useEffect(() => {
     getCustomer(customerId).then((c) => {
       if (!c) {
-        toast('Customer not found');
+        toast(t('customer.notFound'));
         navigate('/');
         return;
       }
@@ -40,7 +42,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
     e.preventDefault();
     const kobo = parseNairaToKobo(amount);
     if (kobo === null || kobo <= 0) {
-      setError('Enter a valid amount greater than zero');
+      setError(t('entry.validAmount'));
       return;
     }
     setBusy(true);
@@ -53,21 +55,22 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
         note: note || undefined,
       });
       notifyChanged();
-      const label = type === 'credit' ? 'Credit sale recorded' : 'Payment recorded';
+      const label =
+        type === 'credit' ? t('entry.creditRecorded') : t('entry.paymentRecorded');
       toast(label, {
         ms: 10000,
         action: {
-          label: 'Undo',
+          label: t('common.undo'),
           onClick: async () => {
             await softDeleteEntry(entry.id);
             notifyChanged();
-            toast('Entry undone');
+            toast(t('entry.undone'));
           },
         },
       });
       navigate(`/customers/${customerId}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save');
+      setError(err instanceof Error ? err.message : t('entry.couldNotSave'));
     } finally {
       setBusy(false);
     }
@@ -79,51 +82,53 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
         <button
           class="icon-btn"
           type="button"
-          aria-label="Back"
+          aria-label={t('common.back')}
           onClick={() => navigate(`/customers/${customerId}`)}
         >
           ←
         </button>
         <div style={{ flex: 1 }}>
-          <h1>{type === 'credit' ? 'Credit sale' : 'Payment'}</h1>
+          <h1>
+            {type === 'credit' ? t('entry.creditSale') : t('entry.payment')}
+          </h1>
           <div class="sub">{customerName}</div>
         </div>
       </header>
       <main class="main">
         <form class="card" onSubmit={submit}>
-          <div class="seg" role="group" aria-label="Entry type">
+          <div class="seg" role="group" aria-label={t('entry.type')}>
             <button
               type="button"
               class={type === 'credit' ? 'active credit' : ''}
               onClick={() => setType('credit')}
             >
-              Credit sale
+              {t('entry.creditSale')}
             </button>
             <button
               type="button"
               class={type === 'payment' ? 'active payment' : ''}
               onClick={() => setType('payment')}
             >
-              Payment
+              {t('entry.payment')}
             </button>
           </div>
 
           <MoneyInput
             id="amount"
-            label="Amount"
+            label={t('entry.amount')}
             value={amount}
             onInput={setAmount}
             autoFocus
           />
 
           <div class="field">
-            <label for="enote">Note (optional)</label>
+            <label for="enote">{t('entry.note')}</label>
             <input
               id="enote"
               class="input"
               value={note}
               maxlength={120}
-              placeholder="e.g. 2 bags of rice"
+              placeholder={t('entry.notePlaceholder')}
               onInput={(e) => setNote((e.target as HTMLInputElement).value)}
             />
           </div>
@@ -139,10 +144,10 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
             style={type === 'payment' ? { background: 'var(--ok)' } : undefined}
           >
             {busy
-              ? 'Saving…'
+              ? t('common.saving')
               : type === 'credit'
-                ? 'Save credit sale'
-                : 'Save payment'}
+                ? t('entry.saveCredit')
+                : t('entry.savePayment')}
           </button>
         </form>
       </main>

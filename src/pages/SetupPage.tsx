@@ -1,6 +1,7 @@
 import { useState } from 'preact/hooks';
 import { saveShop } from '../db/repo';
 import { notifyChanged } from '../components/StatusBadge';
+import { useLocale } from '../hooks/useLocale';
 import { navigate } from '../lib/router';
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function SetupPage({ onDone }: Props) {
+  const { t } = useLocale();
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +18,7 @@ export function SetupPage({ onDone }: Props) {
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) {
-      setError('Enter your shop name');
+      setError(t('setup.errorName'));
       return;
     }
     setBusy(true);
@@ -27,7 +29,7 @@ export function SetupPage({ onDone }: Props) {
       onDone();
       navigate('/');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not save');
+      setError(err instanceof Error ? err.message : t('setup.couldNotSave'));
     } finally {
       setBusy(false);
     }
@@ -36,17 +38,14 @@ export function SetupPage({ onDone }: Props) {
   return (
     <div class="setup-screen">
       <h1>DebtBook</h1>
-      <p>
-        Your offline credit ledger for book debt (udhar). Data stays on this
-        phone — works without internet.
-      </p>
+      <p>{t('setup.tagline')}</p>
       <form onSubmit={submit}>
         <div class="field">
-          <label for="shop-name">Shop name</label>
+          <label for="shop-name">{t('setup.shopName')}</label>
           <input
             id="shop-name"
             class="input"
-            placeholder="e.g. Mama Ngozi Provision"
+            placeholder={t('setup.placeholder')}
             value={name}
             autofocus
             maxlength={80}
@@ -59,7 +58,7 @@ export function SetupPage({ onDone }: Props) {
           )}
         </div>
         <button class="btn btn-primary" type="submit" disabled={busy}>
-          {busy ? 'Saving…' : 'Start keeping books'}
+          {busy ? t('common.saving') : t('setup.start')}
         </button>
       </form>
     </div>

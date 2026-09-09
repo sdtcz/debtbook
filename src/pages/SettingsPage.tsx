@@ -10,8 +10,17 @@ import {
   saveShop,
   setCloudBackupMeta,
   setPin,
+  setShopLocale,
 } from '../db/repo';
+import { useLocale } from '../hooks/useLocale';
 import { useOnline } from '../hooks/useOnline';
+import {
+  LOCALE_OPTIONS,
+  localeNativeName,
+  t as tNow,
+  type Locale,
+  type MessageKey,
+} from '../i18n';
 import { downloadJson, exportBackup, importBackup, readJsonFile } from '../lib/backup';
 import {
   decryptBackup,
@@ -46,6 +55,7 @@ interface Props {
 }
 
 export function SettingsPage({ toast, onPinChanged }: Props) {
+  const { locale, setLocale, t } = useLocale();
   const [name, setName] = useState('');
   const [pending, setPending] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -76,13 +86,15 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       setHasPin(Boolean(s.pinHash && s.pinSalt));
       setPro(isPro(s));
       const e = getEntitlement(s);
-      setEntLabel(e.plan === 'pro' ? 'Pro' : 'Free');
+      setEntLabel(e.plan === 'pro' ? t('common.pro') : t('common.free'));
       setExpLabel(
         e.plan === 'pro' && e.exp
-          ? `Until ${new Date(e.exp).toLocaleDateString('en-NG')}`
+          ? t('settings.until', {
+              date: new Date(e.exp).toLocaleDateString('en-NG'),
+            })
           : e.plan === 'pro' && e.source
             ? String(e.source)
-            : 'Ledger + backup + PIN',
+            : t('settings.ledgerBackupPin'),
       );
       setCloudEnabled(Boolean(s.cloudBackupEnabled && s.cloudBackupId));
       setLastCloudAt(s.lastCloudBackupAt);
@@ -92,19 +104,31 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
 
   useEffect(() => {
     refresh();
-  }, []);
+  }, [locale]);
+
+  const changeLanguage = async (next: Locale) => {
+    if (next === locale) return;
+    setLocale(next);
+    try {
+      await setShopLocale(next);
+    } catch {
+      /* shop may not exist yet — localStorage is enough */
+    }
+    // Toast in the NEW language
+    toast(tNow('settings.languageChanged', { lang: localeNativeName(next) }, next));
+  };
 
   const save = async (e: Event) => {
     e.preventDefault();
     if (!name.trim()) {
-      toast('Shop name required');
+      toast(t('settings.shopNameRequired'));
       return;
     }
     setBusy(true);
     try {
       await saveShop(name);
       notifyChanged();
-      toast('Shop updated');
+      toast(t('settings.shopUpdated'));
       await refresh();
     } finally {
       setBusy(false);
@@ -114,18 +138,18 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   const flush = async () => {
     const items = await listPendingOutbox();
     if (items.length === 0) {
-      toast('Nothing pending');
+      toast(t('settings.nothingPending'));
       return;
     }
     const n = await flushOutboxStub();
     notifyChanged();
     setPending(await countPendingOutbox());
-    toast(`Marked ${n} mutation(s) synced (stub)`);
+    toast(t('settings.markedSynced', { n }));
   };
 
   const savePin = async () => {
     if (!isValidPin(pinInput)) {
-      toast('PIN must be 4 digits');
+      toast(t('settings.pinMustBe4'));
       return;
     }
     const salt = randomSalt();
@@ -136,31 +160,27 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     notifyChanged();
     onPinChanged?.();
     await refresh();
-    toast('PIN lock enabled');
+    toast(t('settings.pinEnabled'));
   };
 
   const removePin = async () => {
-    if (!confirm('Remove PIN lock?')) return;
+    if (!confirm(t('settings.removePinConfirm'))) return;
     await clearPin();
     setShowPinForm(false);
     onPinChanged?.();
     await refresh();
-    toast('PIN removed');
+    toast(t('settings.pinRemoved'));
   };
 
   const doExport = async () => {
     const data = await exportBackup();
     const stamp = new Date().toISOString().slice(0, 10);
     downloadJson(`debtbook-backup-${stamp}.json`, data);
-    toast('Backup downloaded');
+    toast(t('settings.backupDownloaded'));
   };
 
   const doImport = async (file: File) => {
-    if (
-      !confirm(
-        'Import will replace all local shop, customers, and entries. Continue?',
-      )
-    ) {
+    if (!confirm(t('settings.importConfirm'))) {
       return;
     }
     try {
@@ -168,18 +188,23 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       const result = await importBackup(data);
       notifyChanged();
       await refresh();
-      toast(`Imported ${result.customers} customers, ${result.entries} entries`);
+      toast(
+        t('settings.imported', {
+          customers: result.customers,
+          entries: result.entries,
+        }),
+      );
     } catch (err) {
-      toast(err instanceof Error ? err.message : 'Import failed');
+      toast(err instanceof Error ? err.message : t('settings.importFailed'));
     }
   };
 
   const doCsv = async () => {
     if (!pro) {
-      toast('CSV export is a Pro feature', {
+      toast(t('settings.csvPro'), {
         ms: 5000,
         action: {
-          label: 'Upgrade',
+          label: t('common.upgrade'),
           onClick: () => navigate('/settings/pro'),
         },
       });
@@ -193,15 +218,15 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     const csv = buildCsvExport(dash.customers, map);
     const stamp = new Date().toISOString().slice(0, 10);
     downloadCsv(`debtbook-export-${stamp}.csv`, csv);
-    toast('CSV downloaded');
+    toast(t('settings.csvDownloaded'));
   };
 
   const proGateCloud = (): boolean => {
     if (!pro) {
-      toast('Cloud backup is a Pro feature', {
+      toast(t('settings.cloudPro'), {
         ms: 5000,
         action: {
-          label: 'Upgrade',
+          label: t('common.upgrade'),
           onClick: () => navigate('/settings/pro'),
         },
       });
@@ -213,7 +238,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   const startCloudEnable = () => {
     if (!proGateCloud()) return;
     if (!online) {
-      toast('You are offline — connect to enable cloud backup');
+      toast(t('settings.offlineEnableCloud'));
       return;
     }
     setPendingRecoveryCode(generateRecoveryCode());
@@ -228,11 +253,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
 
   const confirmCloudEnable = async () => {
     if (!pendingRecoveryCode) return;
-    if (
-      !confirm(
-        'Have you saved your recovery code? You will need it to restore on another device. We cannot recover it for you.',
-      )
-    ) {
+    if (!confirm(t('settings.cloudConfirmSaved'))) {
       return;
     }
     setCloudBusy(true);
@@ -249,14 +270,14 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       setPendingRecoveryCode('');
       notifyChanged();
       await refresh();
-      toast('Cloud backup enabled');
+      toast(t('settings.cloudEnabled'));
     } catch (err) {
       const msg =
         err instanceof CloudBackupApiError
           ? err.message
           : err instanceof Error
             ? err.message
-            : 'Cloud backup failed';
+            : t('settings.cloudFailed');
       toast(msg);
     } finally {
       setCloudBusy(false);
@@ -266,7 +287,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   const doCloudBackupNow = async () => {
     if (!proGateCloud()) return;
     if (!online) {
-      toast('You are offline — connect to upload cloud backup');
+      toast(t('settings.offlineUploadCloud'));
       return;
     }
     const s = await getShop();
@@ -274,23 +295,17 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       startCloudEnable();
       return;
     }
-    // Re-use existing backupId by encrypting with a code we don't have —
-    // User must still have the recovery code for restore; for "Backup now"
-    // we need the recovery code to encrypt with the same key/id.
-    // Prompt for recovery code so ciphertext matches the same backupId.
-    const code = prompt(
-      'Enter your recovery code to encrypt this backup (same code you saved when enabling cloud backup):',
-    );
+    const code = prompt(t('settings.recoveryPrompt'));
     if (!code) return;
     if (!isValidRecoveryCode(code)) {
-      toast('Invalid recovery code format');
+      toast(t('settings.invalidRecoveryFormat'));
       return;
     }
     setCloudBusy(true);
     try {
       const id = await deriveBackupId(code);
       if (s.cloudBackupId && id !== s.cloudBackupId) {
-        toast('Recovery code does not match this device’s cloud backup');
+        toast(t('settings.recoveryMismatch'));
         return;
       }
       const payload = await exportBackup();
@@ -303,14 +318,14 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       });
       notifyChanged();
       await refresh();
-      toast('Cloud backup uploaded');
+      toast(t('settings.cloudUploaded'));
     } catch (err) {
       const msg =
         err instanceof CloudBackupApiError
           ? err.message
           : err instanceof Error
             ? err.message
-            : 'Cloud backup failed';
+            : t('settings.cloudFailed');
       toast(msg);
     } finally {
       setCloudBusy(false);
@@ -328,18 +343,14 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
 
   const doCloudRestore = async () => {
     if (!online) {
-      toast('You are offline — connect to restore from cloud');
+      toast(t('settings.offlineRestoreCloud'));
       return;
     }
     if (!isValidRecoveryCode(restoreCode)) {
-      toast('Enter a valid recovery code (8 groups of 4)');
+      toast(t('settings.invalidRecoveryFormat'));
       return;
     }
-    if (
-      !confirm(
-        'Restore from cloud will replace all local shop, customers, and entries. Continue?',
-      )
-    ) {
+    if (!confirm(t('settings.restoreCloudConfirm'))) {
       return;
     }
     setCloudBusy(true);
@@ -348,7 +359,6 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       const blob = await fetchCloudBackup(backupId);
       const data = await decryptBackup(blob, restoreCode);
       const result = await importBackup(data);
-      // Mark cloud as enabled on this device after restore
       await setCloudBackupMeta({
         cloudBackupEnabled: true,
         cloudBackupId: backupId,
@@ -358,14 +368,19 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       setRestoreCode('');
       notifyChanged();
       await refresh();
-      toast(`Restored ${result.customers} customers, ${result.entries} entries`);
+      toast(
+        t('settings.restored', {
+          customers: result.customers,
+          entries: result.entries,
+        }),
+      );
     } catch (err) {
       const msg =
         err instanceof CloudBackupApiError
           ? err.message
           : err instanceof Error
             ? err.message
-            : 'Cloud restore failed';
+            : t('settings.cloudRestoreFailed');
       toast(msg);
     } finally {
       setCloudBusy(false);
@@ -375,16 +390,15 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   const copyRecoveryCode = async () => {
     try {
       await navigator.clipboard.writeText(pendingRecoveryCode);
-      toast('Recovery code copied');
+      toast(t('settings.recoveryCopied'));
     } catch {
-      toast('Copy failed — write the code down');
+      toast(t('settings.copyFailedWrite'));
     }
   };
 
-
   const toggleFeedbackTopic = (id: FeedbackTopicId) => {
     setFeedbackTopics((prev) =>
-      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
   };
 
@@ -410,7 +424,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     const text = await composeFeedback();
     openFeedbackWhatsApp(text);
     rememberFeedbackSent();
-    toast('Thanks — WhatsApp draft ready');
+    toast(t('settings.thanksWhatsApp'));
   };
 
   const copyFeedbackMessage = async () => {
@@ -418,16 +432,22 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     const ok = await copyFeedback(text);
     if (ok) {
       rememberFeedbackSent();
-      toast('Thanks — feedback copied');
+      toast(t('settings.thanksCopied'));
     } else {
-      toast('Copy failed — try WhatsApp instead');
+      toast(t('settings.copyFailedWhatsApp'));
     }
+  };
+
+  const feedbackLabel = (id: FeedbackTopicId): string => {
+    return t(`feedback.topic.${id}` as MessageKey);
   };
 
   const initial = name.trim().charAt(0).toUpperCase() || 'D';
   const lastCloudLabel = lastCloudAt
-    ? `Last ${new Date(lastCloudAt).toLocaleString('en-NG')}`
-    : 'Encrypted · multi-device';
+    ? t('settings.cloudLast', {
+        when: new Date(lastCloudAt).toLocaleString('en-NG'),
+      })
+    : t('settings.cloudEncrypted');
 
   return (
     <div class="app-shell">
@@ -435,12 +455,12 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
         <button
           class="icon-btn"
           type="button"
-          aria-label="Back"
+          aria-label={t('common.back')}
           onClick={() => navigate('/')}
         >
           ←
         </button>
-        <h1>Settings</h1>
+        <h1>{t('settings.title')}</h1>
         <StatusBadge />
       </header>
       <main class="main settings-main">
@@ -449,7 +469,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
             {initial}
           </div>
           <div class="settings-hero-text">
-            <div class="settings-hero-name">{name.trim() || 'Your shop'}</div>
+            <div class="settings-hero-name">{name.trim() || t('settings.yourShop')}</div>
             <div class="settings-hero-meta">
               <span class={pro ? 'plan-pill plan-pill-pro' : 'plan-pill'}>
                 {entLabel}
@@ -459,10 +479,10 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           </div>
         </section>
 
-        <div class="settings-group-label">Shop</div>
+        <div class="settings-group-label">{t('settings.shop')}</div>
         <form class="settings-group card" onSubmit={save}>
           <div class="field" style={{ marginBottom: 0 }}>
-            <label for="shop">Shop name</label>
+            <label for="shop">{t('settings.shopName')}</label>
             <input
               id="shop"
               class="input"
@@ -473,11 +493,39 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
             />
           </div>
           <button class="btn btn-primary" type="submit" disabled={busy}>
-            Save shop name
+            {t('settings.saveShopName')}
           </button>
         </form>
 
-        <div class="settings-group-label">Plan &amp; export</div>
+        <div class="settings-group-label">{t('settings.language')}</div>
+        <div class="settings-group card settings-list" role="radiogroup" aria-label={t('settings.language')}>
+          {LOCALE_OPTIONS.map((opt) => {
+            const on = locale === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                class="settings-row"
+                role="radio"
+                aria-checked={on}
+                onClick={() => changeLanguage(opt.id)}
+              >
+                <span class="settings-row-icon" aria-hidden="true">
+                  🌐
+                </span>
+                <span class="settings-row-body">
+                  <span class="settings-row-title">{opt.nativeName}</span>
+                </span>
+                <span class="settings-row-trail">
+                  <span class={on ? 'status-dot on' : 'status-dot'} />
+                  {on ? t('common.on') : ''}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div class="settings-group-label">{t('settings.planExport')}</div>
         <div class="settings-group card settings-list">
           <button
             type="button"
@@ -488,15 +536,13 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
               ★
             </span>
             <span class="settings-row-body">
-              <span class="settings-row-title">DebtBook Pro</span>
+              <span class="settings-row-title">{t('settings.proTitle')}</span>
               <span class="settings-row-sub">
-                {pro
-                  ? 'Manage plan · CSV & cloud unlocked'
-                  : 'CSV · cloud backup · hide upgrade nag'}
+                {pro ? t('settings.proSubPro') : t('settings.proSubFree')}
               </span>
             </span>
             <span class="settings-row-trail">
-              {pro ? 'Pro' : 'Free'}
+              {pro ? t('common.pro') : t('common.free')}
               <span class="chev" aria-hidden="true">
                 ›
               </span>
@@ -507,13 +553,13 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
               ⬇
             </span>
             <span class="settings-row-body">
-              <span class="settings-row-title">Export CSV</span>
+              <span class="settings-row-title">{t('settings.exportCsv')}</span>
               <span class="settings-row-sub">
-                {pro ? 'Customers, balances & entries' : 'Pro feature'}
+                {pro ? t('settings.exportCsvSubPro') : t('settings.exportCsvSubFree')}
               </span>
             </span>
             <span class="settings-row-trail">
-              {pro ? '' : 'Pro'}
+              {pro ? '' : t('common.pro')}
               <span class="chev" aria-hidden="true">
                 ›
               </span>
@@ -521,7 +567,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           </button>
         </div>
 
-        <div class="settings-group-label">Security</div>
+        <div class="settings-group-label">{t('settings.security')}</div>
         <div class="settings-group card settings-list">
           <button
             type="button"
@@ -538,22 +584,20 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
               🔒
             </span>
             <span class="settings-row-body">
-              <span class="settings-row-title">PIN lock</span>
+              <span class="settings-row-title">{t('settings.pinLock')}</span>
               <span class="settings-row-sub">
-                {hasPin
-                  ? 'On · tap to remove'
-                  : 'Hide totals when you leave the app'}
+                {hasPin ? t('settings.pinOn') : t('settings.pinOff')}
               </span>
             </span>
             <span class="settings-row-trail">
               <span class={hasPin ? 'status-dot on' : 'status-dot'} />
-              {hasPin ? 'On' : 'Off'}
+              {hasPin ? t('common.on') : t('common.off')}
             </span>
           </button>
           {showPinForm && !hasPin && (
             <div class="settings-row-panel">
               <div class="field">
-                <label for="pin">New PIN (4 digits)</label>
+                <label for="pin">{t('settings.newPin')}</label>
                 <input
                   id="pin"
                   class="input"
@@ -572,7 +616,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
               </div>
               <div class="btn-row" style={{ marginTop: 0 }}>
                 <button class="btn btn-secondary" type="button" onClick={savePin}>
-                  Enable PIN
+                  {t('settings.enablePin')}
                 </button>
                 <button
                   class="btn btn-ghost"
@@ -582,22 +626,22 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
                     setPinInput('');
                   }}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
           )}
         </div>
 
-        <div class="settings-group-label">Backup</div>
+        <div class="settings-group-label">{t('settings.backup')}</div>
         <div class="settings-group card settings-list">
           <button type="button" class="settings-row" onClick={doExport}>
             <span class="settings-row-icon" aria-hidden="true">
               💾
             </span>
             <span class="settings-row-body">
-              <span class="settings-row-title">Export backup</span>
-              <span class="settings-row-sub">JSON file for this phone · Free</span>
+              <span class="settings-row-title">{t('settings.exportBackup')}</span>
+              <span class="settings-row-sub">{t('settings.exportBackupSub')}</span>
             </span>
             <span class="settings-row-trail">
               <span class="chev" aria-hidden="true">
@@ -614,8 +658,8 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
               ↩
             </span>
             <span class="settings-row-body">
-              <span class="settings-row-title">Restore backup</span>
-              <span class="settings-row-sub">Replaces all local data · Free</span>
+              <span class="settings-row-title">{t('settings.restoreBackup')}</span>
+              <span class="settings-row-sub">{t('settings.restoreBackupSub')}</span>
             </span>
             <span class="settings-row-trail">
               <span class="chev" aria-hidden="true">
@@ -645,18 +689,18 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
             </span>
             <span class="settings-row-body">
               <span class="settings-row-title">
-                {cloudEnabled ? 'Backup now' : 'Cloud backup'}
+                {cloudEnabled ? t('settings.backupNow') : t('settings.cloudBackup')}
               </span>
               <span class="settings-row-sub">
                 {pro
                   ? cloudEnabled
                     ? lastCloudLabel
-                    : 'Enable encrypted multi-device backup'
-                  : 'Pro feature'}
+                    : t('settings.cloudEnableSub')
+                  : t('settings.proFeature')}
               </span>
             </span>
             <span class="settings-row-trail">
-              {pro ? (cloudEnabled ? 'On' : '') : 'Pro'}
+              {pro ? (cloudEnabled ? t('common.on') : '') : t('common.pro')}
               <span class="chev" aria-hidden="true">
                 ›
               </span>
@@ -665,8 +709,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           {showCloudEnable && (
             <div class="settings-row-panel">
               <p class="muted" style={{ marginTop: 0, fontSize: '0.85rem' }}>
-                Save this recovery code somewhere safe. It is the only way to
-                restore on another phone — we never store it.
+                {t('settings.recoveryCodeHelp')}
               </p>
               <div
                 class="input"
@@ -685,7 +728,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
                   type="button"
                   onClick={copyRecoveryCode}
                 >
-                  Copy code
+                  {t('settings.copyCode')}
                 </button>
                 <button
                   class="btn btn-primary"
@@ -693,7 +736,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
                   disabled={cloudBusy}
                   onClick={confirmCloudEnable}
                 >
-                  {cloudBusy ? 'Uploading…' : 'I saved it — enable'}
+                  {cloudBusy ? t('settings.uploading') : t('settings.iSavedIt')}
                 </button>
                 <button
                   class="btn btn-ghost"
@@ -701,7 +744,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
                   disabled={cloudBusy}
                   onClick={cancelCloudEnable}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -713,7 +756,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
             onClick={() => {
               if (!proGateCloud()) return;
               if (!online) {
-                toast('You are offline — connect to restore from cloud');
+                toast(t('settings.offlineRestoreCloud'));
                 return;
               }
               setShowCloudRestore((v) => !v);
@@ -724,15 +767,13 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
               ☁↩
             </span>
             <span class="settings-row-body">
-              <span class="settings-row-title">Restore from cloud</span>
+              <span class="settings-row-title">{t('settings.restoreFromCloud')}</span>
               <span class="settings-row-sub">
-                {pro
-                  ? 'Enter recovery code · replaces local data'
-                  : 'Pro feature'}
+                {pro ? t('settings.restoreFromCloudSub') : t('settings.proFeature')}
               </span>
             </span>
             <span class="settings-row-trail">
-              {pro ? '' : 'Pro'}
+              {pro ? '' : t('common.pro')}
               <span class="chev" aria-hidden="true">
                 {showCloudRestore ? '˅' : '›'}
               </span>
@@ -741,7 +782,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           {showCloudRestore && (
             <div class="settings-row-panel">
               <div class="field">
-                <label for="recovery">Recovery code</label>
+                <label for="recovery">{t('settings.recoveryCode')}</label>
                 <input
                   id="recovery"
                   class="input"
@@ -761,7 +802,9 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
                   disabled={cloudBusy}
                   onClick={doCloudRestore}
                 >
-                  {cloudBusy ? 'Restoring…' : 'Download & restore'}
+                  {cloudBusy
+                    ? t('settings.restoring')
+                    : t('settings.downloadRestore')}
                 </button>
                 <button
                   class="btn btn-ghost"
@@ -772,15 +815,14 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
                     setRestoreCode('');
                   }}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
               </div>
             </div>
           )}
         </div>
 
-
-        <div class="settings-group-label">Feedback</div>
+        <div class="settings-group-label">{t('settings.feedback')}</div>
         <div class="settings-group card settings-list">
           <button
             type="button"
@@ -791,8 +833,8 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
               💬
             </span>
             <span class="settings-row-body">
-              <span class="settings-row-title">Send feedback</span>
-              <span class="settings-row-sub">What broke today?</span>
+              <span class="settings-row-title">{t('settings.sendFeedback')}</span>
+              <span class="settings-row-sub">{t('settings.whatBroke')}</span>
             </span>
             <span class="settings-row-trail">
               <span class="chev" aria-hidden="true">
@@ -802,31 +844,31 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           </button>
           {showFeedback && (
             <div class="settings-row-panel">
-              <div class="chip-row" role="group" aria-label="Feedback topics">
-                {FEEDBACK_TOPICS.map((t) => {
-                  const on = feedbackTopics.includes(t.id);
+              <div class="chip-row" role="group" aria-label={t('settings.feedbackTopics')}>
+                {FEEDBACK_TOPICS.map((topic) => {
+                  const on = feedbackTopics.includes(topic.id);
                   return (
                     <button
-                      key={t.id}
+                      key={topic.id}
                       type="button"
                       class={on ? 'chip on' : 'chip'}
                       aria-pressed={on}
-                      onClick={() => toggleFeedbackTopic(t.id)}
+                      onClick={() => toggleFeedbackTopic(topic.id)}
                     >
-                      {t.label}
+                      {feedbackLabel(topic.id)}
                     </button>
                   );
                 })}
               </div>
               <div class="field">
-                <label for="feedback-note">What broke today? (optional)</label>
+                <label for="feedback-note">{t('settings.whatBrokeOptional')}</label>
                 <textarea
                   id="feedback-note"
                   class="input"
                   rows={3}
                   maxlength={500}
                   value={feedbackNote}
-                  placeholder="A few words help a lot…"
+                  placeholder={t('settings.feedbackPlaceholder')}
                   onInput={(e) =>
                     setFeedbackNote((e.target as HTMLTextAreaElement).value)
                   }
@@ -838,21 +880,21 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
                   type="button"
                   onClick={sendFeedbackWhatsApp}
                 >
-                  Send on WhatsApp
+                  {t('settings.sendWhatsApp')}
                 </button>
                 <button
                   class="btn btn-secondary"
                   type="button"
                   onClick={copyFeedbackMessage}
                 >
-                  Copy
+                  {t('common.copy')}
                 </button>
               </div>
             </div>
           )}
         </div>
 
-        <div class="settings-group-label">More</div>
+        <div class="settings-group-label">{t('settings.more')}</div>
         <div class="settings-group card settings-list">
           <button
             type="button"
@@ -863,9 +905,12 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
               ⚙
             </span>
             <span class="settings-row-body">
-              <span class="settings-row-title">Sync &amp; advanced</span>
+              <span class="settings-row-title">{t('settings.syncAdvanced')}</span>
               <span class="settings-row-sub">
-                {online ? 'Online' : 'Offline'} · {pending} pending
+                {t('settings.syncPending', {
+                  online: online ? t('common.online') : t('common.offline'),
+                  n: pending,
+                })}
               </span>
             </span>
             <span class="settings-row-trail">
@@ -877,20 +922,19 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           {showAdvanced && (
             <div class="settings-row-panel">
               <p class="muted" style={{ marginTop: 0, fontSize: '0.85rem' }}>
-                Data stays on this device. Outbox is ready for future cloud sync —
-                Flush only marks the stub queue as synced.
+                {t('settings.syncAdvancedHelp')}
               </p>
               <button class="btn btn-secondary" type="button" onClick={flush}>
-                Flush outbox (stub)
+                {t('settings.flushOutbox')}
               </button>
             </div>
           )}
         </div>
 
         <p class="settings-about muted">
-          DebtBook · Nigeria · English · ₦
+          {t('settings.aboutLine1', { lang: localeNativeName(locale) })}
           <br />
-          Offline ledger for shopkeeper book debt (udhar)
+          {t('settings.aboutLine2')}
         </p>
       </main>
     </div>

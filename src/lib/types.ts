@@ -25,6 +25,8 @@ export interface ShopProfile {
   lastCloudBackupAt?: number;
   /** Public opaque backup id (SHA-256 hex) — never the recovery code */
   cloudBackupId?: string;
+  /** UI language preference */
+  locale?: 'en' | 'ha' | 'yo';
 }
 
 export interface Customer {

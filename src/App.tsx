@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'preact/hooks';
 import { PinLock } from './components/PinLock';
 import { Toast } from './components/Toast';
 import { getShop } from './db/repo';
+import { useLocale } from './hooks/useLocale';
 import { useToast } from './hooks/useToast';
+import { initLocale } from './i18n';
 import { parseHash, type Route } from './lib/router';
 import { CustomerDetailPage } from './pages/CustomerDetailPage';
 import { CustomerFormPage } from './pages/CustomerFormPage';
@@ -20,9 +22,11 @@ export function App() {
   const [pinSalt, setPinSalt] = useState<string | undefined>();
   const [locked, setLocked] = useState(false);
   const { message, action, toast, clearToast } = useToast();
+  const { t } = useLocale();
 
   const refreshShop = async () => {
     const shop = await getShop();
+    if (shop?.locale) initLocale(shop.locale);
     setHasShop(Boolean(shop?.name));
     setPinHash(shop?.pinHash);
     setPinSalt(shop?.pinSalt);
@@ -60,7 +64,7 @@ export function App() {
     return (
       <div class="setup-screen">
         <h1>DebtBook</h1>
-        <p>Loading…</p>
+        <p>{t('common.loading')}</p>
       </div>
     );
   }

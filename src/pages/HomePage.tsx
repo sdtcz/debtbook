@@ -6,6 +6,7 @@ import {
   isOverdue,
   searchCustomers,
 } from '../db/repo';
+import { useLocale } from '../hooks/useLocale';
 import { isPro } from '../lib/entitlement';
 import type { CustomerBalance, ShopProfile } from '../lib/types';
 import { balanceLabel, balanceTone, formatNaira } from '../lib/money';
@@ -19,14 +20,8 @@ type FilterChip = 'all' | 'overdue' | 'owes';
 
 const PRO_HINT_KEY = 'debtbook:pro-hint-dismissed';
 
-function filterTitle(filter: FilterChip, count: number): string {
-  const n = count ? ` (${count})` : '';
-  if (filter === 'overdue') return `Overdue${n}`;
-  if (filter === 'owes') return `Owes you${n}`;
-  return `Customers${n}`;
-}
-
 export function HomePage({ locked }: Props) {
+  const { t } = useLocale();
   const [shop, setShop] = useState<ShopProfile | null>(null);
   const [rows, setRows] = useState<CustomerBalance[]>([]);
   const [total, setTotal] = useState(0);
@@ -99,11 +94,22 @@ export function HomePage({ locked }: Props) {
     setQuery('');
   };
 
+  const filterTitle = (() => {
+    const n = filtered.length ? ` (${filtered.length})` : '';
+    if (filter === 'overdue') return `${t('home.sectionOverdue')}${n}`;
+    if (filter === 'owes') return `${t('home.sectionOwes')}${n}`;
+    return `${t('home.sectionCustomers')}${n}`;
+  })();
+
   const heroMeta = (() => {
     const parts: string[] = [];
-    if (overdueCount > 0) parts.push(`${overdueCount} overdue`);
-    parts.push(`${rows.length} customer${rows.length === 1 ? '' : 's'}`);
-    if (owesCount > 0) parts.push(`${owesCount} owe you`);
+    if (overdueCount > 0) parts.push(t('home.metaOverdue', { n: overdueCount }));
+    parts.push(
+      rows.length === 1
+        ? t('home.metaCustomer', { n: rows.length })
+        : t('home.metaCustomers', { n: rows.length }),
+    );
+    if (owesCount > 0) parts.push(t('home.metaOweYou', { n: owesCount }));
     return parts.join(' · ');
   })();
 
@@ -113,15 +119,15 @@ export function HomePage({ locked }: Props) {
         <div style={{ flex: 1 }}>
           <h1>
             DebtBook{' '}
-            {pro && <span class="pro-badge">Pro</span>}
+            {pro && <span class="pro-badge">{t('common.pro')}</span>}
           </h1>
-          <div class="sub">{shop?.name || 'My shop'}</div>
+          <div class="sub">{shop?.name || t('home.myShop')}</div>
         </div>
         <StatusBadge />
         <button
           class="icon-btn"
           type="button"
-          aria-label="Settings"
+          aria-label={t('home.settings')}
           onClick={() => navigate('/settings')}
         >
           ⚙
@@ -130,7 +136,7 @@ export function HomePage({ locked }: Props) {
 
       <main class={`main ${locked ? 'locked-blur' : ''}`}>
         <div class="card total">
-          <div class="label">Total outstanding (customers owe you)</div>
+          <div class="label">{t('home.totalOutstanding')}</div>
           <div class="amount">{locked ? '••••••' : formatNaira(total)}</div>
           {!locked && hasCustomers && (
             <div class="total-meta">{heroMeta}</div>
@@ -139,11 +145,11 @@ export function HomePage({ locked }: Props) {
 
         {!pro && !locked && !proHintDismissed && (
           <div class="pro-hint">
-            <a href={href('/settings/pro')}>Pro: CSV export &amp; backup — ₦1,500/mo</a>
+            <a href={href('/settings/pro')}>{t('home.proHint')}</a>
             <button
               type="button"
               class="pro-hint-dismiss"
-              aria-label="Dismiss"
+              aria-label={t('common.dismiss')}
               onClick={dismissProHint}
             >
               ×
@@ -153,27 +159,27 @@ export function HomePage({ locked }: Props) {
 
         <div class="search-wrap">
           <label class="sr-only" for="search">
-            Search customers
+            {t('home.searchLabel')}
           </label>
           <input
             id="search"
             class="input"
             type="search"
-            placeholder="Search name or phone…"
+            placeholder={t('home.searchPlaceholder')}
             value={query}
             onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
           />
         </div>
 
         {hasCustomers && (
-          <div class="chip-row home-filters" role="group" aria-label="Filter customers">
+          <div class="chip-row home-filters" role="group" aria-label={t('home.filterCustomers')}>
             <button
               type="button"
               class={filter === 'all' ? 'chip on' : 'chip'}
               aria-pressed={filter === 'all'}
               onClick={() => setFilter('all')}
             >
-              All
+              {t('home.filterAll')}
             </button>
             <button
               type="button"
@@ -181,7 +187,8 @@ export function HomePage({ locked }: Props) {
               aria-pressed={filter === 'overdue'}
               onClick={() => setFilter('overdue')}
             >
-              Overdue{overdueCount ? ` (${overdueCount})` : ''}
+              {t('home.filterOverdue')}
+              {overdueCount ? ` (${overdueCount})` : ''}
             </button>
             <button
               type="button"
@@ -189,42 +196,40 @@ export function HomePage({ locked }: Props) {
               aria-pressed={filter === 'owes'}
               onClick={() => setFilter('owes')}
             >
-              Owes you{owesCount ? ` (${owesCount})` : ''}
+              {t('home.filterOwes')}
+              {owesCount ? ` (${owesCount})` : ''}
             </button>
           </div>
         )}
 
-        <div class="section-title">{filterTitle(filter, filtered.length)}</div>
+        <div class="section-title">{filterTitle}</div>
 
         {loading ? (
-          <div class="empty">Loading…</div>
+          <div class="empty">{t('common.loading')}</div>
         ) : !hasCustomers ? (
           <div class="empty empty-first-run">
-            <strong>Add your first customer</strong>
-            <p class="empty-tip">
-              DebtBook is for credit / udhar customers — people who buy now and
-              pay later.
-            </p>
+            <strong>{t('home.emptyFirstTitle')}</strong>
+            <p class="empty-tip">{t('home.emptyFirstTip')}</p>
             {!locked && (
               <button
                 class="btn btn-primary"
                 type="button"
                 onClick={() => navigate('/customers/new')}
               >
-                Add first customer
+                {t('home.addFirstCustomer')}
               </button>
             )}
           </div>
         ) : filtered.length === 0 ? (
           <div class="empty">
-            <strong>No matches</strong>
+            <strong>{t('home.noMatches')}</strong>
             {query
-              ? 'Try another name or phone.'
+              ? t('home.tryAnother')
               : filter === 'overdue'
-                ? 'Nobody is overdue right now.'
+                ? t('home.nobodyOverdue')
                 : filter === 'owes'
-                  ? 'Nobody owes you right now.'
-                  : 'Nothing here.'}
+                  ? t('home.nobodyOwes')
+                  : t('home.nothingHere')}
             {filterActive && (
               <div class="empty-actions">
                 <button
@@ -232,7 +237,7 @@ export function HomePage({ locked }: Props) {
                   class="chip"
                   onClick={clearFilters}
                 >
-                  Clear filters
+                  {t('home.clearFilters')}
                 </button>
               </div>
             )}
@@ -252,11 +257,11 @@ export function HomePage({ locked }: Props) {
                       <div class="name">
                         {row.customer.name}
                         {overdue && (
-                          <span class="overdue-badge">Overdue</span>
+                          <span class="overdue-badge">{t('common.overdue')}</span>
                         )}
                       </div>
                       <div class="hint">
-                        {row.customer.phone || 'No phone'} ·{' '}
+                        {row.customer.phone || t('common.noPhone')} ·{' '}
                         {balanceLabel(row.balanceKobo)}
                       </div>
                     </div>
@@ -278,7 +283,7 @@ export function HomePage({ locked }: Props) {
                           );
                         }}
                       >
-                        + Credit
+                        {t('home.credit')}
                       </button>
                       <button
                         type="button"
@@ -290,7 +295,7 @@ export function HomePage({ locked }: Props) {
                           );
                         }}
                       >
-                        − Payment
+                        {t('home.payment')}
                       </button>
                     </div>
                   )}
@@ -305,10 +310,10 @@ export function HomePage({ locked }: Props) {
         <button
           class="fab"
           type="button"
-          aria-label="Add customer"
+          aria-label={t('home.addCustomer')}
           onClick={() => navigate('/customers/new')}
         >
-          + <span class="label">Customer</span>
+          + <span class="label">{t('home.fabCustomer')}</span>
         </button>
       )}
     </div>

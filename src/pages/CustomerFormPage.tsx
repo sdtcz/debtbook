@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { notifyChanged } from '../components/StatusBadge';
 import { getCustomer, softDeleteCustomer, upsertCustomer } from '../db/repo';
+import { useLocale } from '../hooks/useLocale';
 import { navigate } from '../lib/router';
 import type { ToastAction } from '../hooks/useToast';
 
@@ -26,6 +27,7 @@ function fromDateInput(v: string): number | null {
 }
 
 export function CustomerFormPage({ id, toast }: Props) {
+  const { t } = useLocale();
   const editing = Boolean(id);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -38,7 +40,7 @@ export function CustomerFormPage({ id, toast }: Props) {
     if (!id) return;
     getCustomer(id).then((c) => {
       if (!c) {
-        toast('Customer not found');
+        toast(t('customer.notFound'));
         navigate('/');
         return;
       }
@@ -52,7 +54,7 @@ export function CustomerFormPage({ id, toast }: Props) {
   const submit = async (e: Event) => {
     e.preventDefault();
     if (!name.trim()) {
-      setError('Name is required');
+      setError(t('customerForm.nameRequired'));
       return;
     }
     setBusy(true);
@@ -67,10 +69,10 @@ export function CustomerFormPage({ id, toast }: Props) {
         dueAt: dueAt === null ? null : dueAt,
       });
       notifyChanged();
-      toast(editing ? 'Customer updated' : 'Customer added');
+      toast(editing ? t('customerForm.updated') : t('customerForm.added'));
       navigate(`/customers/${c.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Save failed');
+      setError(err instanceof Error ? err.message : t('customerForm.saveFailed'));
     } finally {
       setBusy(false);
     }
@@ -78,18 +80,14 @@ export function CustomerFormPage({ id, toast }: Props) {
 
   const remove = async () => {
     if (!id) return;
-    if (
-      !confirm(
-        'Remove this customer? Their entries stay in the ledger history but the customer will be hidden.',
-      )
-    ) {
+    if (!confirm(t('customerForm.removeConfirm'))) {
       return;
     }
     setBusy(true);
     try {
       await softDeleteCustomer(id);
       notifyChanged();
-      toast('Customer removed');
+      toast(t('customerForm.removed'));
       navigate('/');
     } finally {
       setBusy(false);
@@ -102,42 +100,42 @@ export function CustomerFormPage({ id, toast }: Props) {
         <button
           class="icon-btn"
           type="button"
-          aria-label="Back"
+          aria-label={t('common.back')}
           onClick={() => (id ? navigate(`/customers/${id}`) : navigate('/'))}
         >
           ←
         </button>
-        <h1>{editing ? 'Edit customer' : 'New customer'}</h1>
+        <h1>{editing ? t('customerForm.edit') : t('customerForm.new')}</h1>
       </header>
       <main class="main">
         <form class="card" onSubmit={submit}>
           <div class="field">
-            <label for="cname">Name *</label>
+            <label for="cname">{t('customerForm.name')}</label>
             <input
               id="cname"
               class="input"
               value={name}
               autofocus
               maxlength={80}
-              placeholder="Customer name"
+              placeholder={t('customerForm.namePlaceholder')}
               onInput={(e) => setName((e.target as HTMLInputElement).value)}
             />
           </div>
           <div class="field">
-            <label for="cphone">Phone (optional)</label>
+            <label for="cphone">{t('customerForm.phone')}</label>
             <input
               id="cphone"
               class="input"
               type="tel"
               inputMode="tel"
               value={phone}
-              placeholder="e.g. 0803 123 4567"
+              placeholder={t('customerForm.phonePlaceholder')}
               onInput={(e) => setPhone((e.target as HTMLInputElement).value)}
             />
-            <div class="hint">Used for WhatsApp / SMS reminders</div>
+            <div class="hint">{t('customerForm.phoneHint')}</div>
           </div>
           <div class="field">
-            <label for="cdue">Due date (optional)</label>
+            <label for="cdue">{t('customerForm.dueDate')}</label>
             <input
               id="cdue"
               class="input"
@@ -145,18 +143,16 @@ export function CustomerFormPage({ id, toast }: Props) {
               value={dueDate}
               onInput={(e) => setDueDate((e.target as HTMLInputElement).value)}
             />
-            <div class="hint">
-              Shows an Overdue badge on Home when balance &gt; 0 and past due
-            </div>
+            <div class="hint">{t('customerForm.dueHint')}</div>
           </div>
           <div class="field">
-            <label for="cnote">Note (optional)</label>
+            <label for="cnote">{t('customerForm.note')}</label>
             <textarea
               id="cnote"
               class="textarea"
               value={note}
               maxlength={200}
-              placeholder="e.g. Buys rice weekly"
+              placeholder={t('customerForm.notePlaceholder')}
               onInput={(e) => setNote((e.target as HTMLTextAreaElement).value)}
             />
           </div>
@@ -164,7 +160,11 @@ export function CustomerFormPage({ id, toast }: Props) {
             <p style={{ color: 'var(--danger)', marginTop: 0 }}>{error}</p>
           )}
           <button class="btn btn-primary" type="submit" disabled={busy}>
-            {busy ? 'Saving…' : editing ? 'Save changes' : 'Add customer'}
+            {busy
+              ? t('common.saving')
+              : editing
+                ? t('customerForm.saveChanges')
+                : t('customerForm.add')}
           </button>
           {editing && (
             <div class="btn-row">
@@ -174,7 +174,7 @@ export function CustomerFormPage({ id, toast }: Props) {
                 disabled={busy}
                 onClick={remove}
               >
-                Remove
+                {t('customerForm.remove')}
               </button>
             </div>
           )}

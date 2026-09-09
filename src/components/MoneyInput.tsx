@@ -1,3 +1,5 @@
+import { useLocale } from '../hooks/useLocale';
+
 interface Props {
   id: string;
   label: string;
@@ -16,6 +18,7 @@ const CHIPS: { label: string; value: string }[] = [
 
 /** Amount input — digits, decimal, or market shorthand like 3k */
 export function MoneyInput({ id, label, value, onInput, autoFocus }: Props) {
+  const { t } = useLocale();
   return (
     <div class="field">
       <label for={id}>{label}</label>
@@ -24,7 +27,7 @@ export function MoneyInput({ id, label, value, onInput, autoFocus }: Props) {
         class="input"
         inputMode="decimal"
         autocomplete="off"
-        placeholder="0.00 or 3k"
+        placeholder={t('money.placeholder')}
         value={value}
         autofocus={autoFocus}
         onInput={(e) => {
@@ -35,7 +38,7 @@ export function MoneyInput({ id, label, value, onInput, autoFocus }: Props) {
           }
         }}
       />
-      <div class="chip-row" role="group" aria-label="Quick amounts">
+      <div class="chip-row" role="group" aria-label={t('money.quickAmounts')}>
         {CHIPS.map((c) => (
           <button
             key={c.value}
@@ -47,7 +50,7 @@ export function MoneyInput({ id, label, value, onInput, autoFocus }: Props) {
           </button>
         ))}
       </div>
-      <div class="hint">Naira (₦) — tip: type 3k for ₦3,000</div>
+      <div class="hint">{t('money.hint')}</div>
     </div>
   );
 }
