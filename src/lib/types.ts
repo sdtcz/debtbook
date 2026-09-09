@@ -19,6 +19,12 @@ export interface ShopProfile {
   pinHash?: string;
   pinSalt?: string;
   entitlement?: Entitlement;
+  /** Pro cloud backup enabled on this device */
+  cloudBackupEnabled?: boolean;
+  /** Last successful cloud upload (unix ms) */
+  lastCloudBackupAt?: number;
+  /** Public opaque backup id (SHA-256 hex) — never the recovery code */
+  cloudBackupId?: string;
 }
 
 export interface Customer {

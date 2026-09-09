@@ -105,10 +105,14 @@ export function ProPage({ toast }: Props) {
 
           <div class="settings-group-label">Included</div>
           <ul class="benefits">
+            <li>Encrypted cloud backup + multi-device restore (recovery code)</li>
             <li>CSV export of customers, balances &amp; entries</li>
             <li>Pro badge on your shop</li>
             <li>No upgrade nag on Home</li>
-            <li>Everything in Free stays free (ledger, remind, statement, backup, PIN)</li>
+            <li>
+              Free still includes the offline ledger, remind, statement, local
+              JSON backup, and PIN
+            </li>
           </ul>
 
           {!pro && (

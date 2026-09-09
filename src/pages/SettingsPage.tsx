@@ -7,10 +7,24 @@ import {
   getShop,
   listEntriesForCustomer,
   saveShop,
+  setCloudBackupMeta,
   setPin,
 } from '../db/repo';
 import { useOnline } from '../hooks/useOnline';
 import { downloadJson, exportBackup, importBackup, readJsonFile } from '../lib/backup';
+import {
+  decryptBackup,
+  deriveBackupId,
+  encryptBackup,
+  formatRecoveryCode,
+  generateRecoveryCode,
+  isValidRecoveryCode,
+} from '../lib/cloudBackup';
+import {
+  CloudBackupApiError,
+  fetchCloudBackup,
+  uploadCloudBackup,
+} from '../lib/cloudBackupApi';
 import { buildCsvExport, downloadCsv } from '../lib/csv';
 import { getEntitlement, isPro } from '../lib/entitlement';
 import { hashPin, isValidPin, randomSalt } from '../lib/pin';
@@ -33,6 +47,13 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   const [pro, setPro] = useState(false);
   const [entLabel, setEntLabel] = useState('Free');
   const [expLabel, setExpLabel] = useState('');
+  const [cloudEnabled, setCloudEnabled] = useState(false);
+  const [lastCloudAt, setLastCloudAt] = useState<number | undefined>();
+  const [showCloudEnable, setShowCloudEnable] = useState(false);
+  const [pendingRecoveryCode, setPendingRecoveryCode] = useState('');
+  const [showCloudRestore, setShowCloudRestore] = useState(false);
+  const [restoreCode, setRestoreCode] = useState('');
+  const [cloudBusy, setCloudBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const online = useOnline();
 
@@ -51,6 +72,8 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
             ? String(e.source)
             : 'Ledger + backup + PIN',
       );
+      setCloudEnabled(Boolean(s.cloudBackupEnabled && s.cloudBackupId));
+      setLastCloudAt(s.lastCloudBackupAt);
     }
     setPending(await countPendingOutbox());
   };
@@ -161,7 +184,195 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     toast('CSV downloaded');
   };
 
+  const proGateCloud = (): boolean => {
+    if (!pro) {
+      toast('Cloud backup is a Pro feature', {
+        ms: 5000,
+        action: {
+          label: 'Upgrade',
+          onClick: () => navigate('/settings/pro'),
+        },
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const startCloudEnable = () => {
+    if (!proGateCloud()) return;
+    if (!online) {
+      toast('You are offline — connect to enable cloud backup');
+      return;
+    }
+    setPendingRecoveryCode(generateRecoveryCode());
+    setShowCloudEnable(true);
+    setShowCloudRestore(false);
+  };
+
+  const cancelCloudEnable = () => {
+    setShowCloudEnable(false);
+    setPendingRecoveryCode('');
+  };
+
+  const confirmCloudEnable = async () => {
+    if (!pendingRecoveryCode) return;
+    if (
+      !confirm(
+        'Have you saved your recovery code? You will need it to restore on another device. We cannot recover it for you.',
+      )
+    ) {
+      return;
+    }
+    setCloudBusy(true);
+    try {
+      const payload = await exportBackup();
+      const enc = await encryptBackup(payload, pendingRecoveryCode);
+      await uploadCloudBackup(enc);
+      await setCloudBackupMeta({
+        cloudBackupEnabled: true,
+        cloudBackupId: enc.backupId,
+        lastCloudBackupAt: Date.now(),
+      });
+      setShowCloudEnable(false);
+      setPendingRecoveryCode('');
+      notifyChanged();
+      await refresh();
+      toast('Cloud backup enabled');
+    } catch (err) {
+      const msg =
+        err instanceof CloudBackupApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Cloud backup failed';
+      toast(msg);
+    } finally {
+      setCloudBusy(false);
+    }
+  };
+
+  const doCloudBackupNow = async () => {
+    if (!proGateCloud()) return;
+    if (!online) {
+      toast('You are offline — connect to upload cloud backup');
+      return;
+    }
+    const s = await getShop();
+    if (!s?.cloudBackupId) {
+      startCloudEnable();
+      return;
+    }
+    // Re-use existing backupId by encrypting with a code we don't have —
+    // User must still have the recovery code for restore; for "Backup now"
+    // we need the recovery code to encrypt with the same key/id.
+    // Prompt for recovery code so ciphertext matches the same backupId.
+    const code = prompt(
+      'Enter your recovery code to encrypt this backup (same code you saved when enabling cloud backup):',
+    );
+    if (!code) return;
+    if (!isValidRecoveryCode(code)) {
+      toast('Invalid recovery code format');
+      return;
+    }
+    setCloudBusy(true);
+    try {
+      const id = await deriveBackupId(code);
+      if (s.cloudBackupId && id !== s.cloudBackupId) {
+        toast('Recovery code does not match this device’s cloud backup');
+        return;
+      }
+      const payload = await exportBackup();
+      const enc = await encryptBackup(payload, code);
+      await uploadCloudBackup(enc);
+      await setCloudBackupMeta({
+        cloudBackupEnabled: true,
+        cloudBackupId: enc.backupId,
+        lastCloudBackupAt: Date.now(),
+      });
+      notifyChanged();
+      await refresh();
+      toast('Cloud backup uploaded');
+    } catch (err) {
+      const msg =
+        err instanceof CloudBackupApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Cloud backup failed';
+      toast(msg);
+    } finally {
+      setCloudBusy(false);
+    }
+  };
+
+  const onCloudBackupRow = () => {
+    if (!proGateCloud()) return;
+    if (cloudEnabled) {
+      doCloudBackupNow();
+    } else {
+      startCloudEnable();
+    }
+  };
+
+  const doCloudRestore = async () => {
+    if (!online) {
+      toast('You are offline — connect to restore from cloud');
+      return;
+    }
+    if (!isValidRecoveryCode(restoreCode)) {
+      toast('Enter a valid recovery code (8 groups of 4)');
+      return;
+    }
+    if (
+      !confirm(
+        'Restore from cloud will replace all local shop, customers, and entries. Continue?',
+      )
+    ) {
+      return;
+    }
+    setCloudBusy(true);
+    try {
+      const backupId = await deriveBackupId(restoreCode);
+      const blob = await fetchCloudBackup(backupId);
+      const data = await decryptBackup(blob, restoreCode);
+      const result = await importBackup(data);
+      // Mark cloud as enabled on this device after restore
+      await setCloudBackupMeta({
+        cloudBackupEnabled: true,
+        cloudBackupId: backupId,
+        lastCloudBackupAt: blob.meta?.exportedAt || Date.now(),
+      });
+      setShowCloudRestore(false);
+      setRestoreCode('');
+      notifyChanged();
+      await refresh();
+      toast(`Restored ${result.customers} customers, ${result.entries} entries`);
+    } catch (err) {
+      const msg =
+        err instanceof CloudBackupApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : 'Cloud restore failed';
+      toast(msg);
+    } finally {
+      setCloudBusy(false);
+    }
+  };
+
+  const copyRecoveryCode = async () => {
+    try {
+      await navigator.clipboard.writeText(pendingRecoveryCode);
+      toast('Recovery code copied');
+    } catch {
+      toast('Copy failed — write the code down');
+    }
+  };
+
   const initial = name.trim().charAt(0).toUpperCase() || 'D';
+  const lastCloudLabel = lastCloudAt
+    ? `Last ${new Date(lastCloudAt).toLocaleString('en-NG')}`
+    : 'Encrypted · multi-device';
 
   return (
     <div class="app-shell">
@@ -224,7 +435,9 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
             <span class="settings-row-body">
               <span class="settings-row-title">DebtBook Pro</span>
               <span class="settings-row-sub">
-                {pro ? 'Manage plan · CSV unlocked' : 'CSV export · hide upgrade nag'}
+                {pro
+                  ? 'Manage plan · CSV & cloud unlocked'
+                  : 'CSV · cloud backup · hide upgrade nag'}
               </span>
             </span>
             <span class="settings-row-trail">
@@ -329,7 +542,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
             </span>
             <span class="settings-row-body">
               <span class="settings-row-title">Export backup</span>
-              <span class="settings-row-sub">JSON file for this phone</span>
+              <span class="settings-row-sub">JSON file for this phone · Free</span>
             </span>
             <span class="settings-row-trail">
               <span class="chev" aria-hidden="true">
@@ -347,7 +560,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
             </span>
             <span class="settings-row-body">
               <span class="settings-row-title">Restore backup</span>
-              <span class="settings-row-sub">Replaces all local data</span>
+              <span class="settings-row-sub">Replaces all local data · Free</span>
             </span>
             <span class="settings-row-trail">
               <span class="chev" aria-hidden="true">
@@ -366,6 +579,149 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
               (e.target as HTMLInputElement).value = '';
             }}
           />
+          <button
+            type="button"
+            class="settings-row"
+            disabled={cloudBusy}
+            onClick={onCloudBackupRow}
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              ☁
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">
+                {cloudEnabled ? 'Backup now' : 'Cloud backup'}
+              </span>
+              <span class="settings-row-sub">
+                {pro
+                  ? cloudEnabled
+                    ? lastCloudLabel
+                    : 'Enable encrypted multi-device backup'
+                  : 'Pro feature'}
+              </span>
+            </span>
+            <span class="settings-row-trail">
+              {pro ? (cloudEnabled ? 'On' : '') : 'Pro'}
+              <span class="chev" aria-hidden="true">
+                ›
+              </span>
+            </span>
+          </button>
+          {showCloudEnable && (
+            <div class="settings-row-panel">
+              <p class="muted" style={{ marginTop: 0, fontSize: '0.85rem' }}>
+                Save this recovery code somewhere safe. It is the only way to
+                restore on another phone — we never store it.
+              </p>
+              <div
+                class="input"
+                style={{
+                  fontFamily: 'ui-monospace, monospace',
+                  fontSize: '0.8rem',
+                  wordBreak: 'break-all',
+                  userSelect: 'all',
+                }}
+              >
+                {formatRecoveryCode(pendingRecoveryCode)}
+              </div>
+              <div class="btn-row" style={{ marginTop: 8 }}>
+                <button
+                  class="btn btn-secondary"
+                  type="button"
+                  onClick={copyRecoveryCode}
+                >
+                  Copy code
+                </button>
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  disabled={cloudBusy}
+                  onClick={confirmCloudEnable}
+                >
+                  {cloudBusy ? 'Uploading…' : 'I saved it — enable'}
+                </button>
+                <button
+                  class="btn btn-ghost"
+                  type="button"
+                  disabled={cloudBusy}
+                  onClick={cancelCloudEnable}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+          <button
+            type="button"
+            class="settings-row"
+            disabled={cloudBusy}
+            onClick={() => {
+              if (!proGateCloud()) return;
+              if (!online) {
+                toast('You are offline — connect to restore from cloud');
+                return;
+              }
+              setShowCloudRestore((v) => !v);
+              setShowCloudEnable(false);
+            }}
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              ☁↩
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">Restore from cloud</span>
+              <span class="settings-row-sub">
+                {pro
+                  ? 'Enter recovery code · replaces local data'
+                  : 'Pro feature'}
+              </span>
+            </span>
+            <span class="settings-row-trail">
+              {pro ? '' : 'Pro'}
+              <span class="chev" aria-hidden="true">
+                {showCloudRestore ? '˅' : '›'}
+              </span>
+            </span>
+          </button>
+          {showCloudRestore && (
+            <div class="settings-row-panel">
+              <div class="field">
+                <label for="recovery">Recovery code</label>
+                <input
+                  id="recovery"
+                  class="input"
+                  value={restoreCode}
+                  placeholder="XXXX-XXXX-XXXX-XXXX-…"
+                  autocomplete="off"
+                  autocapitalize="characters"
+                  onInput={(e) =>
+                    setRestoreCode((e.target as HTMLInputElement).value)
+                  }
+                />
+              </div>
+              <div class="btn-row" style={{ marginTop: 0 }}>
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  disabled={cloudBusy}
+                  onClick={doCloudRestore}
+                >
+                  {cloudBusy ? 'Restoring…' : 'Download & restore'}
+                </button>
+                <button
+                  class="btn btn-ghost"
+                  type="button"
+                  disabled={cloudBusy}
+                  onClick={() => {
+                    setShowCloudRestore(false);
+                    setRestoreCode('');
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         <div class="settings-group-label">More</div>

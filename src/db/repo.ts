@@ -37,7 +37,16 @@ export async function saveShop(name: string): Promise<ShopProfile> {
 
 export async function updateShopFields(
   patch: Partial<
-    Pick<ShopProfile, 'pinHash' | 'pinSalt' | 'entitlement' | 'name'>
+    Pick<
+      ShopProfile,
+      | 'pinHash'
+      | 'pinSalt'
+      | 'entitlement'
+      | 'name'
+      | 'cloudBackupEnabled'
+      | 'lastCloudBackupAt'
+      | 'cloudBackupId'
+    >
   > & { clearPin?: boolean },
 ): Promise<ShopProfile> {
   const db = await getDb();
@@ -65,6 +74,14 @@ export async function clearPin(): Promise<ShopProfile> {
 
 export async function setEntitlement(entitlement: Entitlement): Promise<ShopProfile> {
   return updateShopFields({ entitlement });
+}
+
+export async function setCloudBackupMeta(meta: {
+  cloudBackupEnabled?: boolean;
+  lastCloudBackupAt?: number;
+  cloudBackupId?: string;
+}): Promise<ShopProfile> {
+  return updateShopFields(meta);
 }
 
 /* ── Customers ────────────────────────────────────────── */
