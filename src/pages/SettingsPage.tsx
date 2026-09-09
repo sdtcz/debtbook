@@ -5,6 +5,7 @@ import {
   clearPin,
   getDashboardBalances,
   getShop,
+  listCustomers,
   listEntriesForCustomer,
   saveShop,
   setCloudBackupMeta,
@@ -27,6 +28,14 @@ import {
 } from '../lib/cloudBackupApi';
 import { buildCsvExport, downloadCsv } from '../lib/csv';
 import { getEntitlement, isPro } from '../lib/entitlement';
+import {
+  FEEDBACK_TOPICS,
+  buildFeedbackMessage,
+  copyFeedback,
+  openFeedbackWhatsApp,
+  rememberFeedbackSent,
+  type FeedbackTopicId,
+} from '../lib/feedback';
 import { hashPin, isValidPin, randomSalt } from '../lib/pin';
 import { navigate } from '../lib/router';
 import type { ToastAction } from '../hooks/useToast';
@@ -44,6 +53,9 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   const [hasPin, setHasPin] = useState(false);
   const [showPinForm, setShowPinForm] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackTopics, setFeedbackTopics] = useState<FeedbackTopicId[]>([]);
+  const [feedbackNote, setFeedbackNote] = useState('');
   const [pro, setPro] = useState(false);
   const [entLabel, setEntLabel] = useState('Free');
   const [expLabel, setExpLabel] = useState('');
@@ -366,6 +378,49 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       toast('Recovery code copied');
     } catch {
       toast('Copy failed — write the code down');
+    }
+  };
+
+
+  const toggleFeedbackTopic = (id: FeedbackTopicId) => {
+    setFeedbackTopics((prev) =>
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
+    );
+  };
+
+  const composeFeedback = async () => {
+    let customerCount: number | undefined;
+    try {
+      const customers = await listCustomers();
+      customerCount = customers.length;
+    } catch {
+      /* skip count if DB unavailable */
+    }
+    return buildFeedbackMessage({
+      topicIds: feedbackTopics,
+      note: feedbackNote,
+      shopName: name.trim() || undefined,
+      plan: entLabel,
+      customerCount,
+      appVersion: 'DebtBook',
+    });
+  };
+
+  const sendFeedbackWhatsApp = async () => {
+    const text = await composeFeedback();
+    openFeedbackWhatsApp(text);
+    rememberFeedbackSent();
+    toast('Thanks — WhatsApp draft ready');
+  };
+
+  const copyFeedbackMessage = async () => {
+    const text = await composeFeedback();
+    const ok = await copyFeedback(text);
+    if (ok) {
+      rememberFeedbackSent();
+      toast('Thanks — feedback copied');
+    } else {
+      toast('Copy failed — try WhatsApp instead');
     }
   };
 
@@ -718,6 +773,79 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
                   }}
                 >
                   Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+
+        <div class="settings-group-label">Feedback</div>
+        <div class="settings-group card settings-list">
+          <button
+            type="button"
+            class="settings-row"
+            onClick={() => setShowFeedback((v) => !v)}
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              💬
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">Send feedback</span>
+              <span class="settings-row-sub">What broke today?</span>
+            </span>
+            <span class="settings-row-trail">
+              <span class="chev" aria-hidden="true">
+                {showFeedback ? '˅' : '›'}
+              </span>
+            </span>
+          </button>
+          {showFeedback && (
+            <div class="settings-row-panel">
+              <div class="chip-row" role="group" aria-label="Feedback topics">
+                {FEEDBACK_TOPICS.map((t) => {
+                  const on = feedbackTopics.includes(t.id);
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      class={on ? 'chip on' : 'chip'}
+                      aria-pressed={on}
+                      onClick={() => toggleFeedbackTopic(t.id)}
+                    >
+                      {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <div class="field">
+                <label for="feedback-note">What broke today? (optional)</label>
+                <textarea
+                  id="feedback-note"
+                  class="input"
+                  rows={3}
+                  maxlength={500}
+                  value={feedbackNote}
+                  placeholder="A few words help a lot…"
+                  onInput={(e) =>
+                    setFeedbackNote((e.target as HTMLTextAreaElement).value)
+                  }
+                />
+              </div>
+              <div class="btn-row" style={{ marginTop: 0 }}>
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  onClick={sendFeedbackWhatsApp}
+                >
+                  Send on WhatsApp
+                </button>
+                <button
+                  class="btn btn-secondary"
+                  type="button"
+                  onClick={copyFeedbackMessage}
+                >
+                  Copy
                 </button>
               </div>
             </div>

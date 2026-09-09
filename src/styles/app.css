@@ -646,6 +646,13 @@ button:active:not(:disabled),
   color: var(--primary);
 }
 
+.chip.on,
+.chip-selected {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 /* ── Quick actions on home list ────────────────────────── */
 
 .list-item-wrap {
