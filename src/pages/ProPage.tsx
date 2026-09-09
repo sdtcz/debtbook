@@ -80,36 +80,38 @@ export function ProPage({ toast }: Props) {
         <h1>DebtBook Pro</h1>
         {pro && <span class="pro-badge">Pro</span>}
       </header>
-      <main class="main">
-        <div class="card">
-          <div class="section-title" style={{ marginTop: 0 }}>
-            Pricing (Nigeria)
+      <main class="main settings-main">
+        <section class="card">
+          <div class="settings-group-label" style={{ marginTop: 0 }}>
+            Nigeria pricing
           </div>
-          <p style={{ marginTop: 0, fontSize: '1.15rem', fontWeight: 800 }}>
-            ₦1,500/mo &nbsp;or&nbsp; ₦12,000/yr
-          </p>
-          <p class="muted" style={{ marginTop: 0 }}>
-            Paystack preferred for NGN (Stripe optional). Real checkout wires when
-            server secrets are set.
+          <p class="pro-hero-price">₦1,500/mo</p>
+          <p class="muted" style={{ marginTop: 0, marginBottom: 12 }}>
+            or ₦12,000/year · Paystack when checkout is live
           </p>
 
-          <div class="section-title">Pro includes</div>
+          {pro ? (
+            <div class="pro-status">
+              <span aria-hidden="true">✓</span>
+              <span>
+                You’re on Pro
+                {ent.exp
+                  ? ` until ${new Date(ent.exp).toLocaleDateString('en-NG')}`
+                  : ''}
+                {ent.source ? ` · ${ent.source}` : ''}
+              </span>
+            </div>
+          ) : null}
+
+          <div class="settings-group-label">Included</div>
           <ul class="benefits">
             <li>CSV export of customers, balances &amp; entries</li>
             <li>Pro badge on your shop</li>
-            <li>Hide upgrade nag on Home</li>
-            <li>Everything in Free (offline ledger, remind, statement, backup, PIN)</li>
+            <li>No upgrade nag on Home</li>
+            <li>Everything in Free stays free (ledger, remind, statement, backup, PIN)</li>
           </ul>
 
-          {pro ? (
-            <p style={{ fontWeight: 700, color: 'var(--ok)' }}>
-              You are on Pro
-              {ent.exp
-                ? ` until ${new Date(ent.exp).toLocaleDateString('en-NG')}`
-                : ''}
-              {ent.source ? ` (${ent.source})` : ''}.
-            </p>
-          ) : (
+          {!pro && (
             <>
               <button
                 class="btn btn-primary"
@@ -117,7 +119,7 @@ export function ProPage({ toast }: Props) {
                 disabled={busy}
                 onClick={activateDemo}
               >
-                Activate Pro (demo)
+                Try Pro free for 30 days
               </button>
               <div class="btn-row">
                 <button
@@ -126,16 +128,16 @@ export function ProPage({ toast }: Props) {
                   disabled={busy}
                   onClick={tryCheckout}
                 >
-                  Upgrade (Paystack/Stripe)
+                  Pay with Paystack
                 </button>
               </div>
-              <p class="muted" style={{ fontSize: '0.85rem' }}>
-                Demo sets plan=pro for 30 days locally — try tonight without payment
-                keys. Upgrade calls <code>/api/checkout</code> when configured.
+              <p class="muted" style={{ fontSize: '0.85rem', marginBottom: 0 }}>
+                Demo unlocks Pro on this phone only. Real Paystack checkout turns
+                on when server keys are set.
               </p>
             </>
           )}
-        </div>
+        </section>
       </main>
     </div>
   );

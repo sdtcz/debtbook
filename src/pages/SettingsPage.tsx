@@ -28,8 +28,11 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   const [busy, setBusy] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [hasPin, setHasPin] = useState(false);
+  const [showPinForm, setShowPinForm] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [pro, setPro] = useState(false);
   const [entLabel, setEntLabel] = useState('Free');
+  const [expLabel, setExpLabel] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const online = useOnline();
 
@@ -40,10 +43,13 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       setHasPin(Boolean(s.pinHash && s.pinSalt));
       setPro(isPro(s));
       const e = getEntitlement(s);
-      setEntLabel(
-        e.plan === 'pro'
-          ? `Pro${e.source ? ` (${e.source})` : ''}`
-          : 'Free',
+      setEntLabel(e.plan === 'pro' ? 'Pro' : 'Free');
+      setExpLabel(
+        e.plan === 'pro' && e.exp
+          ? `Until ${new Date(e.exp).toLocaleDateString('en-NG')}`
+          : e.plan === 'pro' && e.source
+            ? String(e.source)
+            : 'Ledger + backup + PIN',
       );
     }
     setPending(await countPendingOutbox());
@@ -91,6 +97,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     const hash = await hashPin(salt, pinInput);
     await setPin(hash, salt);
     setPinInput('');
+    setShowPinForm(false);
     notifyChanged();
     onPinChanged?.();
     await refresh();
@@ -100,6 +107,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   const removePin = async () => {
     if (!confirm('Remove PIN lock?')) return;
     await clearPin();
+    setShowPinForm(false);
     onPinChanged?.();
     await refresh();
     toast('PIN removed');
@@ -153,6 +161,8 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     toast('CSV downloaded');
   };
 
+  const initial = name.trim().charAt(0).toUpperCase() || 'D';
+
   return (
     <div class="app-shell">
       <header class="topbar">
@@ -165,61 +175,115 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           ←
         </button>
         <h1>Settings</h1>
-        {pro && <span class="pro-badge">Pro</span>}
         <StatusBadge />
       </header>
-      <main class="main">
-        <form class="card" onSubmit={save}>
-          <div class="field">
+      <main class="main settings-main">
+        <section class="settings-hero card">
+          <div class="settings-avatar" aria-hidden="true">
+            {initial}
+          </div>
+          <div class="settings-hero-text">
+            <div class="settings-hero-name">{name.trim() || 'Your shop'}</div>
+            <div class="settings-hero-meta">
+              <span class={pro ? 'plan-pill plan-pill-pro' : 'plan-pill'}>
+                {entLabel}
+              </span>
+              <span class="muted">{expLabel}</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="settings-group-label">Shop</div>
+        <form class="settings-group card" onSubmit={save}>
+          <div class="field" style={{ marginBottom: 0 }}>
             <label for="shop">Shop name</label>
             <input
               id="shop"
               class="input"
               value={name}
               maxlength={80}
+              autocomplete="organization"
               onInput={(e) => setName((e.target as HTMLInputElement).value)}
             />
           </div>
           <button class="btn btn-primary" type="submit" disabled={busy}>
-            Save
+            Save shop name
           </button>
         </form>
 
-        <div class="card">
-          <div class="section-title" style={{ marginTop: 0 }}>
-            DebtBook Pro
-          </div>
-          <p class="muted" style={{ marginTop: 0 }}>
-            Plan: <strong>{entLabel}</strong>
-          </p>
+        <div class="settings-group-label">Plan &amp; export</div>
+        <div class="settings-group card settings-list">
           <button
-            class="btn btn-secondary"
             type="button"
+            class="settings-row"
             onClick={() => navigate('/settings/pro')}
           >
-            Open Pro page
+            <span class="settings-row-icon" aria-hidden="true">
+              ★
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">DebtBook Pro</span>
+              <span class="settings-row-sub">
+                {pro ? 'Manage plan · CSV unlocked' : 'CSV export · hide upgrade nag'}
+              </span>
+            </span>
+            <span class="settings-row-trail">
+              {pro ? 'Pro' : 'Free'}
+              <span class="chev" aria-hidden="true">
+                ›
+              </span>
+            </span>
           </button>
-          <div class="btn-row">
-            <button class="btn btn-ghost" type="button" onClick={doCsv}>
-              Export CSV {pro ? '' : '(Pro)'}
-            </button>
-          </div>
+          <button type="button" class="settings-row" onClick={doCsv}>
+            <span class="settings-row-icon" aria-hidden="true">
+              ⬇
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">Export CSV</span>
+              <span class="settings-row-sub">
+                {pro ? 'Customers, balances & entries' : 'Pro feature'}
+              </span>
+            </span>
+            <span class="settings-row-trail">
+              {pro ? '' : 'Pro'}
+              <span class="chev" aria-hidden="true">
+                ›
+              </span>
+            </span>
+          </button>
         </div>
 
-        <div class="card">
-          <div class="section-title" style={{ marginTop: 0 }}>
-            PIN lock
-          </div>
-          <p class="muted" style={{ marginTop: 0, fontSize: '0.85rem' }}>
-            Optional 4-digit PIN. When you leave the app and come back, totals
-            stay hidden until unlocked.
-          </p>
-          {hasPin ? (
-            <button class="btn btn-danger" type="button" onClick={removePin}>
-              Remove PIN
-            </button>
-          ) : (
-            <>
+        <div class="settings-group-label">Security</div>
+        <div class="settings-group card settings-list">
+          <button
+            type="button"
+            class="settings-row"
+            onClick={() => {
+              if (hasPin) {
+                removePin();
+              } else {
+                setShowPinForm((v) => !v);
+              }
+            }}
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              🔒
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">PIN lock</span>
+              <span class="settings-row-sub">
+                {hasPin
+                  ? 'On · tap to remove'
+                  : 'Hide totals when you leave the app'}
+              </span>
+            </span>
+            <span class="settings-row-trail">
+              <span class={hasPin ? 'status-dot on' : 'status-dot'} />
+              {hasPin ? 'On' : 'Off'}
+            </span>
+          </button>
+          {showPinForm && !hasPin && (
+            <div class="settings-row-panel">
               <div class="field">
                 <label for="pin">New PIN (4 digits)</label>
                 <input
@@ -229,39 +293,68 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
                   maxlength={4}
                   value={pinInput}
                   placeholder="••••"
+                  autocomplete="off"
                   onInput={(e) => {
-                    const v = (e.target as HTMLInputElement).value.replace(/\D/g, '').slice(0, 4);
+                    const v = (e.target as HTMLInputElement).value
+                      .replace(/\D/g, '')
+                      .slice(0, 4);
                     setPinInput(v);
                   }}
                 />
               </div>
-              <button class="btn btn-secondary" type="button" onClick={savePin}>
-                Enable PIN
-              </button>
-            </>
+              <div class="btn-row" style={{ marginTop: 0 }}>
+                <button class="btn btn-secondary" type="button" onClick={savePin}>
+                  Enable PIN
+                </button>
+                <button
+                  class="btn btn-ghost"
+                  type="button"
+                  onClick={() => {
+                    setShowPinForm(false);
+                    setPinInput('');
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           )}
         </div>
 
-        <div class="card">
-          <div class="section-title" style={{ marginTop: 0 }}>
-            Local backup
-          </div>
-          <p class="muted" style={{ marginTop: 0, fontSize: '0.85rem' }}>
-            Free: download or restore a JSON backup of shop, customers, and
-            entries on this device.
-          </p>
-          <button class="btn btn-secondary" type="button" onClick={doExport}>
-            Export JSON
+        <div class="settings-group-label">Backup</div>
+        <div class="settings-group card settings-list">
+          <button type="button" class="settings-row" onClick={doExport}>
+            <span class="settings-row-icon" aria-hidden="true">
+              💾
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">Export backup</span>
+              <span class="settings-row-sub">JSON file for this phone</span>
+            </span>
+            <span class="settings-row-trail">
+              <span class="chev" aria-hidden="true">
+                ›
+              </span>
+            </span>
           </button>
-          <div class="btn-row">
-            <button
-              class="btn btn-ghost"
-              type="button"
-              onClick={() => fileRef.current?.click()}
-            >
-              Import JSON
-            </button>
-          </div>
+          <button
+            type="button"
+            class="settings-row"
+            onClick={() => fileRef.current?.click()}
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              ↩
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">Restore backup</span>
+              <span class="settings-row-sub">Replaces all local data</span>
+            </span>
+            <span class="settings-row-trail">
+              <span class="chev" aria-hidden="true">
+                ›
+              </span>
+            </span>
+          </button>
           <input
             ref={fileRef}
             type="file"
@@ -275,39 +368,46 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           />
         </div>
 
-        <div class="card">
-          <div class="section-title" style={{ marginTop: 0 }}>
-            Sync outbox
-          </div>
-          <p class="muted" style={{ marginTop: 0 }}>
-            Network: <strong>{online ? 'Online' : 'Offline'}</strong>
-            <br />
-            Pending mutations: <strong>{pending}</strong>
-          </p>
-          <p class="muted" style={{ fontSize: '0.85rem' }}>
-            IndexedDB is the source of truth. Mutations are queued with ids and
-            client timestamps (LWW-ready). There is no backend yet — Flush only
-            marks the stub queue as synced.
-          </p>
-          <button class="btn btn-secondary" type="button" onClick={flush}>
-            Flush outbox (stub)
+        <div class="settings-group-label">More</div>
+        <div class="settings-group card settings-list">
+          <button
+            type="button"
+            class="settings-row"
+            onClick={() => setShowAdvanced((v) => !v)}
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              ⚙
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">Sync &amp; advanced</span>
+              <span class="settings-row-sub">
+                {online ? 'Online' : 'Offline'} · {pending} pending
+              </span>
+            </span>
+            <span class="settings-row-trail">
+              <span class="chev" aria-hidden="true">
+                {showAdvanced ? '˅' : '›'}
+              </span>
+            </span>
           </button>
+          {showAdvanced && (
+            <div class="settings-row-panel">
+              <p class="muted" style={{ marginTop: 0, fontSize: '0.85rem' }}>
+                Data stays on this device. Outbox is ready for future cloud sync —
+                Flush only marks the stub queue as synced.
+              </p>
+              <button class="btn btn-secondary" type="button" onClick={flush}>
+                Flush outbox (stub)
+              </button>
+            </div>
+          )}
         </div>
 
-        <div class="card">
-          <div class="section-title" style={{ marginTop: 0 }}>
-            About
-          </div>
-          <p class="muted" style={{ marginTop: 0, marginBottom: 0 }}>
-            DebtBook v2 — Nigeria · English · ₦ Naira
-            <br />
-            Offline-first PWA for shopkeeper book debt (udhar).
-            <br />
-            Free: ledger, WhatsApp remind, statement, backup, PIN.
-            <br />
-            Pro: CSV export.
-          </p>
-        </div>
+        <p class="settings-about muted">
+          DebtBook · Nigeria · English · ₦
+          <br />
+          Offline ledger for shopkeeper book debt (udhar)
+        </p>
       </main>
     </div>
   );
