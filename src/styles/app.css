@@ -181,17 +181,17 @@ a {
 .list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .list-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px 14px;
+  padding: 10px 12px;
   min-height: var(--tap);
   text-decoration: none;
   color: inherit;
@@ -682,11 +682,11 @@ button:active:not(:disabled),
 
 .quick-actions button {
   flex: 1;
-  min-height: 40px;
+  min-height: 36px;
   border: none;
   background: #f8fafc;
   font-weight: 700;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   cursor: pointer;
   color: var(--text);
 }
@@ -730,18 +730,65 @@ button:active:not(:disabled),
   color: #92400e;
 }
 
-.upgrade-nag {
-  background: linear-gradient(135deg, #fff7ed, #ffedd5);
-  border: 1px solid #fdba74;
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  margin-bottom: 12px;
+.pro-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -4px 0 12px;
+  padding: 6px 4px 6px 2px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.pro-hint a {
+  flex: 1;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.pro-hint a:active {
+  color: var(--primary);
+}
+
+.pro-hint-dismiss {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1;
+  min-width: 36px;
+  min-height: 36px;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.pro-hint-dismiss:active {
+  background: var(--border);
+}
+
+.card.total .total-meta {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.home-filters {
+  margin: 0 0 4px;
+}
+
+.empty-first-run .empty-tip {
+  margin: 0 auto 16px;
+  max-width: 28ch;
+  line-height: 1.45;
   font-size: 0.9rem;
 }
 
-.upgrade-nag strong {
-  display: block;
-  margin-bottom: 4px;
+.empty-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
 }
 
 /* ── Toast with action ─────────────────────────────────── */

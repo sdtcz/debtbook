@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useMemo, useState } from 'preact/hooks';
 import { StatusBadge } from '../components/StatusBadge';
 import {
   getDashboardBalances,
@@ -15,12 +15,31 @@ interface Props {
   locked?: boolean;
 }
 
+type FilterChip = 'all' | 'overdue' | 'owes';
+
+const PRO_HINT_KEY = 'debtbook:pro-hint-dismissed';
+
+function filterTitle(filter: FilterChip, count: number): string {
+  const n = count ? ` (${count})` : '';
+  if (filter === 'overdue') return `Overdue${n}`;
+  if (filter === 'owes') return `Owes you${n}`;
+  return `Customers${n}`;
+}
+
 export function HomePage({ locked }: Props) {
   const [shop, setShop] = useState<ShopProfile | null>(null);
   const [rows, setRows] = useState<CustomerBalance[]>([]);
   const [total, setTotal] = useState(0);
   const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState<FilterChip>('all');
   const [loading, setLoading] = useState(true);
+  const [proHintDismissed, setProHintDismissed] = useState(() => {
+    try {
+      return localStorage.getItem(PRO_HINT_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
 
   const load = async () => {
     setLoading(true);
@@ -42,8 +61,51 @@ export function HomePage({ locked }: Props) {
     return () => window.removeEventListener('debtbook:changed', onChange);
   }, []);
 
-  const filtered = searchCustomers(rows, query);
+  const overdueCount = useMemo(
+    () => rows.filter((r) => isOverdue(r.customer, r.balanceKobo)).length,
+    [rows],
+  );
+  const owesCount = useMemo(
+    () => rows.filter((r) => r.balanceKobo > 0).length,
+    [rows],
+  );
+
+  const filteredByChip = useMemo(() => {
+    if (filter === 'overdue') {
+      return rows.filter((r) => isOverdue(r.customer, r.balanceKobo));
+    }
+    if (filter === 'owes') {
+      return rows.filter((r) => r.balanceKobo > 0);
+    }
+    return rows;
+  }, [rows, filter]);
+
+  const filtered = searchCustomers(filteredByChip, query);
   const pro = isPro(shop);
+  const hasCustomers = rows.length > 0;
+  const filterActive = filter !== 'all' || Boolean(query.trim());
+
+  const dismissProHint = () => {
+    setProHintDismissed(true);
+    try {
+      localStorage.setItem(PRO_HINT_KEY, '1');
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const clearFilters = () => {
+    setFilter('all');
+    setQuery('');
+  };
+
+  const heroMeta = (() => {
+    const parts: string[] = [];
+    if (overdueCount > 0) parts.push(`${overdueCount} overdue`);
+    parts.push(`${rows.length} customer${rows.length === 1 ? '' : 's'}`);
+    if (owesCount > 0) parts.push(`${owesCount} owe you`);
+    return parts.join(' · ');
+  })();
 
   return (
     <div class="app-shell">
@@ -70,13 +132,22 @@ export function HomePage({ locked }: Props) {
         <div class="card total">
           <div class="label">Total outstanding (customers owe you)</div>
           <div class="amount">{locked ? '••••••' : formatNaira(total)}</div>
+          {!locked && hasCustomers && (
+            <div class="total-meta">{heroMeta}</div>
+          )}
         </div>
 
-        {!pro && !locked && (
-          <div class="upgrade-nag">
-            <strong>DebtBook Pro</strong>
-            CSV export &amp; more — ₦1,500/mo.{' '}
-            <a href={href('/settings/pro')}>See Pro</a>
+        {!pro && !locked && !proHintDismissed && (
+          <div class="pro-hint">
+            <a href={href('/settings/pro')}>Pro: CSV export &amp; backup — ₦1,500/mo</a>
+            <button
+              type="button"
+              class="pro-hint-dismiss"
+              aria-label="Dismiss"
+              onClick={dismissProHint}
+            >
+              ×
+            </button>
           </div>
         )}
 
@@ -94,19 +165,77 @@ export function HomePage({ locked }: Props) {
           />
         </div>
 
-        <div class="section-title">
-          Customers {filtered.length ? `(${filtered.length})` : ''} — overdue
-          first, then highest debt
-        </div>
+        {hasCustomers && (
+          <div class="chip-row home-filters" role="group" aria-label="Filter customers">
+            <button
+              type="button"
+              class={filter === 'all' ? 'chip on' : 'chip'}
+              aria-pressed={filter === 'all'}
+              onClick={() => setFilter('all')}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              class={filter === 'overdue' ? 'chip on' : 'chip'}
+              aria-pressed={filter === 'overdue'}
+              onClick={() => setFilter('overdue')}
+            >
+              Overdue{overdueCount ? ` (${overdueCount})` : ''}
+            </button>
+            <button
+              type="button"
+              class={filter === 'owes' ? 'chip on' : 'chip'}
+              aria-pressed={filter === 'owes'}
+              onClick={() => setFilter('owes')}
+            >
+              Owes you{owesCount ? ` (${owesCount})` : ''}
+            </button>
+          </div>
+        )}
+
+        <div class="section-title">{filterTitle(filter, filtered.length)}</div>
 
         {loading ? (
           <div class="empty">Loading…</div>
+        ) : !hasCustomers ? (
+          <div class="empty empty-first-run">
+            <strong>Add your first customer</strong>
+            <p class="empty-tip">
+              DebtBook is for credit / udhar customers — people who buy now and
+              pay later.
+            </p>
+            {!locked && (
+              <button
+                class="btn btn-primary"
+                type="button"
+                onClick={() => navigate('/customers/new')}
+              >
+                Add first customer
+              </button>
+            )}
+          </div>
         ) : filtered.length === 0 ? (
           <div class="empty">
-            <strong>{query ? 'No matches' : 'No customers yet'}</strong>
+            <strong>No matches</strong>
             {query
               ? 'Try another name or phone.'
-              : 'Tap + Customer to add someone who buys on credit.'}
+              : filter === 'overdue'
+                ? 'Nobody is overdue right now.'
+                : filter === 'owes'
+                  ? 'Nobody owes you right now.'
+                  : 'Nothing here.'}
+            {filterActive && (
+              <div class="empty-actions">
+                <button
+                  type="button"
+                  class="chip"
+                  onClick={clearFilters}
+                >
+                  Clear filters
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div class="list">
@@ -163,15 +292,6 @@ export function HomePage({ locked }: Props) {
                       >
                         − Payment
                       </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate(`/customers/${row.customer.id}`);
-                        }}
-                      >
-                        Open
-                      </button>
                     </div>
                   )}
                 </div>
@@ -181,7 +301,7 @@ export function HomePage({ locked }: Props) {
         )}
       </main>
 
-      {!locked && (
+      {!locked && hasCustomers && (
         <button
           class="fab"
           type="button"
