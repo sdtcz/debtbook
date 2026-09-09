@@ -2,6 +2,7 @@ import { newId } from '../lib/id';
 import type {
   Customer,
   CustomerBalance,
+  Entitlement,
   Entry,
   EntryType,
   ShopProfile,
@@ -34,6 +35,38 @@ export async function saveShop(name: string): Promise<ShopProfile> {
   return shop;
 }
 
+export async function updateShopFields(
+  patch: Partial<
+    Pick<ShopProfile, 'pinHash' | 'pinSalt' | 'entitlement' | 'name'>
+  > & { clearPin?: boolean },
+): Promise<ShopProfile> {
+  const db = await getDb();
+  const existing = await db.get('shop', 'shop');
+  if (!existing) throw new Error('Shop not set up');
+  const now = Date.now();
+  const { clearPin: shouldClear, ...rest } = patch;
+  const shop: ShopProfile = { ...existing, ...rest, updatedAt: now };
+  if (shouldClear) {
+    delete shop.pinHash;
+    delete shop.pinSalt;
+  }
+  await db.put('shop', shop);
+  await enqueueOutbox('shop', shop.id, 'upsert', shop);
+  return shop;
+}
+
+export async function setPin(hash: string, salt: string): Promise<ShopProfile> {
+  return updateShopFields({ pinHash: hash, pinSalt: salt });
+}
+
+export async function clearPin(): Promise<ShopProfile> {
+  return updateShopFields({ clearPin: true });
+}
+
+export async function setEntitlement(entitlement: Entitlement): Promise<ShopProfile> {
+  return updateShopFields({ entitlement });
+}
+
 /* ── Customers ────────────────────────────────────────── */
 
 export async function listCustomers(): Promise<Customer[]> {
@@ -56,6 +89,7 @@ export async function upsertCustomer(input: {
   name: string;
   phone?: string;
   note?: string;
+  dueAt?: number | null;
 }): Promise<Customer> {
   const db = await getDb();
   const now = Date.now();
@@ -73,6 +107,11 @@ export async function upsertCustomer(input: {
       note: input.note?.trim() || undefined,
       updatedAt: now,
     };
+    if (input.dueAt === null) {
+      delete customer.dueAt;
+    } else if (input.dueAt !== undefined) {
+      customer.dueAt = input.dueAt;
+    }
   } else {
     customer = {
       id: newId(),
@@ -82,6 +121,7 @@ export async function upsertCustomer(input: {
       createdAt: now,
       updatedAt: now,
     };
+    if (input.dueAt) customer.dueAt = input.dueAt;
   }
   await db.put('customers', customer);
   await enqueueOutbox('customer', customer.id, 'upsert', customer);
@@ -106,6 +146,18 @@ export async function listEntriesForCustomer(customerId: string): Promise<Entry[
   return all
     .filter((e) => !e.deletedAt)
     .sort((a, b) => b.occurredAt - a.occurredAt);
+}
+
+export async function listAllEntries(): Promise<Entry[]> {
+  const db = await getDb();
+  return (await db.getAll('entries')).filter((e) => !e.deletedAt);
+}
+
+export async function getEntry(id: string): Promise<Entry | undefined> {
+  const db = await getDb();
+  const e = await db.get('entries', id);
+  if (!e || e.deletedAt) return undefined;
+  return e;
 }
 
 export async function addEntry(input: {
@@ -179,6 +231,10 @@ export async function getCustomerBalance(customerId: string): Promise<{
   return { ...computeBalance(entries), entries };
 }
 
+export function isOverdue(customer: Customer, balanceKobo: number, now = Date.now()): boolean {
+  return Boolean(customer.dueAt && customer.dueAt < now && balanceKobo > 0);
+}
+
 export async function getDashboardBalances(): Promise<{
   totalOutstandingKobo: number;
   customers: CustomerBalance[];
@@ -187,6 +243,7 @@ export async function getDashboardBalances(): Promise<{
   const db = await getDb();
   const results: CustomerBalance[] = [];
   let totalOutstandingKobo = 0;
+  const now = Date.now();
 
   for (const customer of customers) {
     const all = await db.getAllFromIndex('entries', 'by-customer', customer.id);
@@ -200,11 +257,16 @@ export async function getDashboardBalances(): Promise<{
       paymentTotalKobo,
       entryCount: active.length,
     });
-    // Outstanding = sum of positive balances only (what customers owe the shop)
     if (balanceKobo > 0) totalOutstandingKobo += balanceKobo;
   }
 
-  results.sort((a, b) => b.balanceKobo - a.balanceKobo);
+  // Overdue first, then highest debt
+  results.sort((a, b) => {
+    const aOver = isOverdue(a.customer, a.balanceKobo, now) ? 1 : 0;
+    const bOver = isOverdue(b.customer, b.balanceKobo, now) ? 1 : 0;
+    if (bOver !== aOver) return bOver - aOver;
+    return b.balanceKobo - a.balanceKobo;
+  });
   return { totalOutstandingKobo, customers: results };
 }
 
@@ -220,4 +282,16 @@ export function searchCustomers(
     const note = (c.customer.note || '').toLowerCase();
     return name.includes(q) || phone.includes(q) || note.includes(q);
   });
+}
+
+/** Most recent entry for a customer within the last `withinMs` (default 10 min). */
+export async function getRecentEntryForUndo(
+  customerId: string,
+  withinMs = 10 * 60 * 1000,
+): Promise<Entry | undefined> {
+  const entries = await listEntriesForCustomer(customerId);
+  const latest = entries[0];
+  if (!latest) return undefined;
+  if (Date.now() - latest.createdAt > withinMs) return undefined;
+  return latest;
 }

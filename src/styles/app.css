@@ -553,3 +553,313 @@ a {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+
+/* ── Motion (CSS only) ─────────────────────────────────── */
+
+button,
+.btn,
+.icon-btn,
+.fab,
+.list-item,
+.seg button {
+  transition: transform 100ms ease, background-color 120ms ease, opacity 120ms ease;
+}
+
+button:active:not(:disabled),
+.btn:active:not(:disabled),
+.icon-btn:active,
+.fab:active,
+.seg button:active {
+  transform: scale(0.97);
+}
+
+@keyframes enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.main {
+  animation: enter-up 150ms ease-out both;
+}
+
+.card {
+  animation: enter-up 160ms ease-out both;
+}
+
+.list-item {
+  animation: enter-up 140ms ease-out both;
+}
+
+.list-item:nth-child(1) { animation-delay: 0ms; }
+.list-item:nth-child(2) { animation-delay: 30ms; }
+.list-item:nth-child(3) { animation-delay: 60ms; }
+.list-item:nth-child(4) { animation-delay: 90ms; }
+.list-item:nth-child(5) { animation-delay: 120ms; }
+.list-item:nth-child(6) { animation-delay: 150ms; }
+.list-item:nth-child(7) { animation-delay: 180ms; }
+.list-item:nth-child(8) { animation-delay: 210ms; }
+.list-item:nth-child(n + 9) {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0ms !important;
+  }
+}
+
+/* ── Amount chips ──────────────────────────────────────── */
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -4px 0 14px;
+}
+
+.chip {
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.chip:active {
+  transform: scale(0.97);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* ── Quick actions on home list ────────────────────────── */
+
+.list-item-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  animation: enter-up 140ms ease-out both;
+}
+
+.list-item-wrap .list-item {
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  animation: none;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 0;
+  border-top: 1px solid var(--border);
+}
+
+.quick-actions button {
+  flex: 1;
+  min-height: 40px;
+  border: none;
+  background: #f8fafc;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.quick-actions button + button {
+  border-left: 1px solid var(--border);
+}
+
+.quick-actions .qa-credit {
+  color: var(--danger);
+}
+
+.quick-actions .qa-pay {
+  color: var(--ok);
+}
+
+.overdue-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.pro-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.upgrade-nag {
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border: 1px solid #fdba74;
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.upgrade-nag strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* ── Toast with action ─────────────────────────────────── */
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 14px;
+  padding: 12px 14px 12px 18px;
+}
+
+.toast .toast-msg {
+  flex: 1;
+}
+
+.toast .toast-action {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 8px 14px;
+  min-height: 36px;
+  cursor: pointer;
+  width: auto;
+}
+
+/* ── PIN lock overlay ──────────────────────────────────── */
+
+.pin-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.pin-card {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 24px 20px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+
+.pin-card h2 {
+  margin: 0 0 8px;
+  color: var(--primary);
+}
+
+.pin-dots {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.pin-dots span {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: transparent;
+}
+
+.pin-dots span.filled {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.pin-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.pin-pad button {
+  min-height: 56px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  font-size: 1.35rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pin-pad button:active {
+  transform: scale(0.97);
+  background: var(--primary-soft);
+}
+
+.locked-blur {
+  filter: blur(6px);
+  user-select: none;
+  pointer-events: none;
+}
+
+.benefits {
+  margin: 0 0 14px;
+  padding-left: 1.1rem;
+  color: var(--muted);
+}
+
+.benefits li {
+  margin-bottom: 6px;
+}
+
+.list {
+  gap: 10px;
+}
+
+.list-item-wrap:nth-child(1) { animation-delay: 0ms; }
+.list-item-wrap:nth-child(2) { animation-delay: 30ms; }
+.list-item-wrap:nth-child(3) { animation-delay: 60ms; }
+.list-item-wrap:nth-child(4) { animation-delay: 90ms; }
+.list-item-wrap:nth-child(5) { animation-delay: 120ms; }
+.list-item-wrap:nth-child(6) { animation-delay: 150ms; }
+.list-item-wrap:nth-child(7) { animation-delay: 180ms; }
+.list-item-wrap:nth-child(8) { animation-delay: 210ms; }
+.list-item-wrap:nth-child(n + 9) { animation: none; }

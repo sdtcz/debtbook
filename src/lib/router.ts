@@ -5,7 +5,8 @@ export type Route =
   | { name: 'customer'; id: string }
   | { name: 'customer-edit'; id: string }
   | { name: 'entry-new'; id: string; type?: 'credit' | 'payment' }
-  | { name: 'settings' };
+  | { name: 'settings' }
+  | { name: 'pro' };
 
 export function parseHash(): Route {
   const raw = (location.hash || '#/').replace(/^#/, '') || '/';
@@ -13,7 +14,9 @@ export function parseHash(): Route {
   const parts = path.split('/').filter(Boolean);
 
   if (parts[0] === 'setup') return { name: 'setup' };
+  if (parts[0] === 'settings' && parts[1] === 'pro') return { name: 'pro' };
   if (parts[0] === 'settings') return { name: 'settings' };
+  if (parts[0] === 'pro') return { name: 'pro' };
   if (parts[0] === 'customers' && parts[1] === 'new') return { name: 'customer-new' };
   if (parts[0] === 'customers' && parts[1] && parts[2] === 'edit') {
     return { name: 'customer-edit', id: parts[1] };

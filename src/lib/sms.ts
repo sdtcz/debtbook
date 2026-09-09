@@ -1,27 +1,12 @@
 /**
- * SMS / remind helpers
- *
- * MVP: opens the device SMS app via `sms:` URI with a prefilled body,
- * falling back to Web Share API when available.
+ * Remind helpers — WhatsApp-first for Nigeria, then SMS, then share/clipboard.
  *
  * ---------------------------------------------------------------------------
  * NEXT STEP — Africa's Talking (programmatic SMS)
  * ---------------------------------------------------------------------------
  * When a backend exists, replace or augment `remindCustomer` with an API call:
- *
  *   POST /api/remind  { phone, message, customerId }
- *
- * Africa's Talking (https://africastalking.com) — Nigeria + many African markets:
- *   - Use their SMS API from a server (never put API keys in the PWA).
- *   - Queue the send in the sync outbox if offline; flush when online.
- *   - Keep this file as the single place that builds the message text so
- *     both the local `sms:` path and the AT path stay consistent.
- *
- * Interface note for later:
- *   export interface SmsProvider {
- *     send(to: string, body: string): Promise<{ ok: boolean; id?: string }>;
- *   }
- *   // AfricasTalkingSmsProvider implements SmsProvider on the server.
+ * Keep this file as the single place that builds the message text.
  * ---------------------------------------------------------------------------
  */
 
@@ -42,12 +27,33 @@ export function buildRemindMessage(
   return `Hello ${customerName}, this is ${shopName}. Your account is settled. Thank you for your business.`;
 }
 
+/**
+ * Normalize Nigeria phone to digits for wa.me:
+ * strip non-digits; leading 0 → 234…; leave 234… as-is.
+ */
+export function normalizeNgWhatsAppDigits(phone: string): string | null {
+  let digits = phone.replace(/\D/g, '');
+  if (!digits) return null;
+  if (digits.startsWith('0') && digits.length >= 10) {
+    digits = '234' + digits.slice(1);
+  }
+  if (digits.startsWith('234') && digits.length >= 12) return digits;
+  // Already international without + or local without leading 0
+  if (digits.length >= 10) return digits;
+  return null;
+}
+
+export function buildWhatsAppUri(phone: string, body: string): string | null {
+  const digits = normalizeNgWhatsAppDigits(phone);
+  if (!digits) return null;
+  return `https://wa.me/${digits}?text=${encodeURIComponent(body)}`;
+}
+
 /** Build sms: URI. Android uses ?body=, iOS often uses &body= after ; or ? */
 export function buildSmsUri(phone: string | undefined, body: string): string {
   const encoded = encodeURIComponent(body);
   const digits = (phone || '').replace(/[^\d+]/g, '');
   if (digits) {
-    // Common Android form; works on many devices
     return `sms:${digits}?body=${encoded}`;
   }
   return `sms:?body=${encoded}`;
@@ -58,27 +64,31 @@ export async function remindCustomer(opts: {
   customerName: string;
   phone?: string;
   balanceKobo: number;
-}): Promise<'sms' | 'share' | 'clipboard' | 'none'> {
+}): Promise<'whatsapp' | 'sms' | 'share' | 'clipboard' | 'none'> {
   const message = buildRemindMessage(
     opts.shopName,
     opts.customerName,
     opts.balanceKobo,
   );
 
-  // Prefer native SMS compose when we have a phone number
+  // Prefer WhatsApp when we have a phone number (Nigeria-first)
   if (opts.phone) {
+    const wa = buildWhatsAppUri(opts.phone, message);
+    if (wa) {
+      window.open(wa, '_blank', 'noopener,noreferrer');
+      return 'whatsapp';
+    }
     const uri = buildSmsUri(opts.phone, message);
     window.location.href = uri;
     return 'sms';
   }
 
-  // Web Share fallback
   if (typeof navigator !== 'undefined' && navigator.share) {
     try {
       await navigator.share({ text: message, title: 'Debt reminder' });
       return 'share';
     } catch {
-      // user cancelled or share failed — try clipboard
+      /* cancelled */
     }
   }
 

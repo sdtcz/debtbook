@@ -7,6 +7,7 @@ import {
 } from './money';
 import { computeBalance } from '../db/repo';
 import type { Entry } from './types';
+import { normalizeNgWhatsAppDigits } from './sms';
 
 describe('money', () => {
   it('formats naira with separators', () => {
@@ -20,11 +21,27 @@ describe('money', () => {
     expect(parseNairaToKobo('-5')).toBeNull();
   });
 
+  it('parses market shorthand k / K', () => {
+    expect(parseNairaToKobo('3k')).toBe(300000);
+    expect(parseNairaToKobo('3K')).toBe(300000);
+    expect(parseNairaToKobo('1.5k')).toBe(150000);
+    expect(parseNairaToKobo('10k')).toBe(1000000);
+    expect(parseNairaToKobo('₦2k')).toBe(200000);
+    expect(parseNairaToKobo('k')).toBeNull();
+  });
+
   it('labels balances', () => {
     expect(balanceLabel(100)).toBe('owes you');
     expect(balanceLabel(-50)).toBe('you owe');
     expect(balanceLabel(0)).toBe('settled');
     expect(balanceTone(-1)).toBe('credit');
+  });
+});
+
+describe('whatsapp phone normalize', () => {
+  it('maps NG local 0… to 234…', () => {
+    expect(normalizeNgWhatsAppDigits('0803 123 4567')).toBe('2348031234567');
+    expect(normalizeNgWhatsAppDigits('+2348031234567')).toBe('2348031234567');
   });
 });
 

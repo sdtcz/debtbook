@@ -1,9 +1,9 @@
 # DebtBook
 
 Offline-first **customer credit ledger** (book debt / udhar) for African shopkeepers.  
-MVP: **Nigeria · English · ₦ Naira**.
+**Nigeria · English · ₦ Naira** · Vite + Preact + IndexedDB + PWA.
 
-Built for a provision-store owner on a cheap Android phone: large tap targets, system fonts, works with DevTools Offline, installable as a PWA.
+Live: https://debtbook-neon.vercel.app
 
 ## Quick start
 
@@ -11,32 +11,43 @@ Built for a provision-store owner on a cheap Android phone: large tap targets, s
 cd debtbook
 npm install
 npm run dev      # http://localhost:5173
-npm run build    # production → dist/
-npm run preview  # serve dist/
-npm test         # unit tests (money + balance math)
+npm run build
+npm test
 ```
 
-## Scripts
+## Free vs Pro
 
-| Script | Purpose |
-|--------|---------|
-| `dev` | Vite dev server (PWA plugin enabled in dev) |
-| `build` | Typecheck + production build to `dist/` |
-| `preview` | Preview the production build |
-| `test` | Vitest (balance & money helpers) |
+| | Free | Pro |
+|---|------|-----|
+| Offline ledger (customers, credit sales, payments) | ✓ | ✓ |
+| WhatsApp-first remind (+ SMS / share fallback) | ✓ | ✓ |
+| Plain-text statement | ✓ | ✓ |
+| Local JSON backup (export / import) | ✓ | ✓ |
+| Optional PIN lock | ✓ | ✓ |
+| Due-date overdue badges | ✓ | ✓ |
+| CSV export (customers + balances + entries) | | ✓ |
+| Pro badge / hide upgrade nag | | ✓ |
 
-## Features
+**Pricing:** ₦1,500/mo or ₦12,000/yr.
 
-1. **Shop profile** — name stored in IndexedDB  
-2. **Customers** — add / edit / list / search (name required; optional phone + note)  
-3. **Entries** — credit sale (↑ debt) and payment (↓ debt); amount, optional note, timestamp  
-4. **Balances** — running balance per customer; home sorted by highest debt + total outstanding  
-5. **Offline-first** — IndexedDB is source of truth; offline / pending-sync badge  
-6. **Sync outbox stub** — queued mutations with ids, timestamps, LWW-ready payloads (no backend yet)  
-7. **Remind** — `sms:` link with prefilled body + Web Share / clipboard fallback (`src/lib/sms.ts` notes Africa’s Talking)  
-8. **Statement** — plain-text statement share / copy  
-9. **Mobile-first UI** — ₦ formatting with thousands separators  
-10. **Installable PWA** — manifest + icons + service worker (vite-plugin-pwa)
+**Try Pro tonight:** Settings → **DebtBook Pro** → **Activate Pro (demo)** — sets `plan=pro` for 30 days locally (no Paystack/Stripe keys needed).
+
+**Real payments (stub):** `api/checkout.ts` + `api/webhook.ts` document Paystack (preferred for NGN) and Stripe. They return 501 until `PAYSTACK_SECRET_KEY` / `STRIPE_SECRET_KEY` are set on Vercel — and still need a short wiring pass after that.
+
+## Features (v2)
+
+1. **Shop profile** — IndexedDB  
+2. **Customers** — add / edit / search; optional phone, note, **due date**  
+3. **Entries** — credit sale / payment; amount chips (₦500, 1k, 2k, 5k, 10k); market parse `3k` / `1.5k`  
+4. **Balances** — home: **overdue first**, then highest debt; total outstanding  
+5. **Quick actions** — Credit / Payment from the home list  
+6. **Undo** — toast Undo (~10s) after save; or “Undo last” on customer detail (10 min)  
+7. **Remind** — WhatsApp `wa.me` first (NG `0…` → `234…`), else SMS, else share/clipboard  
+8. **Statement** — share / copy  
+9. **PIN lock** — optional 4-digit; SHA-256(salt+pin); lock on tab return; hide totals when locked  
+10. **Local backup** — Settings Export / Import JSON  
+11. **Motion** — CSS-only press + enter animations; respects `prefers-reduced-motion`  
+12. **PWA** — installable, offline shell  
 
 ## Balance math
 
@@ -44,58 +55,27 @@ npm test         # unit tests (money + balance math)
 customer balance = sum(credit sales) − sum(payments)
 ```
 
-Amounts are stored as **integer kobo** (1 ₦ = 100 kobo) to avoid float errors.
-
-**Negative balances are allowed** (overpay = shop owes customer) and shown clearly as “you owe”.
-
-Total outstanding on the home screen sums **positive** balances only (what customers still owe the shop).
+Amounts stored as **integer kobo** (1 ₦ = 100 kobo). Negative balances allowed (shop owes customer).
 
 ## Architecture
 
 ```
 src/
-  db/          IndexedDB schema (idb), repository, sync outbox
-  lib/         money, sms, statement, router, types, ids
-  pages/       Setup, Home, Customer, Entry, Settings
-  components/  Status badge, toast, money input
-  styles/      Mobile-first CSS (system fonts)
+  db/          IndexedDB schema (idb v2), repository, outbox
+  lib/         money, sms, statement, pin, entitlement, backup, csv, router
+  pages/       Setup, Home, Customer, Entry, Settings, Pro
+  components/  Status badge, toast (+ Undo), money input (+ chips), PIN lock
+  styles/      Mobile-first CSS + motion
+api/           Vercel serverless stubs (checkout / webhook)
 ```
 
-- **Routing:** hash-based (`#/customers/:id`) — works offline from `index.html`  
-- **Persistence:** `idb` stores `shop`, `customers`, `entries`, `outbox`  
-- **Mutations:** every write also enqueues an outbox item (`pending` → stub `synced`)  
-- **PWA:** `vite-plugin-pwa` + Workbox precache; `registerType: 'autoUpdate'`
+- **Routing:** hash (`#/customers/:id`, `#/settings/pro`)  
+- **DB version 2:** optional `dueAt` on customers; `pinHash` / `pinSalt` / `entitlement` on shop  
 
-## PWA / install
+## Paystack note (Nigeria)
 
-1. `npm run build && npm run preview` (or deploy `dist/` to any static host over **HTTPS**)  
-2. On Android Chrome: menu → **Install app** / **Add to Home screen**  
-3. DevTools → Application → Service Workers / Manifest to verify  
-4. DevTools → Network → **Offline** — app should still open and read/write IndexedDB  
-
-> Note: `vite preview` / localhost works for install testing; production needs HTTPS (or localhost).
-
-## 2G / low-end notes
-
-- Bundle is intentionally small (Preact + idb, no UI kit)  
-- System fonts only — no webfont download  
-- Precached shell means first successful visit → later opens without network  
-- Prefer Wi‑Fi for the first install; afterward bookkeeping works offline  
-- Avoid large photos/inventory (out of scope) — keep the ledger lean for storage-constrained phones  
-
-## Africa’s Talking (next step)
-
-SMS reminders currently open the device SMS app. For programmatic SMS (bulk / no handset):
-
-1. Add a small backend that holds Africa’s Talking credentials (never in the PWA)  
-2. Implement `SmsProvider` described in `src/lib/sms.ts`  
-3. Queue “remind” jobs in the outbox when offline; flush when online  
-4. Reuse `buildRemindMessage()` so copy stays consistent  
-
-## Out of scope (MVP)
-
-Inventory, tax, lending, auth, payment APIs, WhatsApp Business API, analytics, photos.
+Prefer **Paystack** for NGN subscriptions. Stripe is optional. Never put secret keys in the PWA — only in Vercel env for `/api/*`. Until keys exist, **Activate Pro (demo)** is the supported path.
 
 ## License
 
-MIT — built as a greenfield demo / starter for shopkeeper credit ledgers.
+MIT

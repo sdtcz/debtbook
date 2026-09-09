@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'preact/hooks';
 import { MoneyInput } from '../components/MoneyInput';
 import { notifyChanged } from '../components/StatusBadge';
-import { addEntry, getCustomer } from '../db/repo';
+import { addEntry, getCustomer, softDeleteEntry } from '../db/repo';
 import type { EntryType } from '../lib/types';
 import { parseNairaToKobo } from '../lib/money';
 import { navigate } from '../lib/router';
+import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
   customerId: string;
   initialType?: EntryType;
-  toast: (msg: string) => void;
+  toast: (msg: string, opts?: { ms?: number; action?: ToastAction }) => void;
 }
 
 export function EntryFormPage({ customerId, initialType, toast }: Props) {
@@ -45,14 +46,25 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
     setBusy(true);
     setError(null);
     try {
-      await addEntry({
+      const entry = await addEntry({
         customerId,
         type,
         amountKobo: kobo,
         note: note || undefined,
       });
       notifyChanged();
-      toast(type === 'credit' ? 'Credit sale recorded' : 'Payment recorded');
+      const label = type === 'credit' ? 'Credit sale recorded' : 'Payment recorded';
+      toast(label, {
+        ms: 10000,
+        action: {
+          label: 'Undo',
+          onClick: async () => {
+            await softDeleteEntry(entry.id);
+            notifyChanged();
+            toast('Entry undone');
+          },
+        },
+      });
       navigate(`/customers/${customerId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not save');

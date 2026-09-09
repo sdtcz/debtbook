@@ -24,11 +24,22 @@ export function formatNairaWhole(kobo: number): string {
   return NGN_COMPACT.format(Math.round(kobo / 100));
 }
 
-/** Parse user input like "1,500.50" or "1500" into kobo. Returns null if invalid. */
+/**
+ * Parse user input into kobo.
+ * Accepts: "1500", "1,500.50", "₦500", "3k", "3K", "1.5k" (k = ×1000 naira).
+ */
 export function parseNairaToKobo(input: string): number | null {
-  const cleaned = input.replace(/[₦\s,]/g, '').trim();
-  if (!cleaned || !/^\d+(\.\d{1,2})?$/.test(cleaned)) return null;
-  const naira = Number(cleaned);
+  let cleaned = input.replace(/[₦\s,]/g, '').trim();
+  if (!cleaned) return null;
+
+  let multiplier = 1;
+  if (/k$/i.test(cleaned)) {
+    cleaned = cleaned.slice(0, -1);
+    multiplier = 1000;
+  }
+
+  if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) return null;
+  const naira = Number(cleaned) * multiplier;
   if (!Number.isFinite(naira) || naira < 0) return null;
   return Math.round(naira * 100);
 }

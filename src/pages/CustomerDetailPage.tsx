@@ -3,6 +3,7 @@ import { StatusBadge, notifyChanged } from '../components/StatusBadge';
 import {
   getCustomer,
   getCustomerBalance,
+  getRecentEntryForUndo,
   getShop,
   softDeleteEntry,
 } from '../db/repo';
@@ -15,10 +16,12 @@ import {
 import { remindCustomer } from '../lib/sms';
 import { buildStatement, shareOrCopyText } from '../lib/statement';
 import { navigate } from '../lib/router';
+import { isOverdue } from '../db/repo';
+import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
   id: string;
-  toast: (msg: string) => void;
+  toast: (msg: string, opts?: { ms?: number; action?: ToastAction }) => void;
 }
 
 function fmtWhen(ts: number): string {
@@ -30,20 +33,30 @@ function fmtWhen(ts: number): string {
   });
 }
 
+function fmtDue(ts: number): string {
+  return new Date(ts).toLocaleDateString('en-NG', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
 export function CustomerDetailPage({ id, toast }: Props) {
   const [shop, setShop] = useState<ShopProfile | null>(null);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [balanceKobo, setBalanceKobo] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [canUndo, setCanUndo] = useState(false);
 
   const load = async () => {
     setLoading(true);
     try {
-      const [s, c, bal] = await Promise.all([
+      const [s, c, bal, recent] = await Promise.all([
         getShop(),
         getCustomer(id),
         getCustomerBalance(id),
+        getRecentEntryForUndo(id),
       ]);
       if (!c) {
         toast('Customer not found');
@@ -54,6 +67,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
       setCustomer(c);
       setEntries(bal.entries);
       setBalanceKobo(bal.balanceKobo);
+      setCanUndo(Boolean(recent));
     } finally {
       setLoading(false);
     }
@@ -74,10 +88,11 @@ export function CustomerDetailPage({ id, toast }: Props) {
       phone: customer.phone,
       balanceKobo,
     });
-    if (result === 'sms') toast('Opening SMS…');
+    if (result === 'whatsapp') toast('Opening WhatsApp…');
+    else if (result === 'sms') toast('Opening SMS…');
     else if (result === 'share') toast('Shared');
     else if (result === 'clipboard') toast('Message copied');
-    else toast('Could not open share or SMS');
+    else toast('Could not open WhatsApp, share, or SMS');
   };
 
   const onStatement = async () => {
@@ -87,7 +102,6 @@ export function CustomerDetailPage({ id, toast }: Props) {
     if (result === 'share') toast('Statement shared');
     else if (result === 'clipboard') toast('Statement copied');
     else {
-      // Last resort: show in prompt for manual copy on very old browsers
       window.prompt('Copy statement:', text);
     }
   };
@@ -97,6 +111,17 @@ export function CustomerDetailPage({ id, toast }: Props) {
     await softDeleteEntry(entryId);
     notifyChanged();
     toast('Entry deleted');
+  };
+
+  const undoLast = async () => {
+    const recent = await getRecentEntryForUndo(id);
+    if (!recent) {
+      toast('Nothing to undo (only last 10 minutes)');
+      return;
+    }
+    await softDeleteEntry(recent.id);
+    notifyChanged();
+    toast('Last entry undone');
   };
 
   if (loading || !customer) {
@@ -116,6 +141,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
   }
 
   const tone = balanceTone(balanceKobo);
+  const overdue = isOverdue(customer, balanceKobo);
 
   return (
     <div class="app-shell">
@@ -131,6 +157,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
         <div style={{ flex: 1, minWidth: 0 }}>
           <h1 style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {customer.name}
+            {overdue && <span class="overdue-badge">Overdue</span>}
           </h1>
           <div class="sub">{customer.phone || 'No phone'}</div>
         </div>
@@ -149,6 +176,12 @@ export function CustomerDetailPage({ id, toast }: Props) {
         <div class={`card balance-hero ${tone}`}>
           <div class={`amount`}>{formatNaira(Math.abs(balanceKobo))}</div>
           <div class="label">{balanceLabel(balanceKobo)}</div>
+          {customer.dueAt && (
+            <div class="hint" style={{ marginTop: 6 }}>
+              Due {fmtDue(customer.dueAt)}
+              {overdue ? ' · overdue' : ''}
+            </div>
+          )}
           {tone === 'credit' && (
             <div class="hint" style={{ marginTop: 6 }}>
               Overpaid — shop owes this customer
@@ -182,6 +215,14 @@ export function CustomerDetailPage({ id, toast }: Props) {
             Statement
           </button>
         </div>
+
+        {canUndo && (
+          <div class="btn-row" style={{ marginTop: 8 }}>
+            <button class="btn btn-ghost" type="button" onClick={undoLast}>
+              Undo last entry
+            </button>
+          </div>
+        )}
 
         {customer.note && (
           <p class="muted" style={{ marginTop: 12 }}>

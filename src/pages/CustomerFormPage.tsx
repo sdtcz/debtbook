@@ -2,10 +2,27 @@ import { useEffect, useState } from 'preact/hooks';
 import { notifyChanged } from '../components/StatusBadge';
 import { getCustomer, softDeleteCustomer, upsertCustomer } from '../db/repo';
 import { navigate } from '../lib/router';
+import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
   id?: string;
-  toast: (msg: string) => void;
+  toast: (msg: string, opts?: { ms?: number; action?: ToastAction }) => void;
+}
+
+function toDateInput(ts?: number): string {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function fromDateInput(v: string): number | null {
+  if (!v.trim()) return null;
+  const d = new Date(v + 'T12:00:00');
+  if (Number.isNaN(d.getTime())) return null;
+  return d.getTime();
 }
 
 export function CustomerFormPage({ id, toast }: Props) {
@@ -13,6 +30,7 @@ export function CustomerFormPage({ id, toast }: Props) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [note, setNote] = useState('');
+  const [dueDate, setDueDate] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,6 +45,7 @@ export function CustomerFormPage({ id, toast }: Props) {
       setName(c.name);
       setPhone(c.phone || '');
       setNote(c.note || '');
+      setDueDate(toDateInput(c.dueAt));
     });
   }, [id]);
 
@@ -39,11 +58,13 @@ export function CustomerFormPage({ id, toast }: Props) {
     setBusy(true);
     setError(null);
     try {
+      const dueAt = fromDateInput(dueDate);
       const c = await upsertCustomer({
         id,
         name,
         phone: phone || undefined,
         note: note || undefined,
+        dueAt: dueAt === null ? null : dueAt,
       });
       notifyChanged();
       toast(editing ? 'Customer updated' : 'Customer added');
@@ -57,7 +78,11 @@ export function CustomerFormPage({ id, toast }: Props) {
 
   const remove = async () => {
     if (!id) return;
-    if (!confirm('Remove this customer? Their entries stay in the ledger history but the customer will be hidden.')) {
+    if (
+      !confirm(
+        'Remove this customer? Their entries stay in the ledger history but the customer will be hidden.',
+      )
+    ) {
       return;
     }
     setBusy(true);
@@ -109,7 +134,20 @@ export function CustomerFormPage({ id, toast }: Props) {
               placeholder="e.g. 0803 123 4567"
               onInput={(e) => setPhone((e.target as HTMLInputElement).value)}
             />
-            <div class="hint">Used for SMS reminders</div>
+            <div class="hint">Used for WhatsApp / SMS reminders</div>
+          </div>
+          <div class="field">
+            <label for="cdue">Due date (optional)</label>
+            <input
+              id="cdue"
+              class="input"
+              type="date"
+              value={dueDate}
+              onInput={(e) => setDueDate((e.target as HTMLInputElement).value)}
+            />
+            <div class="hint">
+              Shows an Overdue badge on Home when balance &gt; 0 and past due
+            </div>
           </div>
           <div class="field">
             <label for="cnote">Note (optional)</label>

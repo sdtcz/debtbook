@@ -1,11 +1,24 @@
 /** Core domain types for DebtBook */
 
+export type Plan = 'free' | 'pro';
+
+export interface Entitlement {
+  plan: Plan;
+  /** Unix ms expiry; omit for perpetual / until revoked */
+  exp?: number;
+  source?: string;
+}
+
 export interface ShopProfile {
   id: 'shop';
   name: string;
   currency: 'NGN';
   createdAt: number;
   updatedAt: number;
+  /** SHA-256 hex of salt+pin; unset = no lock */
+  pinHash?: string;
+  pinSalt?: string;
+  entitlement?: Entitlement;
 }
 
 export interface Customer {
@@ -13,6 +26,8 @@ export interface Customer {
   name: string;
   phone?: string;
   note?: string;
+  /** Optional due date (unix ms) for outstanding balance reminders */
+  dueAt?: number;
   createdAt: number;
   updatedAt: number;
   /** Soft-delete support for LWW sync later */
@@ -58,4 +73,12 @@ export interface CustomerBalance {
   creditTotalKobo: number;
   paymentTotalKobo: number;
   entryCount: number;
+}
+
+export interface BackupPayload {
+  version: 1;
+  exportedAt: number;
+  shop: ShopProfile | null;
+  customers: Customer[];
+  entries: Entry[];
 }

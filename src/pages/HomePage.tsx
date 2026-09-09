@@ -3,13 +3,19 @@ import { StatusBadge } from '../components/StatusBadge';
 import {
   getDashboardBalances,
   getShop,
+  isOverdue,
   searchCustomers,
 } from '../db/repo';
+import { isPro } from '../lib/entitlement';
 import type { CustomerBalance, ShopProfile } from '../lib/types';
 import { balanceLabel, balanceTone, formatNaira } from '../lib/money';
 import { href, navigate } from '../lib/router';
 
-export function HomePage() {
+interface Props {
+  locked?: boolean;
+}
+
+export function HomePage({ locked }: Props) {
   const [shop, setShop] = useState<ShopProfile | null>(null);
   const [rows, setRows] = useState<CustomerBalance[]>([]);
   const [total, setTotal] = useState(0);
@@ -37,12 +43,16 @@ export function HomePage() {
   }, []);
 
   const filtered = searchCustomers(rows, query);
+  const pro = isPro(shop);
 
   return (
     <div class="app-shell">
       <header class="topbar">
         <div style={{ flex: 1 }}>
-          <h1>DebtBook</h1>
+          <h1>
+            DebtBook{' '}
+            {pro && <span class="pro-badge">Pro</span>}
+          </h1>
           <div class="sub">{shop?.name || 'My shop'}</div>
         </div>
         <StatusBadge />
@@ -56,11 +66,19 @@ export function HomePage() {
         </button>
       </header>
 
-      <main class="main">
+      <main class={`main ${locked ? 'locked-blur' : ''}`}>
         <div class="card total">
           <div class="label">Total outstanding (customers owe you)</div>
-          <div class="amount">{formatNaira(total)}</div>
+          <div class="amount">{locked ? '••••••' : formatNaira(total)}</div>
         </div>
+
+        {!pro && !locked && (
+          <div class="upgrade-nag">
+            <strong>DebtBook Pro</strong>
+            CSV export &amp; more — ₦1,500/mo.{' '}
+            <a href={href('/settings/pro')}>See Pro</a>
+          </div>
+        )}
 
         <div class="search-wrap">
           <label class="sr-only" for="search">
@@ -77,7 +95,8 @@ export function HomePage() {
         </div>
 
         <div class="section-title">
-          Customers {filtered.length ? `(${filtered.length})` : ''} — highest debt first
+          Customers {filtered.length ? `(${filtered.length})` : ''} — overdue
+          first, then highest debt
         </div>
 
         {loading ? (
@@ -93,37 +112,85 @@ export function HomePage() {
           <div class="list">
             {filtered.map((row) => {
               const tone = balanceTone(row.balanceKobo);
+              const overdue = isOverdue(row.customer, row.balanceKobo);
               return (
-                <a
-                  class="list-item"
-                  key={row.customer.id}
-                  href={href(`/customers/${row.customer.id}`)}
-                >
-                  <div class="meta">
-                    <div class="name">{row.customer.name}</div>
-                    <div class="hint">
-                      {row.customer.phone || 'No phone'} · {balanceLabel(row.balanceKobo)}
+                <div class="list-item-wrap" key={row.customer.id}>
+                  <a
+                    class="list-item"
+                    href={href(`/customers/${row.customer.id}`)}
+                  >
+                    <div class="meta">
+                      <div class="name">
+                        {row.customer.name}
+                        {overdue && (
+                          <span class="overdue-badge">Overdue</span>
+                        )}
+                      </div>
+                      <div class="hint">
+                        {row.customer.phone || 'No phone'} ·{' '}
+                        {balanceLabel(row.balanceKobo)}
+                      </div>
                     </div>
-                  </div>
-                  <div class={`amount-pill ${tone}`}>
-                    {formatNaira(Math.abs(row.balanceKobo))}
-                    {tone === 'credit' ? ' ▾' : tone === 'debt' ? '' : ''}
-                  </div>
-                </a>
+                    <div class={`amount-pill ${tone}`}>
+                      {locked
+                        ? '••••'
+                        : formatNaira(Math.abs(row.balanceKobo))}
+                    </div>
+                  </a>
+                  {!locked && (
+                    <div class="quick-actions">
+                      <button
+                        type="button"
+                        class="qa-credit"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate(
+                            `/customers/${row.customer.id}/entry/credit`,
+                          );
+                        }}
+                      >
+                        + Credit
+                      </button>
+                      <button
+                        type="button"
+                        class="qa-pay"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate(
+                            `/customers/${row.customer.id}/entry/payment`,
+                          );
+                        }}
+                      >
+                        − Payment
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate(`/customers/${row.customer.id}`);
+                        }}
+                      >
+                        Open
+                      </button>
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
         )}
       </main>
 
-      <button
-        class="fab"
-        type="button"
-        aria-label="Add customer"
-        onClick={() => navigate('/customers/new')}
-      >
-        + <span class="label">Customer</span>
-      </button>
+      {!locked && (
+        <button
+          class="fab"
+          type="button"
+          aria-label="Add customer"
+          onClick={() => navigate('/customers/new')}
+        >
+          + <span class="label">Customer</span>
+        </button>
+      )}
     </div>
   );
 }
