@@ -6,15 +6,42 @@ import { useLocale } from './hooks/useLocale';
 import { useToast } from './hooks/useToast';
 import { initLocale } from './i18n';
 import { parseHash, type Route } from './lib/router';
+import { shouldShowApp } from './lib/viewportMode';
 import { CustomerDetailPage } from './pages/CustomerDetailPage';
 import { CustomerFormPage } from './pages/CustomerFormPage';
 import { EntryFormPage } from './pages/EntryFormPage';
 import { HomePage } from './pages/HomePage';
+import { LandingPage } from './pages/LandingPage';
 import { ProPage } from './pages/ProPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SetupPage } from './pages/SetupPage';
 
+function useAppMode(): [boolean, () => void] {
+  const [showApp, setShowApp] = useState(() => shouldShowApp());
+
+  useEffect(() => {
+    const recompute = () => setShowApp(shouldShowApp());
+    const mqNarrow = window.matchMedia('(max-width: 640px)');
+    const mqCoarse = window.matchMedia('(pointer: coarse)');
+    const mqMid = window.matchMedia('(max-width: 900px)');
+    mqNarrow.addEventListener('change', recompute);
+    mqCoarse.addEventListener('change', recompute);
+    mqMid.addEventListener('change', recompute);
+    window.addEventListener('resize', recompute);
+    return () => {
+      mqNarrow.removeEventListener('change', recompute);
+      mqCoarse.removeEventListener('change', recompute);
+      mqMid.removeEventListener('change', recompute);
+      window.removeEventListener('resize', recompute);
+    };
+  }, []);
+
+  const forceApp = useCallback(() => setShowApp(true), []);
+  return [showApp, forceApp];
+}
+
 export function App() {
+  const [showApp, forceApp] = useAppMode();
   const [route, setRoute] = useState<Route>(parseHash());
   const [ready, setReady] = useState(false);
   const [hasShop, setHasShop] = useState(false);
@@ -41,14 +68,16 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    if (!showApp) return;
     refreshShop();
     const onHash = () => setRoute(parseHash());
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
-  }, []);
+  }, [showApp]);
 
   // Lock when returning to the tab/app if PIN is set
   useEffect(() => {
+    if (!showApp) return;
     const onVis = () => {
       if (document.visibilityState === 'visible' && pinHash && pinSalt) {
         setLocked(true);
@@ -58,7 +87,11 @@ export function App() {
     // Also lock on first load if PIN exists
     if (pinHash && pinSalt) setLocked(true);
     return () => document.removeEventListener('visibilitychange', onVis);
-  }, [pinHash, pinSalt]);
+  }, [showApp, pinHash, pinSalt]);
+
+  if (!showApp) {
+    return <LandingPage onUseAppHere={forceApp} />;
+  }
 
   if (!ready) {
     return (
