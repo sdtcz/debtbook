@@ -4,7 +4,8 @@ declare const process: { env: Record<string, string | undefined> };
  * Encrypted cloud backup store (Vercel serverless).
  *
  * POST — store ciphertext blob keyed by opaque backupId
- * GET  ?id= — retrieve ciphertext + iv + salt + meta
+ * GET  ?id= — retrieve ciphertext + iv + salt + meta + storedAt
+ * GET  ?id=&meta=1 — meta + storedAt only (no ciphertext)
  *
  * Never stores recovery code or plaintext ledger.
  * Requires process.env.BLOB_READ_WRITE_TOKEN (@vercel/blob); else 501.
@@ -12,7 +13,7 @@ declare const process: { env: Record<string, string | undefined> };
 
 type Req = {
   method?: string;
-  query?: { id?: string | string[] };
+  query?: { id?: string | string[]; meta?: string | string[] };
   body?: {
     backupId?: string;
     ciphertext?: string;
@@ -33,6 +34,12 @@ function queryId(req: Req): string | undefined {
   const raw = req.query?.id;
   if (Array.isArray(raw)) return raw[0];
   return raw;
+}
+
+function queryMetaOnly(req: Req): boolean {
+  const raw = req.query?.meta;
+  const v = Array.isArray(raw) ? raw[0] : raw;
+  return v === '1' || v === 'true';
 }
 
 function isHexId(id: string): boolean {
@@ -150,7 +157,18 @@ export default async function handler(req: Req, res: Res) {
         iv?: string;
         salt?: string;
         meta?: unknown;
+        storedAt?: number;
       };
+
+      if (queryMetaOnly(req)) {
+        res.status(200).json({
+          ok: true,
+          backupId: data.backupId || id.toLowerCase(),
+          storedAt: data.storedAt ?? null,
+          meta: data.meta ?? null,
+        });
+        return;
+      }
 
       if (!data.ciphertext || !data.iv || !data.salt) {
         res.status(500).json({ ok: false, message: 'Corrupt backup blob' });
@@ -164,6 +182,7 @@ export default async function handler(req: Req, res: Res) {
         iv: data.iv,
         salt: data.salt,
         meta: data.meta ?? null,
+        storedAt: data.storedAt ?? null,
       });
     } catch (err) {
       res.status(500).json({

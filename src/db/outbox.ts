@@ -36,10 +36,10 @@ export async function listPendingOutbox(): Promise<OutboxItem[]> {
 }
 
 /**
- * Stub: mark all pending as synced.
- * Real backend would POST payloads and use server clock / LWW.
+ * Mark all pending outbox rows as synced (snapshot is on cloud).
+ * Real mutation-log sync would POST payloads; MVP uses encrypted full snapshot.
  */
-export async function flushOutboxStub(): Promise<number> {
+export async function markOutboxSynced(): Promise<number> {
   const db = await getDb();
   const pending = await listPendingOutbox();
   const tx = db.transaction('outbox', 'readwrite');
@@ -49,3 +49,6 @@ export async function flushOutboxStub(): Promise<number> {
   await tx.done;
   return pending.length;
 }
+
+/** @deprecated Use markOutboxSynced — kept for any lingering imports */
+export const flushOutboxStub = markOutboxSynced;

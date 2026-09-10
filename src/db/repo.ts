@@ -32,6 +32,7 @@ export async function saveShop(name: string): Promise<ShopProfile> {
       };
   await db.put('shop', shop);
   await enqueueOutbox('shop', shop.id, 'upsert', shop);
+  await touchLocalChange();
   return shop;
 }
 
@@ -46,6 +47,7 @@ export async function updateShopFields(
       | 'cloudBackupEnabled'
       | 'lastCloudBackupAt'
       | 'cloudBackupId'
+      | 'lastLocalChangeAt'
       | 'locale'
       | 'chaseReminderEnabled'
       | 'chaseReminderTime'
@@ -72,11 +74,15 @@ export async function updateShopFields(
 }
 
 export async function setPin(hash: string, salt: string): Promise<ShopProfile> {
-  return updateShopFields({ pinHash: hash, pinSalt: salt });
+  const shop = await updateShopFields({ pinHash: hash, pinSalt: salt });
+  await touchLocalChange();
+  return shop;
 }
 
 export async function clearPin(): Promise<ShopProfile> {
-  return updateShopFields({ clearPin: true });
+  const shop = await updateShopFields({ clearPin: true });
+  await touchLocalChange();
+  return shop;
 }
 
 export async function setEntitlement(entitlement: Entitlement): Promise<ShopProfile> {
@@ -87,8 +93,22 @@ export async function setCloudBackupMeta(meta: {
   cloudBackupEnabled?: boolean;
   lastCloudBackupAt?: number;
   cloudBackupId?: string;
+  /** Pass after successful sync to clear pending-local without a ledger bump */
+  lastLocalChangeAt?: number;
 }): Promise<ShopProfile> {
+  // Cloud meta updates must NOT bump lastLocalChangeAt via touchLocalChange
   return updateShopFields(meta);
+}
+
+/** Bump lastLocalChangeAt without enqueueing (ledger mutated). */
+export async function touchLocalChange(): Promise<void> {
+  const db = await getDb();
+  const existing = await db.get('shop', 'shop');
+  if (!existing) return;
+  await db.put('shop', {
+    ...existing,
+    lastLocalChangeAt: Date.now(),
+  });
 }
 
 export async function setShopLocale(locale: 'en' | 'ha' | 'yo'): Promise<ShopProfile | undefined> {
@@ -132,6 +152,7 @@ export async function setShopPayMe(details: {
   apply('payLinkUrl', details.payLinkUrl);
   await db.put('shop', next);
   await enqueueOutbox('shop', next.id, 'upsert', next);
+  await touchLocalChange();
   return next;
 }
 
@@ -200,6 +221,7 @@ export async function upsertCustomer(input: {
   }
   await db.put('customers', customer);
   await enqueueOutbox('customer', customer.id, 'upsert', customer);
+  await touchLocalChange();
   return customer;
 }
 
@@ -211,6 +233,7 @@ export async function softDeleteCustomer(id: string): Promise<void> {
   const customer: Customer = { ...existing, deletedAt: now, updatedAt: now };
   await db.put('customers', customer);
   await enqueueOutbox('customer', id, 'delete', customer);
+  await touchLocalChange();
 }
 
 /* ── Entries ──────────────────────────────────────────── */
@@ -260,6 +283,7 @@ export async function addEntry(input: {
   };
   await db.put('entries', entry);
   await enqueueOutbox('entry', entry.id, 'upsert', entry);
+  await touchLocalChange();
   return entry;
 }
 
@@ -271,6 +295,7 @@ export async function softDeleteEntry(id: string): Promise<void> {
   const entry: Entry = { ...existing, deletedAt: now, updatedAt: now };
   await db.put('entries', entry);
   await enqueueOutbox('entry', id, 'delete', entry);
+  await touchLocalChange();
 }
 
 /**

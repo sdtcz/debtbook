@@ -25,6 +25,8 @@ export interface ShopProfile {
   lastCloudBackupAt?: number;
   /** Public opaque backup id (SHA-256 hex) — never the recovery code */
   cloudBackupId?: string;
+  /** Last local ledger mutation (unix ms) — for sync pending / auto-push */
+  lastLocalChangeAt?: number;
   /** UI language preference */
   locale?: 'en' | 'ha' | 'yo';
   /** Daily overdue chase reminder on Home (default off) */

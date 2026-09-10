@@ -11,6 +11,12 @@ export class CloudBackupApiError extends Error {
   }
 }
 
+export type CloudBackupMetaResponse = {
+  backupId: string;
+  storedAt?: number;
+  meta: EncryptedCloudBackup['meta'] | null;
+};
+
 export async function uploadCloudBackup(
   encrypted: EncryptedCloudBackup,
 ): Promise<{ ok: true; backupId: string }> {
@@ -55,7 +61,7 @@ export async function uploadCloudBackup(
 
 export async function fetchCloudBackup(
   backupId: string,
-): Promise<CloudBackupBlob> {
+): Promise<CloudBackupBlob & { storedAt?: number }> {
   if (typeof navigator !== 'undefined' && !navigator.onLine) {
     throw new CloudBackupApiError('You are offline — connect to restore from cloud', 0);
   }
@@ -72,6 +78,7 @@ export async function fetchCloudBackup(
   const body = (await res.json().catch(() => ({}))) as CloudBackupBlob & {
     ok?: boolean;
     message?: string;
+    storedAt?: number;
   };
 
   if (!res.ok) {
@@ -96,5 +103,47 @@ export async function fetchCloudBackup(
     iv: body.iv,
     salt: body.salt,
     meta: body.meta,
+    storedAt: body.storedAt,
+  };
+}
+
+/** Cheap “is cloud newer?” check — meta only, no ciphertext. */
+export async function fetchCloudBackupMeta(
+  backupId: string,
+): Promise<CloudBackupMetaResponse> {
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    throw new CloudBackupApiError('You are offline — connect to check cloud sync', 0);
+  }
+  let res: Response;
+  try {
+    res = await fetch(
+      `/api/cloud-backup?id=${encodeURIComponent(backupId)}&meta=1`,
+      { method: 'GET' },
+    );
+  } catch {
+    throw new CloudBackupApiError('Network error — could not reach cloud backup', 0);
+  }
+
+  const body = (await res.json().catch(() => ({}))) as CloudBackupMetaResponse & {
+    ok?: boolean;
+    message?: string;
+  };
+
+  if (!res.ok) {
+    throw new CloudBackupApiError(
+      body.message ||
+        (res.status === 404
+          ? 'No cloud backup found for this recovery code'
+          : res.status === 501
+            ? 'Cloud backup storage is not configured on the server'
+            : 'Cloud backup meta failed'),
+      res.status,
+    );
+  }
+
+  return {
+    backupId: body.backupId || backupId,
+    storedAt: body.storedAt,
+    meta: body.meta ?? null,
   };
 }

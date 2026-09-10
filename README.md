@@ -26,14 +26,16 @@ npm test
 | Optional PIN lock | ✓ | ✓ |
 | Due-date overdue badges | ✓ | ✓ |
 | CSV export (customers + balances + entries) | | ✓ |
-| Encrypted cloud backup + multi-device restore | | ✓ |
+| Encrypted cloud backup + multi-device sync | | ✓ |
 | Pro badge / hide upgrade nag | | ✓ |
 
 **Pricing:** ₦1,500/mo or ₦12,000/yr.
 
 **Try Pro tonight:** Settings → **BashiBook Pro** → **Activate Pro (demo)** — sets `plan=pro` for 30 days locally (no Paystack/Stripe keys needed).
 
-**Cloud backup (Pro):** `api/cloud-backup.ts` stores encrypted blobs via [Vercel Blob](https://vercel.com/docs/storage/vercel-blob). Create a Blob store in the Vercel project and set `BLOB_READ_WRITE_TOKEN`. Without it the API returns 501. Recovery code never leaves the device as plaintext; server only sees opaque `backupId` + ciphertext.\n\n**Real payments (stub):** `api/checkout.ts` + `api/webhook.ts` document Paystack (preferred for NGN) and Stripe. They return 501 until `PAYSTACK_SECRET_KEY` / `STRIPE_SECRET_KEY` are set on Vercel — and still need a short wiring pass after that.
+**Cloud backup / multi-device sync (Pro):** `api/cloud-backup.ts` stores encrypted blobs via [Vercel Blob](https://vercel.com/docs/storage/vercel-blob). Sync MVP reuses that snapshot channel: Unlock sync on a device (recovery code in IndexedDB only) → Sync now / auto-push. `GET ?id=&meta=1` returns timestamps without ciphertext. Requires `BLOB_READ_WRITE_TOKEN` (501 without it). Recovery code is never uploaded or logged.
+
+**Real payments (stub):** `api/checkout.ts` + `api/webhook.ts` document Paystack (preferred for NGN) and Stripe. They return 501 until `PAYSTACK_SECRET_KEY` / `STRIPE_SECRET_KEY` are set on Vercel — and still need a short wiring pass after that.
 
 ## Features (v2)
 

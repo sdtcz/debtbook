@@ -4,7 +4,13 @@ import { Toast } from './components/Toast';
 import { getShop } from './db/repo';
 import { useLocale } from './hooks/useLocale';
 import { useToast } from './hooks/useToast';
-import { initLocale } from './i18n';
+import { initLocale, t as tNow } from './i18n';
+import {
+  checkPullOnFocus,
+  pullAndRestore,
+  tryAutoPush,
+} from './lib/deviceSync';
+import { getUnlockedRecoveryCode } from './lib/syncUnlock';
 import { isPayMeHash, parseHash, type Route } from './lib/router';
 import {
   clearForceApp,
@@ -120,6 +126,75 @@ export function App() {
     if (pinHash && pinSalt) setLocked(true);
     return () => document.removeEventListener('visibilitychange', onVis);
   }, [showApp, pinHash, pinSalt, route.name]);
+
+  // Multi-device sync: debounced auto-push + pull-offer on focus
+  useEffect(() => {
+    if (!showApp || route.name === 'payme') return;
+
+    let debounceTimer: number | undefined;
+    let cancelled = false;
+
+    const scheduleAutoPush = () => {
+      window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(() => {
+        void tryAutoPush();
+      }, 45_000);
+    };
+
+    const onChanged = () => scheduleAutoPush();
+
+    const onVis = () => {
+      if (document.visibilityState === 'hidden') {
+        void tryAutoPush();
+        return;
+      }
+      if (document.visibilityState !== 'visible' || cancelled) return;
+      void (async () => {
+        const offer = await checkPullOnFocus();
+        if (cancelled || offer.kind !== 'offer_restore') return;
+        const ok = confirm(tNow('settings.syncPullConfirm'));
+        if (!ok || cancelled) return;
+        try {
+          const shop = await getShop();
+          const code = shop?.cloudBackupId
+            ? await getUnlockedRecoveryCode(shop.cloudBackupId)
+            : undefined;
+          if (!code) return;
+          const result = await pullAndRestore(code);
+          if (cancelled) return;
+          toast(
+            tNow('settings.syncRestored', {
+              customers: result.customers,
+              entries: result.entries,
+            }),
+          );
+          window.dispatchEvent(new Event('debtbook:changed'));
+        } catch {
+          /* soft fail — no modal spam */
+        }
+      })();
+    };
+
+    const onOnline = () => {
+      void tryAutoPush();
+    };
+
+    window.addEventListener('debtbook:changed', onChanged);
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('online', onOnline);
+
+    // Initial focus check shortly after mount
+    const boot = window.setTimeout(() => onVis(), 1500);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(debounceTimer);
+      window.clearTimeout(boot);
+      window.removeEventListener('debtbook:changed', onChanged);
+      document.removeEventListener('visibilitychange', onVis);
+      window.removeEventListener('online', onOnline);
+    };
+  }, [showApp, route.name, toast]);
 
   // Public Pay-me page — no PIN, works for customers (incl. desktop)
   if (route.name === 'payme') {

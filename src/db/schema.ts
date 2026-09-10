@@ -1,6 +1,16 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
 import type { Customer, Entry, OutboxItem, ShopProfile } from '../lib/types';
 
+export interface SyncUnlockRecord {
+  /** Always 'shop' for single-shop MVP */
+  id: 'shop';
+  /** Normalized recovery code — device-local only; never uploaded */
+  recoveryCode: string;
+  /** Opaque backup id this unlock is for */
+  backupId: string;
+  unlockedAt: number;
+}
+
 export interface DebtBookDB extends DBSchema {
   shop: {
     key: string;
@@ -25,11 +35,16 @@ export interface DebtBookDB extends DBSchema {
     value: OutboxItem;
     indexes: { 'by-status': string; 'by-created': number };
   };
+  /** Device-local sync unlock (recovery code). Never synced to cloud. */
+  syncUnlock: {
+    key: string;
+    value: SyncUnlockRecord;
+  };
 }
 
 const DB_NAME = 'debtbook'; // KEEP: IndexedDB name — renaming would wipe existing user data
-/** v2: Customer.dueAt / creditLimitKobo + ShopProfile pin/entitlement (no new stores) */
-const DB_VERSION = 2;
+/** v3: syncUnlock store for multi-device sync unlock on this device */
+const DB_VERSION = 3;
 
 let dbPromise: Promise<IDBPDatabase<DebtBookDB>> | null = null;
 
@@ -60,6 +75,11 @@ export function getDb(): Promise<IDBPDatabase<DebtBookDB>> {
         }
         // v2: dueAt / creditLimitKobo / pin / entitlement are optional fields on
         // existing records — no structural index changes required.
+        if (oldVersion < 3) {
+          if (!db.objectStoreNames.contains('syncUnlock')) {
+            db.createObjectStore('syncUnlock', { keyPath: 'id' });
+          }
+        }
       },
     });
   }

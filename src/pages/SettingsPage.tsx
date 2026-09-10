@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { notifyChanged, StatusBadge } from '../components/StatusBadge';
-import { countPendingOutbox, flushOutboxStub, listPendingOutbox } from '../db/outbox';
 import {
   clearPin,
   getDashboardBalances,
@@ -36,6 +35,13 @@ import {
   fetchCloudBackup,
   uploadCloudBackup,
 } from '../lib/cloudBackupApi';
+import {
+  getSyncStatus,
+  lockDeviceSync,
+  runSyncNow,
+  unlockDeviceForSync,
+} from '../lib/deviceSync';
+import { unlockSyncOnDevice } from '../lib/syncUnlock';
 import { buildCsvExport, downloadCsv } from '../lib/csv';
 import { getEntitlement, isPro } from '../lib/entitlement';
 import {
@@ -65,12 +71,15 @@ interface Props {
 export function SettingsPage({ toast, onPinChanged }: Props) {
   const { locale, setLocale, t } = useLocale();
   const [name, setName] = useState('');
-  const [pending, setPending] = useState(0);
   const [busy, setBusy] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [hasPin, setHasPin] = useState(false);
   const [showPinForm, setShowPinForm] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [syncUnlocked, setSyncUnlocked] = useState(false);
+  const [syncPendingLocal, setSyncPendingLocal] = useState(false);
+  const [showSyncUnlock, setShowSyncUnlock] = useState(false);
+  const [syncUnlockCode, setSyncUnlockCode] = useState('');
+  const [syncBusy, setSyncBusy] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackTopics, setFeedbackTopics] = useState<FeedbackTopicId[]>([]);
   const [feedbackNote, setFeedbackNote] = useState('');
@@ -139,7 +148,15 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       setPaySubtitle(t('settings.payMeSubSetup'));
     }
     setNotifPerm(notificationPermission());
-    setPending(await countPendingOutbox());
+    try {
+      const st = await getSyncStatus();
+      setSyncUnlocked(st.unlocked);
+      setSyncPendingLocal(st.pendingLocal);
+      if (st.lastCloudBackupAt) setLastCloudAt(st.lastCloudBackupAt);
+    } catch {
+      setSyncUnlocked(false);
+      setSyncPendingLocal(false);
+    }
   };
 
   useEffect(() => {
@@ -173,18 +190,6 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     } finally {
       setBusy(false);
     }
-  };
-
-  const flush = async () => {
-    const items = await listPendingOutbox();
-    if (items.length === 0) {
-      toast(t('settings.nothingPending'));
-      return;
-    }
-    const n = await flushOutboxStub();
-    notifyChanged();
-    setPending(await countPendingOutbox());
-    toast(t('settings.markedSynced', { n }));
   };
 
   const savePin = async () => {
@@ -306,6 +311,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
         cloudBackupId: enc.backupId,
         lastCloudBackupAt: Date.now(),
       });
+      await unlockSyncOnDevice(pendingRecoveryCode, enc.backupId);
       setShowCloudEnable(false);
       setPendingRecoveryCode('');
       notifyChanged();
@@ -335,30 +341,53 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       startCloudEnable();
       return;
     }
-    const code = prompt(t('settings.recoveryPrompt'));
-    if (!code) return;
-    if (!isValidRecoveryCode(code)) {
-      toast(t('settings.invalidRecoveryFormat'));
-      return;
-    }
     setCloudBusy(true);
     try {
-      const id = await deriveBackupId(code);
-      if (s.cloudBackupId && id !== s.cloudBackupId) {
-        toast(t('settings.recoveryMismatch'));
+      const result = await runSyncNow({});
+      if (result.action === 'locked') {
+        setShowSyncUnlock(true);
+        toast(t('settings.syncUnlockPrompt'));
         return;
       }
-      const payload = await exportBackup();
-      const enc = await encryptBackup(payload, code);
-      await uploadCloudBackup(enc);
-      await setCloudBackupMeta({
-        cloudBackupEnabled: true,
-        cloudBackupId: enc.backupId,
-        lastCloudBackupAt: Date.now(),
-      });
-      notifyChanged();
-      await refresh();
-      toast(t('settings.cloudUploaded'));
+      if (result.action === 'offline') {
+        toast(t('settings.syncOffline'));
+        return;
+      }
+      if (result.action === 'need_confirm_restore') {
+        if (!confirm(t('settings.syncPullConfirm'))) return;
+        const restored = await runSyncNow({ confirmRestore: true });
+        if (restored.action === 'restored') {
+          notifyChanged();
+          await refresh();
+          toast(
+            t('settings.syncRestored', {
+              customers: restored.result.customers,
+              entries: restored.result.entries,
+            }),
+          );
+        }
+        return;
+      }
+      if (result.action === 'pushed') {
+        notifyChanged();
+        await refresh();
+        toast(t('settings.cloudUploaded'));
+        return;
+      }
+      if (result.action === 'up_to_date') {
+        toast(t('settings.syncUpToDate'));
+        return;
+      }
+      if (result.action === 'restored') {
+        notifyChanged();
+        await refresh();
+        toast(
+          t('settings.syncRestored', {
+            customers: result.result.customers,
+            entries: result.result.entries,
+          }),
+        );
+      }
     } catch (err) {
       const msg =
         err instanceof CloudBackupApiError
@@ -404,6 +433,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
         cloudBackupId: backupId,
         lastCloudBackupAt: blob.meta?.exportedAt || Date.now(),
       });
+      await unlockSyncOnDevice(restoreCode, backupId);
       setShowCloudRestore(false);
       setRestoreCode('');
       notifyChanged();
@@ -515,6 +545,95 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     const time = normalizeChaseTime(value);
     setChaseTime(time);
     await persistChase({ time });
+  };
+
+
+  const doSyncNow = async () => {
+    if (!proGateCloud()) return;
+    if (!cloudEnabled) {
+      toast(t('settings.syncNeedCloud'));
+      return;
+    }
+    if (!online) {
+      toast(t('settings.syncOffline'));
+      return;
+    }
+    setSyncBusy(true);
+    try {
+      let result = await runSyncNow({});
+      if (result.action === 'locked') {
+        setShowSyncUnlock(true);
+        toast(t('settings.syncUnlockPrompt'));
+        return;
+      }
+      if (result.action === 'offline') {
+        toast(t('settings.syncOffline'));
+        return;
+      }
+      if (result.action === 'need_confirm_restore') {
+        if (!confirm(t('settings.syncPullConfirm'))) return;
+        result = await runSyncNow({ confirmRestore: true });
+      }
+      if (result.action === 'restored') {
+        notifyChanged();
+        await refresh();
+        toast(
+          t('settings.syncRestored', {
+            customers: result.result.customers,
+            entries: result.result.entries,
+          }),
+        );
+        return;
+      }
+      if (result.action === 'pushed') {
+        notifyChanged();
+        await refresh();
+        toast(t('settings.syncPushed'));
+        return;
+      }
+      if (result.action === 'up_to_date') {
+        toast(t('settings.syncUpToDate'));
+      }
+    } catch (err) {
+      const msg =
+        err instanceof CloudBackupApiError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : t('settings.cloudFailed');
+      toast(msg);
+    } finally {
+      setSyncBusy(false);
+    }
+  };
+
+  const confirmUnlockSync = async () => {
+    if (!isValidRecoveryCode(syncUnlockCode)) {
+      toast(t('settings.invalidRecoveryFormat'));
+      return;
+    }
+    setSyncBusy(true);
+    try {
+      await unlockDeviceForSync(syncUnlockCode);
+      setShowSyncUnlock(false);
+      setSyncUnlockCode('');
+      await refresh();
+      toast(t('settings.syncUnlocked'));
+    } catch (err) {
+      toast(
+        err instanceof Error ? err.message : t('settings.recoveryMismatch'),
+      );
+    } finally {
+      setSyncBusy(false);
+    }
+  };
+
+  const doLockSync = async () => {
+    await lockDeviceSync();
+    setShowSyncUnlock(false);
+    setSyncUnlockCode('');
+    await refresh();
+    toast(t('settings.syncLocked'));
   };
 
   const askNotify = async () => {
@@ -1053,39 +1172,115 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           )}
         </div>
 
-        <div class="settings-group-label">{t('settings.more')}</div>
+        <div class="settings-group-label">{t('settings.devicesSync')}</div>
         <div class="settings-group card settings-list">
-          <button
-            type="button"
-            class="settings-row"
-            onClick={() => setShowAdvanced((v) => !v)}
-          >
+          <div class="settings-row" style={{ cursor: 'default' }}>
             <span class="settings-row-icon" aria-hidden="true">
-              ⚙
+              📱
             </span>
             <span class="settings-row-body">
-              <span class="settings-row-title">{t('settings.syncAdvanced')}</span>
+              <span class="settings-row-title">{t('settings.devicesSync')}</span>
               <span class="settings-row-sub">
-                {t('settings.syncPending', {
-                  online: online ? t('common.online') : t('common.offline'),
-                  n: pending,
-                })}
+                {!pro
+                  ? t('settings.syncPro')
+                  : !cloudEnabled
+                    ? t('settings.syncNeedCloud')
+                    : [
+                        syncUnlocked
+                          ? t('settings.syncStatusUnlocked')
+                          : t('settings.syncStatusLocked'),
+                        lastCloudAt
+                          ? t('settings.syncLast', {
+                              when: new Date(lastCloudAt).toLocaleString('en-NG'),
+                            })
+                          : t('settings.syncNever'),
+                        syncPendingLocal
+                          ? t('settings.syncPendingYes')
+                          : t('settings.syncPendingNo'),
+                      ].join(' · ')}
               </span>
             </span>
             <span class="settings-row-trail">
-              <span class="chev" aria-hidden="true">
-                {showAdvanced ? '˅' : '›'}
-              </span>
+              {pro && cloudEnabled ? (
+                <span class={syncUnlocked ? 'status-dot on' : 'status-dot'} />
+              ) : pro ? (
+                ''
+              ) : (
+                t('common.pro')
+              )}
             </span>
-          </button>
-          {showAdvanced && (
+          </div>
+          {pro && cloudEnabled && (
             <div class="settings-row-panel">
               <p class="muted" style={{ marginTop: 0, fontSize: '0.85rem' }}>
-                {t('settings.syncAdvancedHelp')}
+                {t('settings.syncHelp')}
               </p>
-              <button class="btn btn-secondary" type="button" onClick={flush}>
-                {t('settings.flushOutbox')}
-              </button>
+              <div class="btn-row" style={{ marginTop: 0, flexWrap: 'wrap' }}>
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  disabled={syncBusy || cloudBusy}
+                  onClick={doSyncNow}
+                >
+                  {syncBusy ? t('settings.syncing') : t('settings.syncNow')}
+                </button>
+                {syncUnlocked ? (
+                  <button
+                    class="btn btn-secondary"
+                    type="button"
+                    disabled={syncBusy}
+                    onClick={doLockSync}
+                  >
+                    {t('settings.syncLock')}
+                  </button>
+                ) : (
+                  <button
+                    class="btn btn-secondary"
+                    type="button"
+                    disabled={syncBusy}
+                    onClick={() => setShowSyncUnlock((v) => !v)}
+                  >
+                    {t('settings.syncUnlock')}
+                  </button>
+                )}
+              </div>
+              {showSyncUnlock && !syncUnlocked && (
+                <div class="field" style={{ marginTop: 12 }}>
+                  <label for="sync-unlock">{t('settings.recoveryCode')}</label>
+                  <input
+                    id="sync-unlock"
+                    class="input"
+                    value={syncUnlockCode}
+                    placeholder="XXXX-XXXX-XXXX-XXXX-…"
+                    autocomplete="off"
+                    autocapitalize="characters"
+                    onInput={(e) =>
+                      setSyncUnlockCode((e.target as HTMLInputElement).value)
+                    }
+                  />
+                  <div class="btn-row" style={{ marginTop: 8 }}>
+                    <button
+                      class="btn btn-primary"
+                      type="button"
+                      disabled={syncBusy}
+                      onClick={confirmUnlockSync}
+                    >
+                      {t('settings.syncUnlock')}
+                    </button>
+                    <button
+                      class="btn btn-ghost"
+                      type="button"
+                      disabled={syncBusy}
+                      onClick={() => {
+                        setShowSyncUnlock(false);
+                        setSyncUnlockCode('');
+                      }}
+                    >
+                      {t('common.cancel')}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
