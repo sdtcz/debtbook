@@ -58,6 +58,23 @@ export const ha: Record<MessageKey, string> = {
   'home.metaCustomer': 'abokin ciniki {{n}}',
   'home.metaOweYou': '{{n}} sun baka bashi',
 
+  'home.atLimit': 'Ya kai iyaka',
+  'home.nearLimit': 'Kusa da iyaka',
+  'home.daysOverdue': 'kwanaki {{n}} sun wuce',
+  'home.dayOverdue': 'kwana 1 ya wuce',
+  'home.dueInDays': 'za a biya cikin kwanaki {{n}}',
+  'home.dueToday': 'za a biya yau',
+  'home.lastPaid': 'biya ta ƙarshe {{date}}',
+  'home.digestTitle': 'Bibiyar yau',
+  'home.digestMeta': '{{n}} sun wuce lokaci · {{amount}}',
+  'home.digestTop': '{{names}}',
+  'home.digestOpen': 'Duba waɗanda suka wuce',
+  'home.digestWhatsApp': 'Raba a WhatsApp',
+  'home.digestCopy': 'Kwafi bayanin safiya',
+  'home.digestCopied': 'An kwafi bayani',
+  'home.digestShared': 'Ana buɗe WhatsApp…',
+  'home.digestShareFailed': 'An kasa raba bayani',
+
   'setup.tagline':
     'Littafin bashi na offline (udhar). Bayanai suna kan wannan waya — yana aiki ba intanet ba.',
   'setup.shopName': 'Sunan shago',
@@ -201,6 +218,12 @@ export const ha: Record<MessageKey, string> = {
   'customer.creditSaleLabel': 'Sayarwa bashi',
   'customer.paymentLabel': 'Biya',
 
+  'customer.creditLimit': 'Iyakar bashi {{amount}}',
+  'customer.creditHeadroom': 'Saurin {{amount}}',
+  'customer.creditOverBy': 'Ya wuce da {{amount}}',
+  'customer.atCreditLimit': 'Ya kai iyakar bashi',
+  'customer.nearCreditLimit': 'Kusa da iyakar bashi',
+
   'customerForm.new': 'Sabon abokin ciniki',
   'customerForm.edit': 'Gyara abokin ciniki',
   'customerForm.name': 'Suna *',
@@ -236,6 +259,10 @@ export const ha: Record<MessageKey, string> = {
   'customerForm.contactsUnsupportedTip': 'Shawara: a Android Chrome za ka iya zaɓa daga Contacts',
   'customerForm.contactsUnsupported': 'Zaɓen lambobin waya yana aiki a Chrome akan Android',
 
+  'customerForm.creditLimit': 'Iyakar bashi (₦, na zaɓi)',
+  'customerForm.creditLimitHint': 'Zai yi gargaɗi idan sayarwa ta wuce wannan — har yanzu za ka iya rubutawa',
+  'customerForm.creditLimitInvalid': 'Shigar da iyakar bashi mai kyau (ko barshi babu)',
+
   'entry.creditSale': 'Sayarwa bashi',
   'entry.payment': 'Biya',
   'entry.type': 'Nau\'in shigarwa',
@@ -249,6 +276,8 @@ export const ha: Record<MessageKey, string> = {
   'entry.paymentRecorded': 'An rubuta biya',
   'entry.undone': 'An juyar shigarwa',
   'entry.couldNotSave': 'An kasa ajiyawa',
+
+  'entry.creditLimitWarn': 'Iyaka {{limit}} · zai zama {{wouldBe}}. A rubuta duk da haka?',
 
   'money.placeholder': '0.00 ko 3k',
   'money.hint': 'Naira (₦) — shawara: rubuta 3k don ₦3,000',
@@ -297,6 +326,11 @@ export const ha: Record<MessageKey, string> = {
   'remind.settled':
     'Sannu {{customer}}, wannan {{shop}} ne. An biya asusun ka. Mun gode da kasuwancinka.',
   'remind.shareTitle': 'Tunatarwar bashi',
+
+  'digest.messageTitle': 'Bibiyar safiya — {{shop}}',
+  'digest.messageCount': 'Abokan ciniki {{n}} sun wuce lokaci:',
+  'digest.messageFooter': '— BashiBook',
+  'digest.shareTitle': 'Bibiyar yau',
 
   'statement.title': 'Bayanin Abokin Ciniki',
   'statement.customer': 'Abokin ciniki: {{name}}',

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'preact/hooks';
 import { StatusBadge, notifyChanged } from '../components/StatusBadge';
 import {
+  creditHeadroomKobo,
+  creditLimitStatus,
   getCustomer,
   getCustomerBalance,
   getRecentEntryForUndo,
@@ -147,6 +149,8 @@ export function CustomerDetailPage({ id, toast }: Props) {
 
   const tone = balanceTone(balanceKobo);
   const overdue = isOverdue(customer, balanceKobo);
+  const limitStatus = creditLimitStatus(balanceKobo, customer.creditLimitKobo);
+  const headroom = creditHeadroomKobo(balanceKobo, customer.creditLimitKobo);
 
   return (
     <div class="app-shell">
@@ -163,6 +167,12 @@ export function CustomerDetailPage({ id, toast }: Props) {
           <h1 style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {customer.name}
             {overdue && <span class="overdue-badge">{t('common.overdue')}</span>}
+            {limitStatus === 'at' && (
+              <span class="limit-badge at">{t('customer.atCreditLimit')}</span>
+            )}
+            {limitStatus === 'near' && (
+              <span class="limit-badge near">{t('customer.nearCreditLimit')}</span>
+            )}
           </h1>
           <div class="sub">{customer.phone || t('common.noPhone')}</div>
         </div>
@@ -185,6 +195,18 @@ export function CustomerDetailPage({ id, toast }: Props) {
             <div class="hint" style={{ marginTop: 6 }}>
               {t('customer.due', { date: fmtDue(customer.dueAt) })}
               {overdue ? t('customer.overdueSuffix') : ''}
+            </div>
+          )}
+          {customer.creditLimitKobo != null && customer.creditLimitKobo > 0 && (
+            <div class="hint" style={{ marginTop: 6 }}>
+              {t('customer.creditLimit', {
+                amount: formatNaira(customer.creditLimitKobo),
+              })}
+              {headroom != null && headroom >= 0
+                ? ` · ${t('customer.creditHeadroom', { amount: formatNaira(headroom) })}`
+                : headroom != null
+                  ? ` · ${t('customer.creditOverBy', { amount: formatNaira(-headroom) })}`
+                  : ''}
             </div>
           )}
           {tone === 'credit' && (

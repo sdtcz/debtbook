@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { MoneyInput } from '../components/MoneyInput';
 import { notifyChanged } from '../components/StatusBadge';
 import { getCustomer, listCustomers, softDeleteCustomer, upsertCustomer } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
@@ -7,6 +8,7 @@ import {
   pickContacts,
   type PickedContact,
 } from '../lib/contacts';
+import { parseNairaToKobo } from '../lib/money';
 import { navigate } from '../lib/router';
 import { normalizeNgWhatsAppDigits } from '../lib/sms';
 import type { ToastAction } from '../hooks/useToast';
@@ -60,6 +62,7 @@ export function CustomerFormPage({ id, toast }: Props) {
   const [phone, setPhone] = useState('');
   const [note, setNote] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [creditLimit, setCreditLimit] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [contactsSupported] = useState(() => isContactPickerSupported());
@@ -76,6 +79,14 @@ export function CustomerFormPage({ id, toast }: Props) {
       setPhone(c.phone || '');
       setNote(c.note || '');
       setDueDate(toDateDisplay(c.dueAt));
+      if (c.creditLimitKobo != null && c.creditLimitKobo > 0) {
+        const naira = c.creditLimitKobo / 100;
+        setCreditLimit(
+          Number.isInteger(naira) ? String(naira) : naira.toFixed(2),
+        );
+      } else {
+        setCreditLimit('');
+      }
     });
   }, [id]);
 
@@ -169,6 +180,15 @@ export function CustomerFormPage({ id, toast }: Props) {
       setError(t('customerForm.dueDateInvalid'));
       return;
     }
+    let creditLimitKobo: number | null = null;
+    if (creditLimit.trim()) {
+      const parsed = parseNairaToKobo(creditLimit);
+      if (parsed === null || parsed <= 0) {
+        setError(t('customerForm.creditLimitInvalid'));
+        return;
+      }
+      creditLimitKobo = parsed;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -178,6 +198,7 @@ export function CustomerFormPage({ id, toast }: Props) {
         phone: phone || undefined,
         note: note || undefined,
         dueAt: dueAt === null ? null : dueAt,
+        creditLimitKobo,
       });
       notifyChanged();
       toast(editing ? t('customerForm.updated') : t('customerForm.added'));
@@ -281,6 +302,15 @@ export function CustomerFormPage({ id, toast }: Props) {
             <div class="hint">
               {t('customerForm.dueDateFormat')} · {t('customerForm.dueHint')}
             </div>
+          </div>
+          <MoneyInput
+            id="climit"
+            label={t('customerForm.creditLimit')}
+            value={creditLimit}
+            onInput={setCreditLimit}
+          />
+          <div class="hint" style={{ marginTop: -4, marginBottom: 12 }}>
+            {t('customerForm.creditLimitHint')}
           </div>
           <div class="field">
             <label for="cnote">{t('customerForm.note')}</label>

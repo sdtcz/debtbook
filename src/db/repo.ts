@@ -114,6 +114,7 @@ export async function upsertCustomer(input: {
   phone?: string;
   note?: string;
   dueAt?: number | null;
+  creditLimitKobo?: number | null;
 }): Promise<Customer> {
   const db = await getDb();
   const now = Date.now();
@@ -136,6 +137,11 @@ export async function upsertCustomer(input: {
     } else if (input.dueAt !== undefined) {
       customer.dueAt = input.dueAt;
     }
+    if (input.creditLimitKobo === null) {
+      delete customer.creditLimitKobo;
+    } else if (input.creditLimitKobo !== undefined) {
+      customer.creditLimitKobo = input.creditLimitKobo;
+    }
   } else {
     customer = {
       id: newId(),
@@ -146,6 +152,7 @@ export async function upsertCustomer(input: {
       updatedAt: now,
     };
     if (input.dueAt) customer.dueAt = input.dueAt;
+    if (input.creditLimitKobo) customer.creditLimitKobo = input.creditLimitKobo;
   }
   await db.put('customers', customer);
   await enqueueOutbox('customer', customer.id, 'upsert', customer);
@@ -259,6 +266,66 @@ export function isOverdue(customer: Customer, balanceKobo: number, now = Date.no
   return Boolean(customer.dueAt && customer.dueAt < now && balanceKobo > 0);
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Whole days past due when overdue; otherwise null. */
+export function daysOverdue(
+  customer: Customer,
+  balanceKobo: number,
+  now = Date.now(),
+): number | null {
+  if (!isOverdue(customer, balanceKobo, now) || !customer.dueAt) return null;
+  return Math.max(1, Math.floor((now - customer.dueAt) / DAY_MS));
+}
+
+/**
+ * Days until due when balance > 0 and due within `withinDays` (default 7).
+ * Returns 0 if due today (not yet overdue). Null if not applicable.
+ */
+export function daysUntilDue(
+  customer: Customer,
+  balanceKobo: number,
+  now = Date.now(),
+  withinDays = 7,
+): number | null {
+  if (!customer.dueAt || balanceKobo <= 0) return null;
+  if (customer.dueAt < now) return null;
+  const days = Math.ceil((customer.dueAt - now) / DAY_MS);
+  if (days > withinDays) return null;
+  return Math.max(0, days);
+}
+
+/** Latest payment occurredAt from entries (newest-first or any order). */
+export function lastPaymentAt(entries: Entry[]): number | undefined {
+  let latest: number | undefined;
+  for (const e of entries) {
+    if (e.deletedAt || e.type !== 'payment') continue;
+    if (latest === undefined || e.occurredAt > latest) latest = e.occurredAt;
+  }
+  return latest;
+}
+
+export type CreditLimitStatus = 'ok' | 'near' | 'at' | 'none';
+
+/** Soft credit-limit status: near = ≥80% used, at = balance ≥ limit. */
+export function creditLimitStatus(
+  balanceKobo: number,
+  creditLimitKobo?: number | null,
+): CreditLimitStatus {
+  if (creditLimitKobo == null || creditLimitKobo <= 0) return 'none';
+  if (balanceKobo >= creditLimitKobo) return 'at';
+  if (balanceKobo >= creditLimitKobo * 0.8) return 'near';
+  return 'ok';
+}
+
+export function creditHeadroomKobo(
+  balanceKobo: number,
+  creditLimitKobo?: number | null,
+): number | null {
+  if (creditLimitKobo == null || creditLimitKobo <= 0) return null;
+  return creditLimitKobo - balanceKobo;
+}
+
 export async function getDashboardBalances(): Promise<{
   totalOutstandingKobo: number;
   customers: CustomerBalance[];
@@ -274,12 +341,14 @@ export async function getDashboardBalances(): Promise<{
     const active = all.filter((e) => !e.deletedAt);
     const { balanceKobo, creditTotalKobo, paymentTotalKobo } =
       computeBalance(active);
+    const paidAt = lastPaymentAt(active);
     results.push({
       customer,
       balanceKobo,
       creditTotalKobo,
       paymentTotalKobo,
       entryCount: active.length,
+      ...(paidAt !== undefined ? { lastPaymentAt: paidAt } : {}),
     });
     if (balanceKobo > 0) totalOutstandingKobo += balanceKobo;
   }
@@ -306,6 +375,26 @@ export function searchCustomers(
     const note = (c.customer.note || '').toLowerCase();
     return name.includes(q) || phone.includes(q) || note.includes(q);
   });
+}
+
+/** Overdue customers for morning chase digest (uses dashboard sort: overdue first). */
+export function getOverdueDigest(
+  customers: CustomerBalance[],
+  now = Date.now(),
+): {
+  count: number;
+  totalOverdueKobo: number;
+  top: CustomerBalance[];
+  all: CustomerBalance[];
+} {
+  const all = customers.filter((r) => isOverdue(r.customer, r.balanceKobo, now));
+  const totalOverdueKobo = all.reduce((s, r) => s + r.balanceKobo, 0);
+  return {
+    count: all.length,
+    totalOverdueKobo,
+    top: all.slice(0, 3),
+    all,
+  };
 }
 
 /** Most recent entry for a customer within the last `withinMs` (default 10 min). */

@@ -105,3 +105,71 @@ export async function remindCustomer(opts: {
 
   return 'none';
 }
+
+export function buildMorningDigestMessage(
+  shopName: string,
+  overdue: { name: string; balanceKobo: number }[],
+): string {
+  const lines: string[] = [];
+  lines.push(t('digest.messageTitle', { shop: shopName }));
+  lines.push(t('digest.messageCount', { n: overdue.length }));
+  lines.push('');
+  for (const row of overdue) {
+    lines.push(`• ${row.name}: ${formatNaira(row.balanceKobo)}`);
+  }
+  lines.push('');
+  lines.push(t('digest.messageFooter'));
+  return lines.join('\n');
+}
+
+/** Share morning chase list — WhatsApp compose (pick chat), then share/clipboard. */
+export async function shareMorningDigest(opts: {
+  shopName: string;
+  overdue: { name: string; balanceKobo: number }[];
+}): Promise<'whatsapp' | 'share' | 'clipboard' | 'none'> {
+  const message = buildMorningDigestMessage(opts.shopName, opts.overdue);
+  // Open WhatsApp with prefilled text; user picks self/staff chat
+  const wa = `https://wa.me/?text=${encodeURIComponent(message)}`;
+  try {
+    window.open(wa, '_blank', 'noopener,noreferrer');
+    return 'whatsapp';
+  } catch {
+    /* fall through */
+  }
+
+  if (typeof navigator !== 'undefined' && navigator.share) {
+    try {
+      await navigator.share({ text: message, title: t('digest.shareTitle') });
+      return 'share';
+    } catch {
+      /* cancelled */
+    }
+  }
+
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(message);
+      return 'clipboard';
+    } catch {
+      /* ignore */
+    }
+  }
+
+  return 'none';
+}
+
+export async function copyMorningDigest(opts: {
+  shopName: string;
+  overdue: { name: string; balanceKobo: number }[];
+}): Promise<boolean> {
+  const message = buildMorningDigestMessage(opts.shopName, opts.overdue);
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(message);
+      return true;
+    } catch {
+      /* ignore */
+    }
+  }
+  return false;
+}

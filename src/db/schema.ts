@@ -28,7 +28,7 @@ export interface DebtBookDB extends DBSchema {
 }
 
 const DB_NAME = 'debtbook'; // KEEP: IndexedDB name — renaming would wipe existing user data
-/** v2: Customer.dueAt + ShopProfile pin/entitlement fields (no new stores) */
+/** v2: Customer.dueAt / creditLimitKobo + ShopProfile pin/entitlement (no new stores) */
 const DB_VERSION = 2;
 
 let dbPromise: Promise<IDBPDatabase<DebtBookDB>> | null = null;
@@ -58,8 +58,8 @@ export function getDb(): Promise<IDBPDatabase<DebtBookDB>> {
             ob.createIndex('by-created', 'createdAt');
           }
         }
-        // v2: dueAt / pin / entitlement are optional fields on existing records —
-        // no structural index changes required. Existing data migrates in place.
+        // v2: dueAt / creditLimitKobo / pin / entitlement are optional fields on
+        // existing records — no structural index changes required.
       },
     });
   }

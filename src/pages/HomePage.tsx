@@ -1,16 +1,22 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { StatusBadge } from '../components/StatusBadge';
 import {
+  creditLimitStatus,
+  daysOverdue,
+  daysUntilDue,
   getDashboardBalances,
+  getOverdueDigest,
   getShop,
   isOverdue,
   searchCustomers,
 } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
+import type { MessageKey } from '../i18n';
 import { isPro } from '../lib/entitlement';
 import type { CustomerBalance, ShopProfile } from '../lib/types';
 import { balanceLabel, balanceTone, formatNaira } from '../lib/money';
 import { href, navigate } from '../lib/router';
+import { copyMorningDigest, shareMorningDigest } from '../lib/sms';
 
 interface Props {
   locked?: boolean;
@@ -19,6 +25,39 @@ interface Props {
 type FilterChip = 'all' | 'overdue' | 'owes';
 
 const PRO_HINT_KEY = 'debtbook:pro-hint-dismissed'; // KEEP: avoid re-showing dismissed Pro hint
+
+function fmtShortDate(ts: number): string {
+  return new Date(ts).toLocaleDateString('en-NG', {
+    day: 'numeric',
+    month: 'short',
+  });
+}
+
+function rowStatusLine(
+  row: CustomerBalance,
+  t: (key: MessageKey, vars?: Record<string, string | number>) => string,
+): string | null {
+  const parts: string[] = [];
+  const overdueDays = daysOverdue(row.customer, row.balanceKobo);
+  if (overdueDays != null) {
+    parts.push(
+      overdueDays === 1
+        ? t('home.dayOverdue')
+        : t('home.daysOverdue', { n: overdueDays }),
+    );
+  } else {
+    const until = daysUntilDue(row.customer, row.balanceKobo);
+    if (until != null) {
+      parts.push(
+        until === 0 ? t('home.dueToday') : t('home.dueInDays', { n: until }),
+      );
+    }
+  }
+  if (row.lastPaymentAt) {
+    parts.push(t('home.lastPaid', { date: fmtShortDate(row.lastPaymentAt) }));
+  }
+  return parts.length ? parts.join(' · ') : null;
+}
 
 export function HomePage({ locked }: Props) {
   const { t } = useLocale();
@@ -35,6 +74,7 @@ export function HomePage({ locked }: Props) {
       return false;
     }
   });
+  const [flash, setFlash] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -65,6 +105,8 @@ export function HomePage({ locked }: Props) {
     [rows],
   );
 
+  const digest = useMemo(() => getOverdueDigest(rows), [rows]);
+
   const filteredByChip = useMemo(() => {
     if (filter === 'overdue') {
       return rows.filter((r) => isOverdue(r.customer, r.balanceKobo));
@@ -92,6 +134,43 @@ export function HomePage({ locked }: Props) {
   const clearFilters = () => {
     setFilter('all');
     setQuery('');
+  };
+
+  const openOverdue = () => {
+    setFilter('overdue');
+    setQuery('');
+  };
+
+  const showFlash = (msg: string) => {
+    setFlash(msg);
+    window.setTimeout(() => setFlash(null), 2500);
+  };
+
+  const shareDigest = async () => {
+    if (!shop || digest.count === 0) return;
+    const result = await shareMorningDigest({
+      shopName: shop.name,
+      overdue: digest.all.map((r) => ({
+        name: r.customer.name,
+        balanceKobo: r.balanceKobo,
+      })),
+    });
+    if (result === 'whatsapp') showFlash(t('home.digestShared'));
+    else if (result === 'share') showFlash(t('home.digestShared'));
+    else if (result === 'clipboard') showFlash(t('home.digestCopied'));
+    else showFlash(t('home.digestShareFailed'));
+  };
+
+  const copyDigest = async () => {
+    if (!shop || digest.count === 0) return;
+    const ok = await copyMorningDigest({
+      shopName: shop.name,
+      overdue: digest.all.map((r) => ({
+        name: r.customer.name,
+        balanceKobo: r.balanceKobo,
+      })),
+    });
+    showFlash(ok ? t('home.digestCopied') : t('home.digestShareFailed'));
   };
 
   const filterTitle = (() => {
@@ -157,6 +236,54 @@ export function HomePage({ locked }: Props) {
             <div class="total-meta">{heroMeta}</div>
           )}
         </div>
+
+        {!locked && digest.count > 0 && (
+          <div class="card digest-card">
+            <button
+              type="button"
+              class="digest-main"
+              onClick={openOverdue}
+            >
+              <div class="digest-title">{t('home.digestTitle')}</div>
+              <div class="digest-meta">
+                {t('home.digestMeta', {
+                  n: digest.count,
+                  amount: locked
+                    ? '••••'
+                    : formatNaira(digest.totalOverdueKobo),
+                })}
+              </div>
+              <div class="digest-top">
+                {t('home.digestTop', {
+                  names: digest.top.map((r) => r.customer.name).join(', '),
+                })}
+              </div>
+              <div class="digest-open">{t('home.digestOpen')} →</div>
+            </button>
+            <div class="digest-actions">
+              <button
+                type="button"
+                class="btn btn-secondary digest-btn"
+                onClick={shareDigest}
+              >
+                {t('home.digestWhatsApp')}
+              </button>
+              <button
+                type="button"
+                class="btn btn-ghost digest-btn"
+                onClick={copyDigest}
+              >
+                {t('home.digestCopy')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {flash && (
+          <div class="digest-flash" role="status">
+            {flash}
+          </div>
+        )}
 
         {!pro && !locked && !proHintDismissed && (
           <div class="pro-hint">
@@ -260,6 +387,11 @@ export function HomePage({ locked }: Props) {
             {filtered.map((row) => {
               const tone = balanceTone(row.balanceKobo);
               const overdue = isOverdue(row.customer, row.balanceKobo);
+              const limit = creditLimitStatus(
+                row.balanceKobo,
+                row.customer.creditLimitKobo,
+              );
+              const status = rowStatusLine(row, t);
               return (
                 <div class="list-item-wrap" key={row.customer.id}>
                   <a
@@ -272,11 +404,18 @@ export function HomePage({ locked }: Props) {
                         {overdue && (
                           <span class="overdue-badge">{t('common.overdue')}</span>
                         )}
+                        {limit === 'at' && (
+                          <span class="limit-badge at">{t('home.atLimit')}</span>
+                        )}
+                        {limit === 'near' && (
+                          <span class="limit-badge near">{t('home.nearLimit')}</span>
+                        )}
                       </div>
                       <div class="hint">
                         {row.customer.phone || t('common.noPhone')} ·{' '}
                         {balanceLabel(row.balanceKobo)}
                       </div>
+                      {status && <div class="hint row-status">{status}</div>}
                     </div>
                     <div class={`amount-pill ${tone}`}>
                       {locked

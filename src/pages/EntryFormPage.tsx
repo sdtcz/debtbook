@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'preact/hooks';
 import { MoneyInput } from '../components/MoneyInput';
 import { notifyChanged } from '../components/StatusBadge';
-import { addEntry, getCustomer, softDeleteEntry } from '../db/repo';
+import {
+  addEntry,
+  getCustomer,
+  getCustomerBalance,
+  softDeleteEntry,
+} from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
-import type { EntryType } from '../lib/types';
-import { parseNairaToKobo } from '../lib/money';
+import type { Customer, EntryType } from '../lib/types';
+import { formatNaira, parseNairaToKobo } from '../lib/money';
 import { navigate } from '../lib/router';
 import type { ToastAction } from '../hooks/useToast';
 
@@ -20,6 +25,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [customerName, setCustomerName] = useState('');
+  const [customer, setCustomer] = useState<Customer | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +37,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
         return;
       }
       setCustomerName(c.name);
+      setCustomer(c);
     });
   }, [customerId]);
 
@@ -48,6 +55,22 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
     setBusy(true);
     setError(null);
     try {
+      if (type === 'credit' && customer?.creditLimitKobo) {
+        const bal = await getCustomerBalance(customerId);
+        const wouldBe = bal.balanceKobo + kobo;
+        if (wouldBe > customer.creditLimitKobo) {
+          const ok = confirm(
+            t('entry.creditLimitWarn', {
+              limit: formatNaira(customer.creditLimitKobo),
+              wouldBe: formatNaira(wouldBe),
+            }),
+          );
+          if (!ok) {
+            setBusy(false);
+            return;
+          }
+        }
+      }
       const entry = await addEntry({
         customerId,
         type,

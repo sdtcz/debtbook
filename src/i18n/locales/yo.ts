@@ -58,6 +58,23 @@ export const yo: Record<MessageKey, string> = {
   'home.metaCustomer': 'oníbàárà {{n}}',
   'home.metaOweYou': '{{n}} jẹ́ ọ́',
 
+  'home.atLimit': 'Ti dé òpin',
+  'home.nearLimit': 'Sún mọ́ òpin',
+  'home.daysOverdue': 'ọjọ́ {{n}} ti pẹ́',
+  'home.dayOverdue': 'ọjọ́ 1 ti pẹ́',
+  'home.dueInDays': 'yóò tó ní ọjọ́ {{n}}',
+  'home.dueToday': 'yóò tó lónìí',
+  'home.lastPaid': 'ìsanwó ìgbẹ̀yìn {{date}}',
+  'home.digestTitle': 'Ìlépa òní',
+  'home.digestMeta': '{{n}} ti pẹ́ · {{amount}}',
+  'home.digestTop': '{{names}}',
+  'home.digestOpen': 'Wo àwọn tó ti pẹ́',
+  'home.digestWhatsApp': 'Pín lórí WhatsApp',
+  'home.digestCopy': 'Dàákọ àkọsílẹ̀ àárọ̀',
+  'home.digestCopied': 'A ti dàákọ àkọsílẹ̀',
+  'home.digestShared': 'Ń ṣí WhatsApp…',
+  'home.digestShareFailed': 'Kò le pín àkọsílẹ̀',
+
   'setup.tagline':
     'Ìwé gbèsè offline rẹ fún udhar. Dátà wà lórí ẹ̀rọ yìí — ó ń ṣiṣẹ́ láìsí ayélujára.',
   'setup.shopName': 'Orúkọ ilé ìtajà',
@@ -201,6 +218,12 @@ export const yo: Record<MessageKey, string> = {
   'customer.creditSaleLabel': 'Tita gbèsè',
   'customer.paymentLabel': 'Ìsanwó',
 
+  'customer.creditLimit': 'Òpin gbèsè {{amount}}',
+  'customer.creditHeadroom': '{{amount}} tó kù',
+  'customer.creditOverBy': 'Ju ní {{amount}}',
+  'customer.atCreditLimit': 'Ti dé òpin gbèsè',
+  'customer.nearCreditLimit': 'Sún mọ́ òpin gbèsè',
+
   'customerForm.new': 'Oníbàárà tuntun',
   'customerForm.edit': 'Ṣàtúnṣe oníbàárà',
   'customerForm.name': 'Orúkọ *',
@@ -236,6 +259,10 @@ export const yo: Record<MessageKey, string> = {
   'customerForm.contactsUnsupportedTip': 'Ìmọ̀ràn: lórí Android Chrome o lè yan láti Contacts',
   'customerForm.contactsUnsupported': 'Yíyan olùbásọ̀rọ̀ ń ṣiṣẹ́ nínú Chrome lórí Android',
 
+  'customerForm.creditLimit': 'Òpin gbèsè (₦, àyànfẹ́)',
+  'customerForm.creditLimitHint': 'Yóò kìlọ̀ nígbà tí tita bá ju èyí lọ — o ṣì le kọ ọ́',
+  'customerForm.creditLimitInvalid': 'Tẹ òpin gbèsè tó tọ́ (tàbí fi sílẹ̀)',
+
   'entry.creditSale': 'Tita gbèsè',
   'entry.payment': 'Ìsanwó',
   'entry.type': 'Irú àkọsílẹ̀',
@@ -249,6 +276,8 @@ export const yo: Record<MessageKey, string> = {
   'entry.paymentRecorded': 'A ti kọ ìsanwó',
   'entry.undone': 'A ti dá àkọsílẹ̀ padà',
   'entry.couldNotSave': 'Kò le fi pamọ́',
+
+  'entry.creditLimitWarn': 'Òpin {{limit}} · yóò jẹ́ {{wouldBe}}. Kọ ọ́ síbẹ̀?',
 
   'money.placeholder': '0.00 tàbí 3k',
   'money.hint': 'Náírà (₦) — ìmọ̀ràn: tẹ 3k fún ₦3,000',
@@ -297,6 +326,11 @@ export const yo: Record<MessageKey, string> = {
   'remind.settled':
     'Ẹ káàbọ̀ {{customer}}, èyí ni {{shop}}. A ti san àkọọ́lẹ̀ rẹ. A dúpẹ́ fún òwò rẹ.',
   'remind.shareTitle': 'Ìránnilétí gbèsè',
+
+  'digest.messageTitle': 'Ìlépa àárọ̀ — {{shop}}',
+  'digest.messageCount': 'Oníbàárà {{n}} ti pẹ́:',
+  'digest.messageFooter': '— BashiBook',
+  'digest.shareTitle': 'Ìlépa òní',
 
   'statement.title': 'Àkọọ́lẹ̀ Oníbàárà',
   'statement.customer': 'Oníbàárà: {{name}}',

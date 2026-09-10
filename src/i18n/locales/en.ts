@@ -56,6 +56,23 @@ export const en = {
   'home.metaCustomer': '{{n}} customer',
   'home.metaOweYou': '{{n}} owe you',
 
+  'home.atLimit': 'At limit',
+  'home.nearLimit': 'Near limit',
+  'home.daysOverdue': '{{n}} days overdue',
+  'home.dayOverdue': '1 day overdue',
+  'home.dueInDays': 'due in {{n}} days',
+  'home.dueToday': 'due today',
+  'home.lastPaid': 'last paid {{date}}',
+  'home.digestTitle': "Today's chase",
+  'home.digestMeta': '{{n}} overdue · {{amount}}',
+  'home.digestTop': '{{names}}',
+  'home.digestOpen': 'View overdue',
+  'home.digestWhatsApp': 'Share on WhatsApp',
+  'home.digestCopy': 'Copy morning digest',
+  'home.digestCopied': 'Digest copied',
+  'home.digestShared': 'Opening WhatsApp…',
+  'home.digestShareFailed': 'Could not share digest',
+
   'setup.tagline':
     'Your offline credit ledger for book debt (udhar). Data stays on this phone — works without internet.',
   'setup.shopName': 'Shop name',
@@ -199,6 +216,12 @@ export const en = {
   'customer.creditSaleLabel': 'Credit sale',
   'customer.paymentLabel': 'Payment',
 
+  'customer.creditLimit': 'Credit limit {{amount}}',
+  'customer.creditHeadroom': '{{amount}} left',
+  'customer.creditOverBy': 'Over by {{amount}}',
+  'customer.atCreditLimit': 'At credit limit',
+  'customer.nearCreditLimit': 'Near credit limit',
+
   'customerForm.new': 'New customer',
   'customerForm.edit': 'Edit customer',
   'customerForm.name': 'Name *',
@@ -234,6 +257,10 @@ export const en = {
   'customerForm.contactsUnsupportedTip': 'Tip: on Android Chrome you can pick from Contacts',
   'customerForm.contactsUnsupported': 'Contact pick works in Chrome on Android',
 
+  'customerForm.creditLimit': 'Credit limit (₦, optional)',
+  'customerForm.creditLimitHint': 'Soft warn when a credit sale would go past this — you can still record',
+  'customerForm.creditLimitInvalid': 'Enter a valid credit limit (or leave blank)',
+
   'entry.creditSale': 'Credit sale',
   'entry.payment': 'Payment',
   'entry.type': 'Entry type',
@@ -247,6 +274,8 @@ export const en = {
   'entry.paymentRecorded': 'Payment recorded',
   'entry.undone': 'Entry undone',
   'entry.couldNotSave': 'Could not save',
+
+  'entry.creditLimitWarn': 'Limit {{limit}} · would be {{wouldBe}}. Record anyway?',
 
   'money.placeholder': '0.00 or 3k',
   'money.hint': 'Naira (₦) — tip: type 3k for ₦3,000',
@@ -295,6 +324,11 @@ export const en = {
   'remind.settled':
     'Hello {{customer}}, this is {{shop}}. Your account is settled. Thank you for your business.',
   'remind.shareTitle': 'Debt reminder',
+
+  'digest.messageTitle': "Morning chase — {{shop}}",
+  'digest.messageCount': '{{n}} overdue customer(s):',
+  'digest.messageFooter': '— BashiBook',
+  'digest.shareTitle': "Today's chase",
 
   'statement.title': 'Customer Statement',
   'statement.customer': 'Customer: {{name}}',

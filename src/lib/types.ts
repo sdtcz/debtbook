@@ -36,6 +36,8 @@ export interface Customer {
   note?: string;
   /** Optional due date (unix ms) for outstanding balance reminders */
   dueAt?: number;
+  /** Optional credit limit in kobo; soft-warn when lending past this */
+  creditLimitKobo?: number;
   createdAt: number;
   updatedAt: number;
   /** Soft-delete support for LWW sync later */
@@ -81,6 +83,8 @@ export interface CustomerBalance {
   creditTotalKobo: number;
   paymentTotalKobo: number;
   entryCount: number;
+  /** Latest payment entry occurredAt, if any */
+  lastPaymentAt?: number;
 }
 
 export interface BackupPayload {
