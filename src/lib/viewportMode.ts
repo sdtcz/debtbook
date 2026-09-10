@@ -9,12 +9,16 @@ export function isForcedApp(): boolean {
   } catch {
     /* ignore */
   }
+  return isLocalForceApp();
+}
+
+/** True when the user chose “Open app home” on desktop (not iframe ?app=1 alone). */
+export function isLocalForceApp(): boolean {
   try {
-    if (localStorage.getItem(FORCE_KEY) === '1') return true;
+    return localStorage.getItem(FORCE_KEY) === '1';
   } catch {
-    /* ignore */
+    return false;
   }
-  return false;
 }
 
 /** Narrow phone / tablet portrait, or coarse pointer on a relatively narrow screen. */
@@ -34,6 +38,22 @@ export function setForceApp(on: boolean): void {
   try {
     if (on) localStorage.setItem(FORCE_KEY, '1');
     else localStorage.removeItem(FORCE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Leave forced desktop app mode and return to the marketing showcase. */
+export function clearForceApp(): void {
+  setForceApp(false);
+  try {
+    const u = new URL(window.location.href);
+    if (u.searchParams.has('app')) {
+      u.searchParams.delete('app');
+      const qs = u.searchParams.toString();
+      const next = u.pathname + (qs ? `?${qs}` : '') + u.hash;
+      window.history.replaceState(null, '', next);
+    }
   } catch {
     /* ignore */
   }

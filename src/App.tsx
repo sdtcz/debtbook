@@ -6,7 +6,12 @@ import { useLocale } from './hooks/useLocale';
 import { useToast } from './hooks/useToast';
 import { initLocale } from './i18n';
 import { parseHash, type Route } from './lib/router';
-import { shouldShowApp } from './lib/viewportMode';
+import {
+  clearForceApp,
+  isLocalForceApp,
+  isPhoneLikeViewport,
+  shouldShowApp,
+} from './lib/viewportMode';
 import { CustomerDetailPage } from './pages/CustomerDetailPage';
 import { CustomerFormPage } from './pages/CustomerFormPage';
 import { EntryFormPage } from './pages/EntryFormPage';
@@ -16,11 +21,17 @@ import { ProPage } from './pages/ProPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SetupPage } from './pages/SetupPage';
 
-function useAppMode(): [boolean, () => void] {
+function useAppMode(): [boolean, () => void, () => void, boolean] {
   const [showApp, setShowApp] = useState(() => shouldShowApp());
+  const [showShowcaseBack, setShowShowcaseBack] = useState(
+    () => isLocalForceApp() && !isPhoneLikeViewport(),
+  );
 
   useEffect(() => {
-    const recompute = () => setShowApp(shouldShowApp());
+    const recompute = () => {
+      setShowApp(shouldShowApp());
+      setShowShowcaseBack(isLocalForceApp() && !isPhoneLikeViewport());
+    };
     const mqNarrow = window.matchMedia('(max-width: 640px)');
     const mqCoarse = window.matchMedia('(pointer: coarse)');
     const mqMid = window.matchMedia('(max-width: 900px)');
@@ -36,12 +47,22 @@ function useAppMode(): [boolean, () => void] {
     };
   }, []);
 
-  const forceApp = useCallback(() => setShowApp(true), []);
-  return [showApp, forceApp];
+  const forceApp = useCallback(() => {
+    setShowApp(true);
+    setShowShowcaseBack(isLocalForceApp() && !isPhoneLikeViewport());
+  }, []);
+
+  const backToShowcase = useCallback(() => {
+    clearForceApp();
+    setShowApp(shouldShowApp());
+    setShowShowcaseBack(false);
+  }, []);
+
+  return [showApp, forceApp, backToShowcase, showShowcaseBack];
 }
 
 export function App() {
-  const [showApp, forceApp] = useAppMode();
+  const [showApp, forceApp, backToShowcase, showShowcaseBack] = useAppMode();
   const [route, setRoute] = useState<Route>(parseHash());
   const [ready, setReady] = useState(false);
   const [hasShop, setHasShop] = useState(false);
@@ -93,18 +114,28 @@ export function App() {
     return <LandingPage onUseAppHere={forceApp} />;
   }
 
+  const showcaseBtn = showShowcaseBack ? (
+    <button type="button" class="showcase-back-btn" onClick={backToShowcase}>
+      ← Showcase home
+    </button>
+  ) : null;
+
   if (!ready) {
     return (
-      <div class="setup-screen">
-        <h1>BashiBook</h1>
-        <p>{t('common.loading')}</p>
-      </div>
+      <>
+        {showcaseBtn}
+        <div class="setup-screen">
+          <h1>BashiBook</h1>
+          <p>{t('common.loading')}</p>
+        </div>
+      </>
     );
   }
 
   if (!hasShop || route.name === 'setup') {
     return (
       <>
+        {showcaseBtn}
         <SetupPage
           onDone={() => {
             setHasShop(true);
@@ -147,6 +178,7 @@ export function App() {
 
   return (
     <>
+      {showcaseBtn}
       {page}
       {locked && pinHash && pinSalt && (
         <PinLock
