@@ -160,6 +160,21 @@ export const en = {
   'settings.language': 'Language',
   'settings.languageChanged': 'Language set to {{lang}}',
 
+  'settings.payMe': 'Pay me',
+  'settings.payMeHelp':
+    'Customers get these when you send a Pay-me link',
+  'settings.payBankName': 'Bank / wallet',
+  'settings.payBankPlaceholder': 'e.g. Opay, GTBank, Palmpay',
+  'settings.payAccountNumber': 'Account number',
+  'settings.payAccountPlaceholder': 'e.g. 0123456789',
+  'settings.payAccountName': 'Account name',
+  'settings.payAccountNamePlaceholder': 'Name on the account',
+  'settings.payLinkUrl': 'Payment link (optional)',
+  'settings.payLinkPlaceholder': 'Opay / Palmpay / Paystack.me URL',
+  'settings.payMeSave': 'Save payment details',
+  'settings.payMeSaved': 'Payment details saved',
+  'settings.payMeSaveFailed': 'Could not save payment details',
+
   'settings.chaseReminders': 'Chase reminders',
   'settings.chaseDaily': 'Daily chase reminder',
   'settings.chaseDailySub': 'When you open the app, nudge if anyone is overdue',
@@ -221,6 +236,10 @@ export const en = {
   'customer.overpaid': 'Overpaid — shop owes this customer',
   'customer.creditSale': '+ Credit sale',
   'customer.payment': '− Payment',
+  'customer.payMe': 'Pay-me link',
+  'customer.payMeNeedSetup': 'Add your bank or payment link in Settings first',
+  'customer.payMeGoSettings': 'Settings',
+
   'customer.remind': 'Remind',
   'customer.statement': 'Statement',
   'customer.undoLast': 'Undo last entry',
@@ -342,6 +361,33 @@ export const en = {
   'status.pendingSync': '{{n}} pending sync',
   'status.pendingTitle':
     'Changes queued for sync when a backend is connected',
+
+  'payme.pageTitle': 'Payment request',
+  'payme.shopFallback': 'Shop',
+  'payme.amountDue': 'Amount due',
+  'payme.forCustomer': 'For {{name}}',
+  'payme.bank': 'Bank',
+  'payme.accountNumber': 'Account number',
+  'payme.accountName': 'Account name',
+  'payme.copyAccount': 'Copy account number',
+  'payme.copied': 'Copied!',
+  'payme.copiedAcct': 'Account number copied',
+  'payme.copyFailed': 'Could not copy',
+  'payme.openPaymentLink': 'Open payment link',
+  'payme.noDetails': 'No payment details were included in this link.',
+  'payme.manualNote':
+    'Pay outside the app (bank transfer / wallet). Tell the shopkeeper after you pay — they record it in BashiBook.',
+  'payme.shareTitle': 'Pay-me request',
+  'payme.messageIntro':
+    'Hello {{customer}}, {{shop}} is requesting payment of {{amount}}.',
+  'payme.messageBankHeader': 'Pay to:',
+  'payme.messageBank': 'Bank: {{bank}}',
+  'payme.messageAcct': 'Account: {{acct}}',
+  'payme.messageAcctName': 'Name: {{name}}',
+  'payme.messagePageUrl': 'Details: {{url}}',
+  'payme.messagePayLink': 'Pay here: {{url}}',
+  'payme.messageAsk':
+    'Please pay, then tell the shop so they can record it. Thank you.',
 
   'remind.owes':
     'Hello {{customer}}, this is a reminder from {{shop}}. Your outstanding balance is {{amount}}. Please settle when you can. Thank you.',

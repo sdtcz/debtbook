@@ -16,6 +16,7 @@ import {
   balanceTone,
   formatNaira,
 } from '../lib/money';
+import { hasPayMeDetails, sendPayMeRequest } from '../lib/payMe';
 import { remindCustomer } from '../lib/sms';
 import { buildStatement, shareOrCopyText } from '../lib/statement';
 import { navigate } from '../lib/router';
@@ -88,6 +89,31 @@ export function CustomerDetailPage({ id, toast }: Props) {
     if (!customer || !shop) return;
     const result = await remindCustomer({
       shopName: shop.name,
+      customerName: customer.name,
+      phone: customer.phone,
+      balanceKobo,
+    });
+    if (result === 'whatsapp') toast(t('customer.openingWhatsApp'));
+    else if (result === 'sms') toast(t('customer.openingSms'));
+    else if (result === 'share') toast(t('customer.shared'));
+    else if (result === 'clipboard') toast(t('customer.messageCopied'));
+    else toast(t('customer.couldNotRemind'));
+  };
+
+  const onPayMe = async () => {
+    if (!customer || !shop) return;
+    if (!hasPayMeDetails(shop)) {
+      toast(t('customer.payMeNeedSetup'), {
+        ms: 5000,
+        action: {
+          label: t('customer.payMeGoSettings'),
+          onClick: () => navigate('/settings'),
+        },
+      });
+      return;
+    }
+    const result = await sendPayMeRequest({
+      shop,
       customerName: customer.name,
       phone: customer.phone,
       balanceKobo,
@@ -238,6 +264,14 @@ export function CustomerDetailPage({ id, toast }: Props) {
             {t('customer.statement')}
           </button>
         </div>
+
+        {balanceKobo > 0 && (
+          <div class="btn-row" style={{ marginTop: 0, marginBottom: 12 }}>
+            <button class="btn btn-primary" type="button" onClick={onPayMe}>
+              {t('customer.payMe')}
+            </button>
+          </div>
+        )}
 
         {canUndo && (
           <div class="btn-row" style={{ marginTop: 8 }}>

@@ -1,3 +1,15 @@
+export type PayMeRoute = {
+  name: 'payme';
+  shop: string;
+  amountKobo: number;
+  bank: string;
+  acct: string;
+  /** Account name */
+  accountName: string;
+  link: string;
+  customer: string;
+};
+
 export type Route =
   | { name: 'home' }
   | { name: 'setup' }
@@ -6,13 +18,40 @@ export type Route =
   | { name: 'customer-edit'; id: string }
   | { name: 'entry-new'; id: string; type?: 'credit' | 'payment' }
   | { name: 'settings' }
-  | { name: 'pro' };
+  | { name: 'pro' }
+  | PayMeRoute;
+
+function parsePayMeFromQuery(queryPart: string | undefined): PayMeRoute {
+  const q = new URLSearchParams(queryPart || '');
+  const amountRaw = q.get('amountKobo') || q.get('amount') || '0';
+  const amountKobo = Number.parseInt(amountRaw, 10);
+  return {
+    name: 'payme',
+    shop: q.get('shop') || '',
+    amountKobo: Number.isFinite(amountKobo) ? amountKobo : 0,
+    bank: q.get('bank') || '',
+    acct: q.get('acct') || '',
+    accountName: q.get('name') || '',
+    link: q.get('link') || '',
+    customer: q.get('customer') || '',
+  };
+}
+
+/** True when hash path is /payme (public customer payment page). */
+export function isPayMeHash(hash = typeof location !== 'undefined' ? location.hash : ''): boolean {
+  const raw = (hash || '#/').replace(/^#/, '') || '/';
+  const path = raw.split('?')[0];
+  const parts = path.split('/').filter(Boolean);
+  return parts[0] === 'payme';
+}
 
 export function parseHash(): Route {
   const raw = (location.hash || '#/').replace(/^#/, '') || '/';
-  const path = raw.split('?')[0];
+  const [pathPart, queryPart] = raw.split('?');
+  const path = pathPart || '/';
   const parts = path.split('/').filter(Boolean);
 
+  if (parts[0] === 'payme') return parsePayMeFromQuery(queryPart);
   if (parts[0] === 'setup') return { name: 'setup' };
   if (parts[0] === 'settings' && parts[1] === 'pro') return { name: 'pro' };
   if (parts[0] === 'settings') return { name: 'settings' };

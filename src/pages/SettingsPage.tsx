@@ -12,6 +12,7 @@ import {
   setCloudBackupMeta,
   setPin,
   setShopLocale,
+  setShopPayMe,
 } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
 import { useOnline } from '../hooks/useOnline';
@@ -86,6 +87,11 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   const [cloudBusy, setCloudBusy] = useState(false);
   const [chaseEnabled, setChaseEnabled] = useState(false);
   const [chaseTime, setChaseTime] = useState('09:00');
+  const [payBankName, setPayBankName] = useState('');
+  const [payAccountNumber, setPayAccountNumber] = useState('');
+  const [payAccountName, setPayAccountName] = useState('');
+  const [payLinkUrl, setPayLinkUrl] = useState('');
+  const [payBusy, setPayBusy] = useState(false);
   const [notifPerm, setNotifPerm] = useState<
     NotificationPermission | 'unsupported'
   >(() => notificationPermission());
@@ -114,6 +120,10 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       const chase = resolveChasePrefs(s);
       setChaseEnabled(chase.enabled);
       setChaseTime(chase.time);
+      setPayBankName(s.payBankName || '');
+      setPayAccountNumber(s.payAccountNumber || '');
+      setPayAccountName(s.payAccountName || '');
+      setPayLinkUrl(s.payLinkUrl || '');
     } else {
       const chase = resolveChasePrefs(null);
       setChaseEnabled(chase.enabled);
@@ -464,6 +474,26 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   };
 
 
+  const savePayMe = async (e: Event) => {
+    e.preventDefault();
+    setPayBusy(true);
+    try {
+      await setShopPayMe({
+        payBankName,
+        payAccountNumber,
+        payAccountName,
+        payLinkUrl,
+      });
+      notifyChanged();
+      toast(t('settings.payMeSaved'));
+      await refresh();
+    } catch (err) {
+      toast(err instanceof Error ? err.message : t('settings.payMeSaveFailed'));
+    } finally {
+      setPayBusy(false);
+    }
+  };
+
   const persistChase = async (next: { enabled?: boolean; time?: string }) => {
     const enabled = next.enabled !== undefined ? next.enabled : chaseEnabled;
     const time = normalizeChaseTime(next.time !== undefined ? next.time : chaseTime);
@@ -588,6 +618,70 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           })}
         </div>
 
+
+        <div class="settings-group-label">{t('settings.payMe')}</div>
+        <form class="settings-group card" onSubmit={savePayMe}>
+          <p class="muted" style={{ marginTop: 0, fontSize: '0.85rem' }}>
+            {t('settings.payMeHelp')}
+          </p>
+          <div class="field">
+            <label for="pay-bank">{t('settings.payBankName')}</label>
+            <input
+              id="pay-bank"
+              class="input"
+              value={payBankName}
+              maxlength={80}
+              placeholder={t('settings.payBankPlaceholder')}
+              autocomplete="off"
+              onInput={(e) => setPayBankName((e.target as HTMLInputElement).value)}
+            />
+          </div>
+          <div class="field">
+            <label for="pay-acct">{t('settings.payAccountNumber')}</label>
+            <input
+              id="pay-acct"
+              class="input"
+              value={payAccountNumber}
+              maxlength={20}
+              inputMode="numeric"
+              placeholder={t('settings.payAccountPlaceholder')}
+              autocomplete="off"
+              onInput={(e) =>
+                setPayAccountNumber((e.target as HTMLInputElement).value)
+              }
+            />
+          </div>
+          <div class="field">
+            <label for="pay-name">{t('settings.payAccountName')}</label>
+            <input
+              id="pay-name"
+              class="input"
+              value={payAccountName}
+              maxlength={80}
+              placeholder={t('settings.payAccountNamePlaceholder')}
+              autocomplete="off"
+              onInput={(e) =>
+                setPayAccountName((e.target as HTMLInputElement).value)
+              }
+            />
+          </div>
+          <div class="field" style={{ marginBottom: 8 }}>
+            <label for="pay-link">{t('settings.payLinkUrl')}</label>
+            <input
+              id="pay-link"
+              class="input"
+              value={payLinkUrl}
+              maxlength={200}
+              type="url"
+              placeholder={t('settings.payLinkPlaceholder')}
+              autocomplete="off"
+              onInput={(e) => setPayLinkUrl((e.target as HTMLInputElement).value)}
+            />
+          </div>
+          <button class="btn btn-primary" type="submit" disabled={payBusy}>
+            {payBusy ? t('common.saving') : t('settings.payMeSave')}
+          </button>
+        </form>
 
         <div class="settings-group-label">{t('settings.chaseReminders')}</div>
         <div class="settings-group card settings-list">

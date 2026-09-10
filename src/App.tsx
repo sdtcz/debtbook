@@ -5,7 +5,7 @@ import { getShop } from './db/repo';
 import { useLocale } from './hooks/useLocale';
 import { useToast } from './hooks/useToast';
 import { initLocale } from './i18n';
-import { parseHash, type Route } from './lib/router';
+import { isPayMeHash, parseHash, type Route } from './lib/router';
 import {
   clearForceApp,
   isLocalForceApp,
@@ -17,19 +17,20 @@ import { CustomerFormPage } from './pages/CustomerFormPage';
 import { EntryFormPage } from './pages/EntryFormPage';
 import { HomePage } from './pages/HomePage';
 import { LandingPage } from './pages/LandingPage';
+import { PayMePage } from './pages/PayMePage';
 import { ProPage } from './pages/ProPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SetupPage } from './pages/SetupPage';
 
 function useAppMode(): [boolean, () => void, () => void, boolean] {
-  const [showApp, setShowApp] = useState(() => shouldShowApp());
+  const [showApp, setShowApp] = useState(() => shouldShowApp() || isPayMeHash());
   const [showShowcaseBack, setShowShowcaseBack] = useState(
     () => isLocalForceApp() && !isPhoneLikeViewport(),
   );
 
   useEffect(() => {
     const recompute = () => {
-      setShowApp(shouldShowApp());
+      setShowApp(shouldShowApp() || isPayMeHash());
       setShowShowcaseBack(isLocalForceApp() && !isPhoneLikeViewport());
     };
     const mqNarrow = window.matchMedia('(max-width: 640px)');
@@ -39,11 +40,13 @@ function useAppMode(): [boolean, () => void, () => void, boolean] {
     mqCoarse.addEventListener('change', recompute);
     mqMid.addEventListener('change', recompute);
     window.addEventListener('resize', recompute);
+    window.addEventListener('hashchange', recompute);
     return () => {
       mqNarrow.removeEventListener('change', recompute);
       mqCoarse.removeEventListener('change', recompute);
       mqMid.removeEventListener('change', recompute);
       window.removeEventListener('resize', recompute);
+      window.removeEventListener('hashchange', recompute);
     };
   }, []);
 
@@ -54,7 +57,7 @@ function useAppMode(): [boolean, () => void, () => void, boolean] {
 
   const backToShowcase = useCallback(() => {
     clearForceApp();
-    setShowApp(shouldShowApp());
+    setShowApp(shouldShowApp() || isPayMeHash());
     setShowShowcaseBack(false);
   }, []);
 
@@ -88,27 +91,44 @@ export function App() {
     if (!shop?.pinHash) setLocked(false);
   }, []);
 
+  // Always track hash (needed for public #/payme on desktop landing)
   useEffect(() => {
-    if (!showApp) return;
-    refreshShop();
     const onHash = () => setRoute(parseHash());
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
-  }, [showApp]);
+  }, []);
 
-  // Lock when returning to the tab/app if PIN is set
   useEffect(() => {
-    if (!showApp) return;
+    if (!showApp && route.name !== 'payme') return;
+    if (route.name === 'payme') {
+      setReady(true);
+      return;
+    }
+    refreshShop();
+  }, [showApp, route.name]);
+
+  // Lock when returning to the tab/app if PIN is set (never for public payme)
+  useEffect(() => {
+    if (!showApp || route.name === 'payme') return;
     const onVis = () => {
       if (document.visibilityState === 'visible' && pinHash && pinSalt) {
         setLocked(true);
       }
     };
     document.addEventListener('visibilitychange', onVis);
-    // Also lock on first load if PIN exists
     if (pinHash && pinSalt) setLocked(true);
     return () => document.removeEventListener('visibilitychange', onVis);
-  }, [showApp, pinHash, pinSalt]);
+  }, [showApp, pinHash, pinSalt, route.name]);
+
+  // Public Pay-me page — no PIN, works for customers (incl. desktop)
+  if (route.name === 'payme') {
+    return (
+      <>
+        <PayMePage route={route} toast={(msg) => toast(msg)} />
+        <Toast message={message} action={action} onDismiss={clearToast} />
+      </>
+    );
+  }
 
   if (!showApp) {
     return <LandingPage onUseAppHere={forceApp} />;

@@ -2190,3 +2190,116 @@ button:active:not(:disabled),
   padding: 10px 16px 4px;
   border-top: 1px solid var(--border);
 }
+
+
+/* ── Public Pay-me page (customer-facing, teal, large taps) ── */
+.payme-screen {
+  min-height: 100dvh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 24px 16px calc(24px + var(--safe-bottom));
+  background: linear-gradient(180deg, var(--primary-soft) 0%, var(--bg) 42%);
+}
+
+.payme-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  padding: 24px 20px 28px;
+}
+
+.payme-brand {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin-bottom: 8px;
+}
+
+.payme-title {
+  margin: 0 0 4px;
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.payme-shop {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.payme-amount-block {
+  background: var(--primary-soft);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.payme-amount-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.payme-amount {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+}
+
+.payme-customer {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.payme-bank {
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+
+.payme-bank-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.payme-bank-row:last-of-type {
+  margin-bottom: 12px;
+}
+
+.payme-acct {
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  word-break: break-all;
+}
+
+.payme-copy-btn,
+.payme-link-btn {
+  min-height: 48px;
+  margin-top: 4px;
+}
+
+.payme-link-btn {
+  margin-bottom: 8px;
+}
+
+.payme-empty {
+  text-align: center;
+  margin: 12px 0;
+}
+
+.payme-note {
+  margin: 16px 0 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}

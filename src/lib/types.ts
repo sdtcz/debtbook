@@ -31,6 +31,14 @@ export interface ShopProfile {
   chaseReminderEnabled?: boolean;
   /** Preferred local time HH:mm for chase copy / notification */
   chaseReminderTime?: string;
+  /** Bank name for Pay-me links (e.g. Opay, GTBank) */
+  payBankName?: string;
+  /** NUBAN / wallet account number for transfers */
+  payAccountNumber?: string;
+  /** Account name as shown on bank / wallet */
+  payAccountName?: string;
+  /** Optional Opay/Palmpay/Paystack.me/custom payment URL */
+  payLinkUrl?: string;
 }
 
 export interface Customer {

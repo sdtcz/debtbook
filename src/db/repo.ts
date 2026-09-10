@@ -49,6 +49,10 @@ export async function updateShopFields(
       | 'locale'
       | 'chaseReminderEnabled'
       | 'chaseReminderTime'
+      | 'payBankName'
+      | 'payAccountNumber'
+      | 'payAccountName'
+      | 'payLinkUrl'
     >
   > & { clearPin?: boolean },
 ): Promise<ShopProfile> {
@@ -100,6 +104,35 @@ export async function setChaseReminderPrefs(prefs: {
   const existing = await getShop();
   if (!existing) return undefined;
   return updateShopFields(prefs);
+}
+
+/** Save shop Pay-me bank / payment-link details (empty string clears). */
+export async function setShopPayMe(details: {
+  payBankName?: string;
+  payAccountNumber?: string;
+  payAccountName?: string;
+  payLinkUrl?: string;
+}): Promise<ShopProfile | undefined> {
+  const db = await getDb();
+  const existing = await db.get('shop', 'shop');
+  if (!existing) return undefined;
+  const next: ShopProfile = { ...existing, updatedAt: Date.now() };
+  const apply = (
+    key: 'payBankName' | 'payAccountNumber' | 'payAccountName' | 'payLinkUrl',
+    raw?: string,
+  ) => {
+    if (raw === undefined) return;
+    const trimmed = raw.trim();
+    if (trimmed) next[key] = trimmed;
+    else delete next[key];
+  };
+  apply('payBankName', details.payBankName);
+  apply('payAccountNumber', details.payAccountNumber);
+  apply('payAccountName', details.payAccountName);
+  apply('payLinkUrl', details.payLinkUrl);
+  await db.put('shop', next);
+  await enqueueOutbox('shop', next.id, 'upsert', next);
+  return next;
 }
 
 /* ── Customers ────────────────────────────────────────── */

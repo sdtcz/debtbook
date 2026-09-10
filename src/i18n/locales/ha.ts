@@ -162,6 +162,21 @@ export const ha: Record<MessageKey, string> = {
   'settings.language': 'Harshe',
   'settings.languageChanged': 'An saita harshe zuwa {{lang}}',
 
+  'settings.payMe': 'Biya ni',
+  'settings.payMeHelp':
+    'Abokan ciniki suna samun waɗannan lokacin da ka aika hanyar Biya-ni',
+  'settings.payBankName': 'Banki / wallet',
+  'settings.payBankPlaceholder': 'misali Opay, GTBank, Palmpay',
+  'settings.payAccountNumber': 'Lambar asusu',
+  'settings.payAccountPlaceholder': 'misali 0123456789',
+  'settings.payAccountName': 'Sunan asusu',
+  'settings.payAccountNamePlaceholder': 'Suna akan asusun',
+  'settings.payLinkUrl': 'Hanyar biya (na zaɓi)',
+  'settings.payLinkPlaceholder': 'Opay / Palmpay / Paystack.me URL',
+  'settings.payMeSave': 'Ajiye bayanan biya',
+  'settings.payMeSaved': 'An ajiye bayanan biya',
+  'settings.payMeSaveFailed': 'An kasa ajiye bayanan biya',
+
   'settings.chaseReminders': 'Tunatarwar bibiya',
   'settings.chaseDaily': 'Tunatarwar bibiya ta yau da kullum',
   'settings.chaseDailySub': 'Idan ka buɗe app, a tuna idan akwai wanda ya wuce lokaci',
@@ -223,6 +238,10 @@ export const ha: Record<MessageKey, string> = {
   'customer.overpaid': 'An biya fiye — shago yana bin wannan abokin ciniki',
   'customer.creditSale': '+ Sayarwa bashi',
   'customer.payment': '− Biya',
+  'customer.payMe': 'Hanyar Biya-ni',
+  'customer.payMeNeedSetup': 'Da farko ƙara banki ko hanyar biya a Saiti',
+  'customer.payMeGoSettings': 'Saiti',
+
   'customer.remind': 'Tunatar',
   'customer.statement': 'Bayani',
   'customer.undoLast': 'Juyar shigarwa ta ƙarshe',
@@ -344,6 +363,33 @@ export const ha: Record<MessageKey, string> = {
   'status.pendingSync': '{{n}} jiran daidaitawa',
   'status.pendingTitle':
     'Canje-canje suna jiran daidaitawa idan an haɗa backend',
+
+  'payme.pageTitle': 'Buƙatar biya',
+  'payme.shopFallback': 'Shago',
+  'payme.amountDue': 'Adadin da ake biya',
+  'payme.forCustomer': 'Don {{name}}',
+  'payme.bank': 'Banki',
+  'payme.accountNumber': 'Lambar asusu',
+  'payme.accountName': 'Sunan asusu',
+  'payme.copyAccount': 'Kwafi lambar asusu',
+  'payme.copied': 'An kwafi!',
+  'payme.copiedAcct': 'An kwafi lambar asusu',
+  'payme.copyFailed': 'An kasa kwafi',
+  'payme.openPaymentLink': 'Buɗe hanyar biya',
+  'payme.noDetails': 'Babu bayanan biya a wannan hanya.',
+  'payme.manualNote':
+    'Biya a wajen app (canja wuri / wallet). Faɗa wa mai shago bayan ka biya — shi ne zai rubuta a BashiBook.',
+  'payme.shareTitle': 'Buƙatar Biya-ni',
+  'payme.messageIntro':
+    'Sannu {{customer}}, {{shop}} yana neman biya na {{amount}}.',
+  'payme.messageBankHeader': 'Biya zuwa:',
+  'payme.messageBank': 'Banki: {{bank}}',
+  'payme.messageAcct': 'Asusu: {{acct}}',
+  'payme.messageAcctName': 'Suna: {{name}}',
+  'payme.messagePageUrl': 'Cikakkun bayanai: {{url}}',
+  'payme.messagePayLink': 'Biya anan: {{url}}',
+  'payme.messageAsk':
+    "Don Allah ka biya, sa'an nan ka faɗa wa shago don su rubuta. Na gode.",
 
   'remind.owes':
     'Sannu {{customer}}, wannan tunatarwa ce daga {{shop}}. Bashinka da ya rage shine {{amount}}. Don Allah ka biya lokacin da za ka iya. Na gode.',

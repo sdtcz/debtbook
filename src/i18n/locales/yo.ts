@@ -162,6 +162,21 @@ export const yo: Record<MessageKey, string> = {
   'settings.language': 'Èdè',
   'settings.languageChanged': 'A ti yí èdè sí {{lang}}',
 
+  'settings.payMe': 'San mi',
+  'settings.payMeHelp':
+    'Àwọn oníbàárà máa rí àwọn wọ̀nyí nígbà tí o bá fi ọ̀nà San-mi ránṣẹ́',
+  'settings.payBankName': 'Bánkì / wallet',
+  'settings.payBankPlaceholder': 'àpẹẹrẹ Opay, GTBank, Palmpay',
+  'settings.payAccountNumber': 'Nọ́mbà àkọọ́lẹ̀',
+  'settings.payAccountPlaceholder': 'àpẹẹrẹ 0123456789',
+  'settings.payAccountName': 'Orúkọ àkọọ́lẹ̀',
+  'settings.payAccountNamePlaceholder': 'Orúkọ lórí àkọọ́lẹ̀',
+  'settings.payLinkUrl': 'Ọ̀nà ìsanwó (àyọ̀ǹdà)',
+  'settings.payLinkPlaceholder': 'Opay / Palmpay / Paystack.me URL',
+  'settings.payMeSave': 'Fi àlàyé ìsanwó pamọ́',
+  'settings.payMeSaved': 'A ti fi àlàyé ìsanwó pamọ́',
+  'settings.payMeSaveFailed': 'A kò le fi àlàyé ìsanwó pamọ́',
+
   'settings.chaseReminders': 'Ìránlétí ìlépa',
   'settings.chaseDaily': 'Ìránlétí ìlépa ojoojúmọ́',
   'settings.chaseDailySub': 'Nígbà tí o bá ṣí app, jẹ́ ká rán ọ létí bí ẹnìkan bá ti pẹ́',
@@ -223,6 +238,10 @@ export const yo: Record<MessageKey, string> = {
   'customer.overpaid': 'A san ju — ilé ìtajà jẹ́ oníbàárà yìí',
   'customer.creditSale': '+ Tita gbèsè',
   'customer.payment': '− Ìsanwó',
+  'customer.payMe': 'Ọ̀nà San-mi',
+  'customer.payMeNeedSetup': 'Kọ́kọ́ fi bánkì tàbí ọ̀nà ìsanwó kún Settings',
+  'customer.payMeGoSettings': 'Settings',
+
   'customer.remind': 'Rán létí',
   'customer.statement': 'Àkọọ́lẹ̀',
   'customer.undoLast': 'Dá àkọsílẹ̀ ìgbẹ̀yìn padà',
@@ -344,6 +363,33 @@ export const yo: Record<MessageKey, string> = {
   'status.pendingSync': '{{n}} ń dúró ìṣọ̀kan',
   'status.pendingTitle':
     'Àwọn àyípadà ń dúró ìṣọ̀kan nígbà tí a bá so backend',
+
+  'payme.pageTitle': 'Ìbéèrè ìsanwó',
+  'payme.shopFallback': 'Ilé ìtajà',
+  'payme.amountDue': 'Owó tó yẹ́ kó san',
+  'payme.forCustomer': 'Fún {{name}}',
+  'payme.bank': 'Bánkì',
+  'payme.accountNumber': 'Nọ́mbà àkọọ́lẹ̀',
+  'payme.accountName': 'Orúkọ àkọọ́lẹ̀',
+  'payme.copyAccount': 'Ṣẹ̀dá nọ́mbà àkọọ́lẹ̀',
+  'payme.copied': 'A ti ṣẹ̀dá!',
+  'payme.copiedAcct': 'A ti ṣẹ̀dá nọ́mbà àkọọ́lẹ̀',
+  'payme.copyFailed': 'A kò le ṣẹ̀dá',
+  'payme.openPaymentLink': 'Ṣí ọ̀nà ìsanwó',
+  'payme.noDetails': 'Kò sí àlàyé ìsanwó nínú ọ̀nà yìí.',
+  'payme.manualNote':
+    'San ní ìta app (ìfiránṣẹ́ bánkì / wallet). Sọ fún oníṣòwò lẹ́yìn tí o bá san — ó máa kọ ọ́ sílẹ̀ nínú BashiBook.',
+  'payme.shareTitle': 'Ìbéèrè San-mi',
+  'payme.messageIntro':
+    'Ẹ káàbọ̀ {{customer}}, {{shop}} ń béèrè ìsanwó {{amount}}.',
+  'payme.messageBankHeader': 'San sí:',
+  'payme.messageBank': 'Bánkì: {{bank}}',
+  'payme.messageAcct': 'Àkọọ́lẹ̀: {{acct}}',
+  'payme.messageAcctName': 'Orúkọ: {{name}}',
+  'payme.messagePageUrl': 'Àlàyé: {{url}}',
+  'payme.messagePayLink': 'San níbí: {{url}}',
+  'payme.messageAsk':
+    'Jọ̀wọ́ san, lẹ́yìn náà sọ fún ilé ìtajà kí wọ́n lè kọ ọ́ sílẹ̀. O ṣeun.',
 
   'remind.owes':
     'Ẹ káàbọ̀ {{customer}}, èyí jẹ́ ìránnilétí láti ọ̀dọ̀ {{shop}}. Gbèsè rẹ tó kù ni {{amount}}. Jọ̀wọ́ san nígbà tí o bá lè. O ṣeun.',
