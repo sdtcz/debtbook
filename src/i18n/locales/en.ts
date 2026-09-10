@@ -210,7 +210,9 @@ export const en = {
   'customerForm.dueDate': 'Due date (optional)',
   'customerForm.dueHint':
     'Shows an Overdue badge on Home when balance > 0 and past due',
-  'customerForm.dueDateFormat': 'Use day/month/year (dd/mm)',
+  'customerForm.dueDateFormat': 'Day / month / year',
+  'customerForm.dueDatePlaceholder': 'dd/mm/yyyy',
+  'customerForm.dueDateInvalid': 'Enter a valid date as dd/mm/yyyy',
   'customerForm.note': 'Note (optional)',
   'customerForm.notePlaceholder': 'e.g. Buys rice weekly',
   'customerForm.add': 'Add customer',
@@ -230,6 +232,7 @@ export const en = {
   'customerForm.contactsNone': 'No contacts with names to add',
   'customerForm.contactsFailed': 'Could not open contacts',
   'customerForm.contactsUnsupportedTip': 'Tip: on Android Chrome you can pick from Contacts',
+  'customerForm.contactsUnsupported': 'Contact pick works in Chrome on Android',
 
   'entry.creditSale': 'Credit sale',
   'entry.payment': 'Payment',

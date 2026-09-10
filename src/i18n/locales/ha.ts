@@ -212,7 +212,9 @@ export const ha: Record<MessageKey, string> = {
   'customerForm.dueDate': 'Ranar biya (na zaɓi)',
   'customerForm.dueHint':
     'Yana nuna alamar Ya wuce lokaci a Gida idan ma\'auni > 0 kuma lokaci ya wuce',
-  'customerForm.dueDateFormat': 'Yi amfani da rana/wata/shekara (dd/mm)',
+  'customerForm.dueDateFormat': 'Rana / wata / shekara',
+  'customerForm.dueDatePlaceholder': 'dd/mm/yyyy',
+  'customerForm.dueDateInvalid': 'Shigar da ingantaccen rana kamar dd/mm/yyyy',
   'customerForm.note': 'Bayani (na zaɓi)',
   'customerForm.notePlaceholder': 'misali Yana sayen shinkafa kowane mako',
   'customerForm.add': 'Ƙara abokin ciniki',
@@ -232,6 +234,7 @@ export const ha: Record<MessageKey, string> = {
   'customerForm.contactsNone': 'Babu lambobin waya da suna da za a ƙara',
   'customerForm.contactsFailed': 'An kasa buɗe lambobin waya',
   'customerForm.contactsUnsupportedTip': 'Shawara: a Android Chrome za ka iya zaɓa daga Contacts',
+  'customerForm.contactsUnsupported': 'Zaɓen lambobin waya yana aiki a Chrome akan Android',
 
   'entry.creditSale': 'Sayarwa bashi',
   'entry.payment': 'Biya',

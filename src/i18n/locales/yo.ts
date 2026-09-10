@@ -212,7 +212,9 @@ export const yo: Record<MessageKey, string> = {
   'customerForm.dueDate': 'Ọjọ́ ìsanwó (àyànfẹ́)',
   'customerForm.dueHint':
     'Ó ń fi àmì Ti pẹ́ hàn ní Ilé nígbà tí ìwọ̀ntúnwọ̀nsì > 0 tí ọjọ́ sì ti kọjá',
-  'customerForm.dueDateFormat': 'Lo ọjọ́/osù/ọdún (dd/mm)',
+  'customerForm.dueDateFormat': 'Ọjọ́ / osù / ọdún',
+  'customerForm.dueDatePlaceholder': 'dd/mm/yyyy',
+  'customerForm.dueDateInvalid': 'Tẹ ọjọ́ tó tọ́ bíi dd/mm/yyyy',
   'customerForm.note': 'Àkọsílẹ̀ (àyànfẹ́)',
   'customerForm.notePlaceholder': 'àpẹẹrẹ Ó ń ra iresi lọ́sọ̀ọ̀sẹ̀',
   'customerForm.add': 'Fi oníbàárà kún un',
@@ -232,6 +234,7 @@ export const yo: Record<MessageKey, string> = {
   'customerForm.contactsNone': 'Kò sí olùbásọ̀rọ̀ tó ní orúkọ láti fi kún un',
   'customerForm.contactsFailed': 'A kò le ṣí àwọn olùbásọ̀rọ̀',
   'customerForm.contactsUnsupportedTip': 'Ìmọ̀ràn: lórí Android Chrome o lè yan láti Contacts',
+  'customerForm.contactsUnsupported': 'Yíyan olùbásọ̀rọ̀ ń ṣiṣẹ́ nínú Chrome lórí Android',
 
   'entry.creditSale': 'Tita gbèsè',
   'entry.payment': 'Ìsanwó',

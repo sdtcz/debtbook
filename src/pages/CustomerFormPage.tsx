@@ -16,19 +16,34 @@ interface Props {
   toast: (msg: string, opts?: { ms?: number; action?: ToastAction }) => void;
 }
 
-function toDateInput(ts?: number): string {
+/** Display dates as dd/mm/yyyy for Nigeria (browsers ignore locale on type=date). */
+function toDateDisplay(ts?: number): string {
   if (!ts) return '';
   const d = new Date(ts);
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const y = d.getFullYear();
+  return `${day}/${m}/${y}`;
 }
 
-function fromDateInput(v: string): number | null {
-  if (!v.trim()) return null;
-  const d = new Date(v + 'T12:00:00');
-  if (Number.isNaN(d.getTime())) return null;
+/** Parse dd/mm/yyyy. Returns null if empty, undefined if invalid. */
+function fromDateDisplay(v: string): number | null | undefined {
+  const trimmed = v.trim();
+  if (!trimmed) return null;
+  const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(trimmed);
+  if (!m) return undefined;
+  const day = Number(m[1]);
+  const month = Number(m[2]);
+  const year = Number(m[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return undefined;
+  const d = new Date(year, month - 1, day, 12, 0, 0);
+  if (
+    d.getFullYear() !== year ||
+    d.getMonth() !== month - 1 ||
+    d.getDate() !== day
+  ) {
+    return undefined;
+  }
   return d.getTime();
 }
 
@@ -60,7 +75,7 @@ export function CustomerFormPage({ id, toast }: Props) {
       setName(c.name);
       setPhone(c.phone || '');
       setNote(c.note || '');
-      setDueDate(toDateInput(c.dueAt));
+      setDueDate(toDateDisplay(c.dueAt));
     });
   }, [id]);
 
@@ -124,7 +139,11 @@ export function CustomerFormPage({ id, toast }: Props) {
   };
 
   const fromContacts = async () => {
-    if (!contactsSupported || busy) return;
+    if (busy) return;
+    if (!contactsSupported) {
+      toast(t('customerForm.contactsUnsupported'));
+      return;
+    }
     try {
       // Multiple only on new customer; edit refills a single pick into fields
       const picked = await pickContacts({ multiple: !editing });
@@ -145,10 +164,14 @@ export function CustomerFormPage({ id, toast }: Props) {
       setError(t('customerForm.nameRequired'));
       return;
     }
+    const dueAt = fromDateDisplay(dueDate);
+    if (dueAt === undefined) {
+      setError(t('customerForm.dueDateInvalid'));
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
-      const dueAt = fromDateInput(dueDate);
       const c = await upsertCustomer({
         id,
         name,
@@ -197,18 +220,16 @@ export function CustomerFormPage({ id, toast }: Props) {
       </header>
       <main class="main">
         <form class="card" onSubmit={submit}>
-          {contactsSupported && (
-            <div class="btn-row" style={{ marginTop: 0, marginBottom: 12 }}>
-              <button
-                class="btn btn-secondary"
-                type="button"
-                disabled={busy}
-                onClick={fromContacts}
-              >
-                {t('customerForm.fromContacts')}
-              </button>
-            </div>
-          )}
+          <div class="btn-row" style={{ marginTop: 0, marginBottom: 12 }}>
+            <button
+              class="btn btn-secondary"
+              type="button"
+              disabled={busy}
+              onClick={fromContacts}
+            >
+              {t('customerForm.fromContacts')}
+            </button>
+          </div>
           <div class="field">
             <label for="cname">{t('customerForm.name')}</label>
             <input
@@ -223,7 +244,7 @@ export function CustomerFormPage({ id, toast }: Props) {
           </div>
           <div class="field">
             <label for="cphone">{t('customerForm.phone')}</label>
-            <div class={contactsSupported ? 'input-with-action' : undefined}>
+            <div class="input-with-action">
               <input
                 id="cphone"
                 class="input"
@@ -233,17 +254,15 @@ export function CustomerFormPage({ id, toast }: Props) {
                 placeholder={t('customerForm.phonePlaceholder')}
                 onInput={(e) => setPhone((e.target as HTMLInputElement).value)}
               />
-              {contactsSupported && (
-                <button
-                  type="button"
-                  class="icon-btn input-action"
-                  aria-label={t('customerForm.fromContacts')}
-                  disabled={busy}
-                  onClick={fromContacts}
-                >
-                  📇
-                </button>
-              )}
+              <button
+                type="button"
+                class="icon-btn input-action"
+                aria-label={t('customerForm.fromContacts')}
+                disabled={busy}
+                onClick={fromContacts}
+              >
+                📇
+              </button>
             </div>
             <div class="hint">{t('customerForm.phoneHint')}</div>
           </div>
@@ -252,13 +271,15 @@ export function CustomerFormPage({ id, toast }: Props) {
             <input
               id="cdue"
               class="input"
-              type="date"
-              lang="en-NG"
+              type="text"
+              inputMode="numeric"
+              autocomplete="off"
+              placeholder={t('customerForm.dueDatePlaceholder')}
               value={dueDate}
               onInput={(e) => setDueDate((e.target as HTMLInputElement).value)}
             />
             <div class="hint">
-              {t('customerForm.dueHint')} · {t('customerForm.dueDateFormat')}
+              {t('customerForm.dueDateFormat')} · {t('customerForm.dueHint')}
             </div>
           </div>
           <div class="field">
