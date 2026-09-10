@@ -138,10 +138,9 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
           )}
 
           <button
-            class={`btn ${type === 'credit' ? 'btn-danger' : 'btn-primary'}`}
+            class={`btn ${type === 'credit' ? 'btn-danger' : 'btn-ok'}`}
             type="submit"
             disabled={busy}
-            style={type === 'payment' ? { background: 'var(--ok)' } : undefined}
           >
             {busy
               ? t('common.saving')

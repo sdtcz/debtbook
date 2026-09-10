@@ -223,19 +223,29 @@ export function CustomerFormPage({ id, toast }: Props) {
           </div>
           <div class="field">
             <label for="cphone">{t('customerForm.phone')}</label>
-            <input
-              id="cphone"
-              class="input"
-              type="tel"
-              inputMode="tel"
-              value={phone}
-              placeholder={t('customerForm.phonePlaceholder')}
-              onInput={(e) => setPhone((e.target as HTMLInputElement).value)}
-            />
+            <div class={contactsSupported ? 'input-with-action' : undefined}>
+              <input
+                id="cphone"
+                class="input"
+                type="tel"
+                inputMode="tel"
+                value={phone}
+                placeholder={t('customerForm.phonePlaceholder')}
+                onInput={(e) => setPhone((e.target as HTMLInputElement).value)}
+              />
+              {contactsSupported && (
+                <button
+                  type="button"
+                  class="icon-btn input-action"
+                  aria-label={t('customerForm.fromContacts')}
+                  disabled={busy}
+                  onClick={fromContacts}
+                >
+                  📇
+                </button>
+              )}
+            </div>
             <div class="hint">{t('customerForm.phoneHint')}</div>
-            {!editing && !contactsSupported && (
-              <div class="hint">{t('customerForm.contactsUnsupportedTip')}</div>
-            )}
           </div>
           <div class="field">
             <label for="cdue">{t('customerForm.dueDate')}</label>
@@ -243,10 +253,13 @@ export function CustomerFormPage({ id, toast }: Props) {
               id="cdue"
               class="input"
               type="date"
+              lang="en-NG"
               value={dueDate}
               onInput={(e) => setDueDate((e.target as HTMLInputElement).value)}
             />
-            <div class="hint">{t('customerForm.dueHint')}</div>
+            <div class="hint">
+              {t('customerForm.dueHint')} · {t('customerForm.dueDateFormat')}
+            </div>
           </div>
           <div class="field">
             <label for="cnote">{t('customerForm.note')}</label>

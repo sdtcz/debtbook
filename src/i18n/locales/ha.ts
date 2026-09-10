@@ -212,6 +212,7 @@ export const ha: Record<MessageKey, string> = {
   'customerForm.dueDate': 'Ranar biya (na zaɓi)',
   'customerForm.dueHint':
     'Yana nuna alamar Ya wuce lokaci a Gida idan ma\'auni > 0 kuma lokaci ya wuce',
+  'customerForm.dueDateFormat': 'Yi amfani da rana/wata/shekara (dd/mm)',
   'customerForm.note': 'Bayani (na zaɓi)',
   'customerForm.notePlaceholder': 'misali Yana sayen shinkafa kowane mako',
   'customerForm.add': 'Ƙara abokin ciniki',

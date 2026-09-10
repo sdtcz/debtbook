@@ -203,20 +203,16 @@ export function CustomerDetailPage({ id, toast }: Props) {
             {t('customer.creditSale')}
           </button>
           <button
-            class="btn btn-primary"
+            class="btn btn-ok"
             type="button"
-            style={{ background: 'var(--ok)' }}
             onClick={() => navigate(`/customers/${id}/entry/payment`)}
           >
             {t('customer.payment')}
           </button>
-        </div>
-
-        <div class="btn-row">
           <button class="btn btn-secondary" type="button" onClick={onRemind}>
             {t('customer.remind')}
           </button>
-          <button class="btn btn-ghost" type="button" onClick={onStatement}>
+          <button class="btn btn-outline" type="button" onClick={onStatement}>
             {t('customer.statement')}
           </button>
         </div>

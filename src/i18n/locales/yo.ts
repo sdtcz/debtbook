@@ -212,6 +212,7 @@ export const yo: Record<MessageKey, string> = {
   'customerForm.dueDate': 'Ọjọ́ ìsanwó (àyànfẹ́)',
   'customerForm.dueHint':
     'Ó ń fi àmì Ti pẹ́ hàn ní Ilé nígbà tí ìwọ̀ntúnwọ̀nsì > 0 tí ọjọ́ sì ti kọjá',
+  'customerForm.dueDateFormat': 'Lo ọjọ́/osù/ọdún (dd/mm)',
   'customerForm.note': 'Àkọsílẹ̀ (àyànfẹ́)',
   'customerForm.notePlaceholder': 'àpẹẹrẹ Ó ń ra iresi lọ́sọ̀ọ̀sẹ̀',
   'customerForm.add': 'Fi oníbàárà kún un',

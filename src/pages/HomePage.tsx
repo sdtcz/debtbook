@@ -135,6 +135,21 @@ export function HomePage({ locked }: Props) {
       </header>
 
       <main class={`main ${locked ? 'locked-blur' : ''}`}>
+        {loading ? (
+          <div class="home-skeleton" aria-busy="true" aria-live="polite">
+            <div class="card total skel-total">
+              <div class="skel-line" />
+              <div class="skel-amount" />
+            </div>
+            <div class="skel skel-search" />
+            <div class="skel skel-section" />
+            <div class="skel skel-row" />
+            <div class="skel skel-row" />
+            <div class="skel skel-row" />
+            <span class="sr-only">{t('common.loading')}</span>
+          </div>
+        ) : (
+          <>
         <div class="card total">
           <div class="label">{t('home.totalOutstanding')}</div>
           <div class="amount">{locked ? '••••••' : formatNaira(total)}</div>
@@ -204,9 +219,7 @@ export function HomePage({ locked }: Props) {
 
         <div class="section-title">{filterTitle}</div>
 
-        {loading ? (
-          <div class="empty">{t('common.loading')}</div>
-        ) : !hasCustomers ? (
+        {!hasCustomers ? (
           <div class="empty empty-first-run">
             <strong>{t('home.emptyFirstTitle')}</strong>
             <p class="empty-tip">{t('home.emptyFirstTip')}</p>
@@ -304,9 +317,11 @@ export function HomePage({ locked }: Props) {
             })}
           </div>
         )}
+          </>
+        )}
       </main>
 
-      {!locked && hasCustomers && (
+      {!locked && !loading && hasCustomers && (
         <button
           class="fab"
           type="button"

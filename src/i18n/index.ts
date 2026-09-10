@@ -43,6 +43,17 @@ function writeStored(locale: Locale): void {
   }
 }
 
+
+function applyDocumentLang(locale: Locale): void {
+  try {
+    // Prefer en-NG so native date inputs lean toward dd/mm for Nigeria
+    const lang = locale === 'en' ? 'en-NG' : locale === 'ha' ? 'ha-NG' : 'yo-NG';
+    document.documentElement.lang = lang;
+  } catch {
+    /* ignore SSR / non-DOM */
+  }
+}
+
 /** Call once at startup (and after shop load) to hydrate from storage / shop. */
 export function initLocale(shopLocale?: string | null): Locale {
   const fromShop = isLocale(shopLocale) ? shopLocale : null;
@@ -52,6 +63,7 @@ export function initLocale(shopLocale?: string | null): Locale {
   const changed = next !== current;
   current = next;
   if (!fromStorage) writeStored(current);
+  applyDocumentLang(current);
   if (changed) {
     for (const fn of listeners) {
       try {
@@ -90,6 +102,7 @@ export function setLocale(locale: Locale): void {
   const changed = locale !== current;
   current = locale;
   writeStored(locale);
+  applyDocumentLang(current);
   if (changed) {
     for (const fn of listeners) {
       try {

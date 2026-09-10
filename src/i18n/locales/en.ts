@@ -210,6 +210,7 @@ export const en = {
   'customerForm.dueDate': 'Due date (optional)',
   'customerForm.dueHint':
     'Shows an Overdue badge on Home when balance > 0 and past due',
+  'customerForm.dueDateFormat': 'Use day/month/year (dd/mm)',
   'customerForm.note': 'Note (optional)',
   'customerForm.notePlaceholder': 'e.g. Buys rice weekly',
   'customerForm.add': 'Add customer',
