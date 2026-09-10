@@ -62,6 +62,7 @@ export function LandingPage({ onUseAppHere }: Props) {
         <div class="landing-orb landing-orb-c" />
         <div class="landing-grid" />
         <div class="landing-noise" />
+        <div class="landing-naira-wm">₦</div>
       </div>
 
       <nav class="landing-nav">
@@ -107,7 +108,7 @@ export function LandingPage({ onUseAppHere }: Props) {
             </button>
           </div>
 
-          <ul class="landing-features">
+          <ul class="landing-features landing-features-bento">
             {FEATURES.map((f) => (
               <li key={f.title} class="landing-feature-card">
                 <span class="landing-feature-icon" aria-hidden="true">
@@ -155,6 +156,7 @@ export function LandingPage({ onUseAppHere }: Props) {
               allow="clipboard-write"
             />
           </div>
+          <div class="landing-phone-reflect" aria-hidden="true" />
           <p class="landing-stage-caption">Live preview · tap around inside the phone</p>
         </aside>
       </div>
