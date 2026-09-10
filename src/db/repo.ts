@@ -47,6 +47,8 @@ export async function updateShopFields(
       | 'lastCloudBackupAt'
       | 'cloudBackupId'
       | 'locale'
+      | 'chaseReminderEnabled'
+      | 'chaseReminderTime'
     >
   > & { clearPin?: boolean },
 ): Promise<ShopProfile> {
@@ -89,6 +91,15 @@ export async function setShopLocale(locale: 'en' | 'ha' | 'yo'): Promise<ShopPro
   const existing = await getShop();
   if (!existing) return undefined;
   return updateShopFields({ locale });
+}
+
+export async function setChaseReminderPrefs(prefs: {
+  chaseReminderEnabled?: boolean;
+  chaseReminderTime?: string;
+}): Promise<ShopProfile | undefined> {
+  const existing = await getShop();
+  if (!existing) return undefined;
+  return updateShopFields(prefs);
 }
 
 /* ── Customers ────────────────────────────────────────── */

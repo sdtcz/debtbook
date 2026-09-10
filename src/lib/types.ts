@@ -27,6 +27,10 @@ export interface ShopProfile {
   cloudBackupId?: string;
   /** UI language preference */
   locale?: 'en' | 'ha' | 'yo';
+  /** Daily overdue chase reminder on Home (default off) */
+  chaseReminderEnabled?: boolean;
+  /** Preferred local time HH:mm for chase copy / notification */
+  chaseReminderTime?: string;
 }
 
 export interface Customer {

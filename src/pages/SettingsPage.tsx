@@ -8,6 +8,7 @@ import {
   listCustomers,
   listEntriesForCustomer,
   saveShop,
+  setChaseReminderPrefs,
   setCloudBackupMeta,
   setPin,
   setShopLocale,
@@ -48,6 +49,13 @@ import {
 import { hashPin, isValidPin, randomSalt } from '../lib/pin';
 import { navigate } from '../lib/router';
 import type { ToastAction } from '../hooks/useToast';
+import {
+  notificationPermission,
+  normalizeChaseTime,
+  requestChaseNotificationPermission,
+  resolveChasePrefs,
+  writeChasePrefsToStorage,
+} from '../lib/chaseReminders';
 
 interface Props {
   toast: (msg: string, opts?: { ms?: number; action?: ToastAction }) => void;
@@ -76,6 +84,11 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   const [showCloudRestore, setShowCloudRestore] = useState(false);
   const [restoreCode, setRestoreCode] = useState('');
   const [cloudBusy, setCloudBusy] = useState(false);
+  const [chaseEnabled, setChaseEnabled] = useState(false);
+  const [chaseTime, setChaseTime] = useState('09:00');
+  const [notifPerm, setNotifPerm] = useState<
+    NotificationPermission | 'unsupported'
+  >(() => notificationPermission());
   const fileRef = useRef<HTMLInputElement>(null);
   const online = useOnline();
 
@@ -98,7 +111,15 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       );
       setCloudEnabled(Boolean(s.cloudBackupEnabled && s.cloudBackupId));
       setLastCloudAt(s.lastCloudBackupAt);
+      const chase = resolveChasePrefs(s);
+      setChaseEnabled(chase.enabled);
+      setChaseTime(chase.time);
+    } else {
+      const chase = resolveChasePrefs(null);
+      setChaseEnabled(chase.enabled);
+      setChaseTime(chase.time);
     }
+    setNotifPerm(notificationPermission());
     setPending(await countPendingOutbox());
   };
 
@@ -442,7 +463,49 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     return t(`feedback.topic.${id}` as MessageKey);
   };
 
-  const initial = name.trim().charAt(0).toUpperCase() || 'D';
+
+  const persistChase = async (next: { enabled?: boolean; time?: string }) => {
+    const enabled = next.enabled !== undefined ? next.enabled : chaseEnabled;
+    const time = normalizeChaseTime(next.time !== undefined ? next.time : chaseTime);
+    writeChasePrefsToStorage({ enabled, time });
+    setChaseEnabled(enabled);
+    setChaseTime(time);
+    try {
+      await setChaseReminderPrefs({
+        chaseReminderEnabled: enabled,
+        chaseReminderTime: time,
+      });
+      notifyChanged();
+    } catch {
+      /* shop may not exist — localStorage is enough */
+    }
+  };
+
+  const toggleChaseDaily = async () => {
+    const next = !chaseEnabled;
+    await persistChase({ enabled: next });
+    toast(next ? t('settings.chaseDaily') + ' — ' + t('common.on') : t('settings.chaseDaily') + ' — ' + t('common.off'));
+    if (next && notificationPermission() === 'default') {
+      const perm = await requestChaseNotificationPermission();
+      setNotifPerm(perm === 'unsupported' ? 'unsupported' : perm);
+    }
+  };
+
+  const onChaseTime = async (value: string) => {
+    const time = normalizeChaseTime(value);
+    setChaseTime(time);
+    await persistChase({ time });
+  };
+
+  const askNotify = async () => {
+    const perm = await requestChaseNotificationPermission();
+    setNotifPerm(perm === 'unsupported' ? 'unsupported' : perm);
+    if (perm === 'granted') toast(t('settings.chaseNotifyGranted'));
+    else if (perm === 'denied') toast(t('settings.chaseNotifyDenied'));
+    else if (perm === 'unsupported') toast(t('settings.chaseNotifyUnsupported'));
+  };
+
+    const initial = name.trim().charAt(0).toUpperCase() || 'D';
   const lastCloudLabel = lastCloudAt
     ? t('settings.cloudLast', {
         when: new Date(lastCloudAt).toLocaleString('en-NG'),
@@ -523,6 +586,57 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
               </button>
             );
           })}
+        </div>
+
+
+        <div class="settings-group-label">{t('settings.chaseReminders')}</div>
+        <div class="settings-group card settings-list">
+          <button
+            type="button"
+            class="settings-row"
+            onClick={toggleChaseDaily}
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              📣
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">{t('settings.chaseDaily')}</span>
+              <span class="settings-row-sub">{t('settings.chaseDailySub')}</span>
+            </span>
+            <span class="settings-row-trail">
+              <span class={chaseEnabled ? 'status-dot on' : 'status-dot'} />
+              {chaseEnabled ? t('common.on') : t('common.off')}
+            </span>
+          </button>
+          <div class="settings-row-panel chase-time-panel">
+            <div class="field" style={{ marginBottom: 8 }}>
+              <label for="chase-time">{t('settings.chaseTime')}</label>
+              <input
+                id="chase-time"
+                class="input"
+                type="time"
+                value={chaseTime}
+                onChange={(e) =>
+                  onChaseTime((e.target as HTMLInputElement).value)
+                }
+              />
+              <p class="muted" style={{ margin: '6px 0 0', fontSize: '0.8rem' }}>
+                {t('settings.chaseTimeHint')}
+              </p>
+            </div>
+            {chaseEnabled && notifPerm !== 'unsupported' && (
+              <button
+                type="button"
+                class="btn btn-secondary"
+                disabled={notifPerm === 'granted'}
+                onClick={askNotify}
+              >
+                {notifPerm === 'granted'
+                  ? t('settings.chaseNotifyGranted')
+                  : t('settings.chaseNotifyAsk')}
+              </button>
+            )}
+          </div>
         </div>
 
         <div class="settings-group-label">{t('settings.planExport')}</div>

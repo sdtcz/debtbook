@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
+import { ChaseAllSheet } from '../components/ChaseAllSheet';
 import { StatusBadge } from '../components/StatusBadge';
 import {
   creditLimitStatus,
@@ -12,14 +13,22 @@ import {
 } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
 import type { MessageKey } from '../i18n';
+import {
+  markPromptedToday,
+  resolveChasePrefs,
+  shouldShowDailyChasePrompt,
+  tryNotifyChaseOverdue,
+} from '../lib/chaseReminders';
 import { isPro } from '../lib/entitlement';
 import type { CustomerBalance, ShopProfile } from '../lib/types';
 import { balanceLabel, balanceTone, formatNaira } from '../lib/money';
 import { href, navigate } from '../lib/router';
 import { copyMorningDigest, shareMorningDigest } from '../lib/sms';
+import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
   locked?: boolean;
+  toast?: (msg: string, opts?: { ms?: number; action?: ToastAction }) => void;
 }
 
 type FilterChip = 'all' | 'overdue' | 'owes';
@@ -59,7 +68,7 @@ function rowStatusLine(
   return parts.length ? parts.join(' · ') : null;
 }
 
-export function HomePage({ locked }: Props) {
+export function HomePage({ locked, toast }: Props) {
   const { t } = useLocale();
   const [shop, setShop] = useState<ShopProfile | null>(null);
   const [rows, setRows] = useState<CustomerBalance[]>([]);
@@ -75,6 +84,16 @@ export function HomePage({ locked }: Props) {
     }
   });
   const [flash, setFlash] = useState<string | null>(null);
+  const [chasePrompt, setChasePrompt] = useState(false);
+  const [chaseSheetOpen, setChaseSheetOpen] = useState(false);
+
+  const notify = (msg: string) => {
+    if (toast) toast(msg);
+    else {
+      setFlash(msg);
+      window.setTimeout(() => setFlash(null), 2500);
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -106,6 +125,7 @@ export function HomePage({ locked }: Props) {
   );
 
   const digest = useMemo(() => getOverdueDigest(rows), [rows]);
+  const chasePrefs = useMemo(() => resolveChasePrefs(shop), [shop]);
 
   const filteredByChip = useMemo(() => {
     if (filter === 'overdue') {
@@ -121,6 +141,41 @@ export function HomePage({ locked }: Props) {
   const pro = isPro(shop);
   const hasCustomers = rows.length > 0;
   const filterActive = filter !== 'all' || Boolean(query.trim());
+
+  /** Daily chase prompt on open / focus */
+  useEffect(() => {
+    if (loading || locked) return;
+
+    const maybePrompt = () => {
+      if (document.visibilityState === 'hidden') return;
+      const prefs = resolveChasePrefs(shop);
+      const count = rows.filter((r) => isOverdue(r.customer, r.balanceKobo)).length;
+      if (
+        !shouldShowDailyChasePrompt({
+          enabled: prefs.enabled,
+          overdueCount: count,
+          locked,
+        })
+      ) {
+        return;
+      }
+      markPromptedToday();
+      setChasePrompt(true);
+      tryNotifyChaseOverdue(count);
+    };
+
+    maybePrompt();
+    const onVis = () => {
+      if (document.visibilityState === 'visible') maybePrompt();
+    };
+    const onFocus = () => maybePrompt();
+    document.addEventListener('visibilitychange', onVis);
+    window.addEventListener('focus', onFocus);
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [loading, locked, shop, rows]);
 
   const dismissProHint = () => {
     setProHintDismissed(true);
@@ -141,9 +196,14 @@ export function HomePage({ locked }: Props) {
     setQuery('');
   };
 
-  const showFlash = (msg: string) => {
-    setFlash(msg);
-    window.setTimeout(() => setFlash(null), 2500);
+  const openChaseSheet = () => {
+    setChasePrompt(false);
+    setChaseSheetOpen(true);
+  };
+
+  const dismissChasePrompt = () => {
+    setChasePrompt(false);
+    markPromptedToday();
   };
 
   const shareDigest = async () => {
@@ -155,10 +215,10 @@ export function HomePage({ locked }: Props) {
         balanceKobo: r.balanceKobo,
       })),
     });
-    if (result === 'whatsapp') showFlash(t('home.digestShared'));
-    else if (result === 'share') showFlash(t('home.digestShared'));
-    else if (result === 'clipboard') showFlash(t('home.digestCopied'));
-    else showFlash(t('home.digestShareFailed'));
+    if (result === 'whatsapp') notify(t('home.digestShared'));
+    else if (result === 'share') notify(t('home.digestShared'));
+    else if (result === 'clipboard') notify(t('home.digestCopied'));
+    else notify(t('home.digestShareFailed'));
   };
 
   const copyDigest = async () => {
@@ -170,7 +230,7 @@ export function HomePage({ locked }: Props) {
         balanceKobo: r.balanceKobo,
       })),
     });
-    showFlash(ok ? t('home.digestCopied') : t('home.digestShareFailed'));
+    notify(ok ? t('home.digestCopied') : t('home.digestShareFailed'));
   };
 
   const filterTitle = (() => {
@@ -237,8 +297,38 @@ export function HomePage({ locked }: Props) {
           )}
         </div>
 
+        {!locked && chasePrompt && digest.count > 0 && (
+          <div class="card chase-prompt" role="status">
+            <div class="chase-prompt-text">
+              <div class="chase-prompt-title">{t('home.chasePromptTitle')}</div>
+              <div class="chase-prompt-body">
+                {t('home.chasePromptBody', {
+                  n: digest.count,
+                  time: chasePrefs.time,
+                })}
+              </div>
+            </div>
+            <div class="chase-prompt-actions">
+              <button
+                type="button"
+                class="btn btn-primary"
+                onClick={openChaseSheet}
+              >
+                {t('home.chasePromptGo')}
+              </button>
+              <button
+                type="button"
+                class="btn btn-ghost"
+                onClick={dismissChasePrompt}
+              >
+                {t('home.chasePromptDismiss')}
+              </button>
+            </div>
+          </div>
+        )}
+
         {!locked && digest.count > 0 && (
-          <div class="card digest-card">
+          <div class={`card digest-card${chasePrompt ? ' digest-card-emphasize' : ''}`}>
             <button
               type="button"
               class="digest-main"
@@ -261,6 +351,13 @@ export function HomePage({ locked }: Props) {
               <div class="digest-open">{t('home.digestOpen')} →</div>
             </button>
             <div class="digest-actions">
+              <button
+                type="button"
+                class="btn btn-primary digest-btn"
+                onClick={openChaseSheet}
+              >
+                {t('home.chaseAll')}
+              </button>
               <button
                 type="button"
                 class="btn btn-secondary digest-btn"
@@ -340,6 +437,18 @@ export function HomePage({ locked }: Props) {
             >
               {t('home.filterOwes')}
               {owesCount ? ` (${owesCount})` : ''}
+            </button>
+          </div>
+        )}
+
+        {!locked && filter === 'overdue' && overdueCount > 0 && (
+          <div class="chase-filter-bar">
+            <button
+              type="button"
+              class="btn btn-primary"
+              onClick={openChaseSheet}
+            >
+              {t('home.chaseAll')}
             </button>
           </div>
         )}
@@ -469,6 +578,15 @@ export function HomePage({ locked }: Props) {
         >
           + <span class="label">{t('home.fabCustomer')}</span>
         </button>
+      )}
+
+      {chaseSheetOpen && shop && (
+        <ChaseAllSheet
+          shopName={shop.name}
+          overdue={digest.all}
+          onClose={() => setChaseSheetOpen(false)}
+          onToast={notify}
+        />
       )}
     </div>
   );

@@ -173,7 +173,7 @@ export function App() {
       page = <ProPage toast={toast} />;
       break;
     default:
-      page = <HomePage locked={locked} />;
+      page = <HomePage locked={locked} toast={toast} />;
   }
 
   return (
