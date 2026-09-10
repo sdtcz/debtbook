@@ -1,7 +1,7 @@
 declare const process: { env: Record<string, string | undefined> };
 
 /**
- * DebtBook Pro webhook stub (Vercel serverless).
+ * BashiBook Pro webhook stub (Vercel serverless).
  *
  * Paystack: verify x-paystack-signature with PAYSTACK_SECRET_KEY
  * Stripe: verify Stripe-Signature with STRIPE_WEBHOOK_SECRET

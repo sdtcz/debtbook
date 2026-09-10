@@ -27,7 +27,7 @@ export interface DebtBookDB extends DBSchema {
   };
 }
 
-const DB_NAME = 'debtbook';
+const DB_NAME = 'debtbook'; // KEEP: IndexedDB name — renaming would wipe existing user data
 /** v2: Customer.dueAt + ShopProfile pin/entitlement fields (no new stores) */
 const DB_VERSION = 2;
 

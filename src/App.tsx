@@ -63,7 +63,7 @@ export function App() {
   if (!ready) {
     return (
       <div class="setup-screen">
-        <h1>DebtBook</h1>
+        <h1>BashiBook</h1>
         <p>{t('common.loading')}</p>
       </div>
     );

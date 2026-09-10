@@ -1,7 +1,7 @@
 declare const process: { env: Record<string, string | undefined> };
 
 /**
- * DebtBook Pro checkout stub (Vercel serverless).
+ * BashiBook Pro checkout stub (Vercel serverless).
  *
  * Preferred for Nigeria (NGN): Paystack — https://paystack.com
  * Optional: Stripe Checkout.

@@ -1,4 +1,4 @@
-# DebtBook
+# BashiBook
 
 Offline-first **customer credit ledger** (book debt / udhar) for African shopkeepers.  
 **Nigeria · English · ₦ Naira** · Vite + Preact + IndexedDB + PWA.
@@ -31,7 +31,7 @@ npm test
 
 **Pricing:** ₦1,500/mo or ₦12,000/yr.
 
-**Try Pro tonight:** Settings → **DebtBook Pro** → **Activate Pro (demo)** — sets `plan=pro` for 30 days locally (no Paystack/Stripe keys needed).
+**Try Pro tonight:** Settings → **BashiBook Pro** → **Activate Pro (demo)** — sets `plan=pro` for 30 days locally (no Paystack/Stripe keys needed).
 
 **Cloud backup (Pro):** `api/cloud-backup.ts` stores encrypted blobs via [Vercel Blob](https://vercel.com/docs/storage/vercel-blob). Create a Blob store in the Vercel project and set `BLOB_READ_WRITE_TOKEN`. Without it the API returns 501. Recovery code never leaves the device as plaintext; server only sees opaque `backupId` + ciphertext.\n\n**Real payments (stub):** `api/checkout.ts` + `api/webhook.ts` document Paystack (preferred for NGN) and Stripe. They return 501 until `PAYSTACK_SECRET_KEY` / `STRIPE_SECRET_KEY` are set on Vercel — and still need a short wiring pass after that.
 

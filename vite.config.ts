@@ -9,8 +9,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
-        name: 'DebtBook',
-        short_name: 'DebtBook',
+        name: 'BashiBook',
+        short_name: 'BashiBook',
         description: 'Offline customer credit ledger for African shopkeepers',
         theme_color: '#0f766e',
         background_color: '#f8fafc',

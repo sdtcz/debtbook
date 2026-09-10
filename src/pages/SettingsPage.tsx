@@ -175,7 +175,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   const doExport = async () => {
     const data = await exportBackup();
     const stamp = new Date().toISOString().slice(0, 10);
-    downloadJson(`debtbook-backup-${stamp}.json`, data);
+    downloadJson(`bashibook-backup-${stamp}.json`, data);
     toast(t('settings.backupDownloaded'));
   };
 
@@ -217,7 +217,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     }
     const csv = buildCsvExport(dash.customers, map);
     const stamp = new Date().toISOString().slice(0, 10);
-    downloadCsv(`debtbook-export-${stamp}.csv`, csv);
+    downloadCsv(`bashibook-export-${stamp}.csv`, csv);
     toast(t('settings.csvDownloaded'));
   };
 
@@ -416,7 +416,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       shopName: name.trim() || undefined,
       plan: entLabel,
       customerCount,
-      appVersion: 'DebtBook',
+      appVersion: 'BashiBook',
     });
   };
 
@@ -935,6 +935,12 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           {t('settings.aboutLine1', { lang: localeNativeName(locale) })}
           <br />
           {t('settings.aboutLine2')}
+          {t('settings.aboutTip') ? (
+            <>
+              <br />
+              {t('settings.aboutTip')}
+            </>
+          ) : null}
         </p>
       </main>
     </div>

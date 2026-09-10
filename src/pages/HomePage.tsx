@@ -18,7 +18,7 @@ interface Props {
 
 type FilterChip = 'all' | 'overdue' | 'owes';
 
-const PRO_HINT_KEY = 'debtbook:pro-hint-dismissed';
+const PRO_HINT_KEY = 'debtbook:pro-hint-dismissed'; // KEEP: avoid re-showing dismissed Pro hint
 
 export function HomePage({ locked }: Props) {
   const { t } = useLocale();
@@ -118,7 +118,7 @@ export function HomePage({ locked }: Props) {
       <header class="topbar">
         <div style={{ flex: 1 }}>
           <h1>
-            DebtBook{' '}
+            BashiBook{' '}
             {pro && <span class="pro-badge">{t('common.pro')}</span>}
           </h1>
           <div class="sub">{shop?.name || t('home.myShop')}</div>

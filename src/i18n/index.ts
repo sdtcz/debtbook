@@ -5,7 +5,7 @@ import { yo } from './locales/yo';
 export type Locale = 'en' | 'ha' | 'yo';
 export type { MessageKey };
 
-const STORAGE_KEY = 'debtbook-locale';
+const STORAGE_KEY = 'debtbook-locale'; // KEEP: avoid resetting user locale preference
 
 const catalogs: Record<Locale, Record<MessageKey, string>> = {
   en: en as Record<MessageKey, string>,

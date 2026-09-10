@@ -10,7 +10,7 @@ export const FEEDBACK_TOPICS = [
 
 export type FeedbackTopicId = (typeof FEEDBACK_TOPICS)[number]['id'];
 
-export const FEEDBACK_SENT_KEY = 'debtbook-feedback-sent';
+export const FEEDBACK_SENT_KEY = 'debtbook-feedback-sent'; // KEEP: avoid resetting feedback-sent flag
 
 export function labelForTopic(id: FeedbackTopicId): string {
   return FEEDBACK_TOPICS.find((t) => t.id === id)?.label ?? id;
@@ -29,7 +29,7 @@ export function buildFeedbackMessage(opts: {
       ? opts.topicIds.map(labelForTopic).join(', ')
       : '(none selected)';
   const lines: string[] = [
-    'DebtBook feedback',
+    'BashiBook feedback',
     `Topics: ${topics}`,
   ];
   const note = opts.note?.trim();
@@ -44,7 +44,7 @@ export function buildFeedbackMessage(opts: {
   ) {
     lines.push(`Customers: ~${Math.round(opts.customerCount)}`);
   }
-  lines.push(`App: ${opts.appVersion || 'DebtBook'}`);
+  lines.push(`App: ${opts.appVersion || 'BashiBook'}`);
   return lines.join('\n');
 }
 

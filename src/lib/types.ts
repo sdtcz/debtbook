@@ -1,4 +1,4 @@
-/** Core domain types for DebtBook */
+/** Core domain types for BashiBook */
 
 export type Plan = 'free' | 'pro';
 

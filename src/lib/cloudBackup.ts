@@ -89,7 +89,7 @@ export function isValidRecoveryCode(code: string): boolean {
   return true;
 }
 
-/** Public opaque id — SHA-256 hex of `debtbook-backup-id:` + normalized code. */
+/** Public opaque id — SHA-256 hex of `debtbook-backup-id:` + normalized code. KEEP salt prefix for existing backups. */
 export async function deriveBackupId(recoveryCode: string): Promise<string> {
   const normalized = normalizeRecoveryCode(recoveryCode);
   const data = new TextEncoder().encode(`debtbook-backup-id:${normalized}`);

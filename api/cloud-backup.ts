@@ -27,7 +27,7 @@ type Res = {
   json: (body: unknown) => void;
 };
 
-const PATH_PREFIX = 'debtbook-backups';
+const PATH_PREFIX = 'debtbook-backups'; // KEEP: blob path prefix for existing cloud backups
 
 function queryId(req: Req): string | undefined {
   const raw = req.query?.id;

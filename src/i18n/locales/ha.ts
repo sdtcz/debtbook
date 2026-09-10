@@ -41,7 +41,7 @@ export const ha: Record<MessageKey, string> = {
   'home.sectionOwes': 'Ya baka bashi',
   'home.emptyFirstTitle': 'Ƙara abokin ciniki na farko',
   'home.emptyFirstTip':
-    'DebtBook na abokan ciniki na bashi / udhar ne — waɗanda suke saya yanzu su biya daga baya.',
+    'BashiBook na abokan ciniki na bashi / udhar ne — waɗanda suke saya yanzu su biya daga baya.',
   'home.addFirstCustomer': 'Ƙara abokin ciniki na farko',
   'home.noMatches': 'Babu da ya dace',
   'home.tryAnother': 'Gwada wani suna ko waya.',
@@ -74,7 +74,7 @@ export const ha: Record<MessageKey, string> = {
   'settings.shopUpdated': 'An sabunta shago',
   'settings.shopNameRequired': 'Ana buƙatar sunan shago',
   'settings.planExport': 'Shiri & fitarwa',
-  'settings.proTitle': 'DebtBook Pro',
+  'settings.proTitle': 'BashiBook Pro',
   'settings.proSubPro': 'Sarrafa shiri · CSV & gajimare a buɗe',
   'settings.proSubFree': 'CSV · ajiyar gajimare · ɓoye nasihancin haɓaka',
   'settings.exportCsv': 'Fitar da CSV',
@@ -124,8 +124,9 @@ export const ha: Record<MessageKey, string> = {
   'settings.syncAdvancedHelp':
     'Bayanai suna kan wannan na’ura. Outbox yana shirye don daidaitawar gajimare — Flush yana alama kawai cewa an daidaita.',
   'settings.flushOutbox': 'Flush outbox (stub)',
-  'settings.aboutLine1': 'DebtBook · Najeriya · {{lang}} · ₦',
+  'settings.aboutLine1': 'BashiBook · Najeriya · {{lang}} · ₦',
   'settings.aboutLine2': 'Littafin bashi na offline ga masu shago (udhar)',
+  'settings.aboutTip': '',
   'settings.language': 'Harshe',
   'settings.languageChanged': 'An saita harshe zuwa {{lang}}',
   'settings.langEnglish': 'English',
@@ -249,12 +250,12 @@ export const ha: Record<MessageKey, string> = {
   'money.hint': 'Naira (₦) — shawara: rubuta 3k don ₦3,000',
   'money.quickAmounts': 'Adadi na sauri',
 
-  'pin.unlock': 'Buɗe DebtBook',
+  'pin.unlock': 'Buɗe BashiBook',
   'pin.enter': 'Shigar da PIN ɗinka ta lambobi 4',
   'pin.wrong': 'PIN ba daidai ba',
   'pin.backspace': 'Share',
 
-  'pro.title': 'DebtBook Pro',
+  'pro.title': 'BashiBook Pro',
   'pro.nigeriaPricing': 'Farashin Najeriya',
   'pro.perMonth': '₦1,500/wata',
   'pro.orYear': 'ko ₦12,000/shekara · Paystack idan checkout ya shirya',
@@ -305,7 +306,7 @@ export const ha: Record<MessageKey, string> = {
   'statement.balanceOwed': 'BASHI DA YA RAGE: {{amount}}',
   'statement.shopOwes': 'SHAGO YANA BIN ABOKIN CINIKI: {{amount}}',
   'statement.balanceSettled': 'MA\'AUNI: An biya (₦0.00)',
-  'statement.generated': 'An ƙirƙira ta DebtBook (offline)',
+  'statement.generated': 'An ƙirƙira ta BashiBook (offline)',
   'statement.shareTitle': 'Bayanin {{name}}',
 
   'locale.name.en': 'English',

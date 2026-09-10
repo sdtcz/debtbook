@@ -41,7 +41,7 @@ export const yo: Record<MessageKey, string> = {
   'home.sectionOwes': 'Jẹ́ ọ́',
   'home.emptyFirstTitle': 'Fi oníbàárà àkọ́kọ́ kún un',
   'home.emptyFirstTip':
-    'DebtBook wà fún àwọn oníbàárà gbèsè / udhar — àwọn tó ń ra nísinsìnyí tí wọ́n yóò san nígbà mìíràn.',
+    'BashiBook wà fún àwọn oníbàárà gbèsè / udhar — àwọn tó ń ra nísinsìnyí tí wọ́n yóò san nígbà mìíràn.',
   'home.addFirstCustomer': 'Fi oníbàárà àkọ́kọ́ kún un',
   'home.noMatches': 'Kò sí èyí tó bá a mu',
   'home.tryAnother': 'Gbìyànjú orúkọ tàbí ẹ̀rọ mìíràn.',
@@ -74,7 +74,7 @@ export const yo: Record<MessageKey, string> = {
   'settings.shopUpdated': 'A ti ṣe àtúnṣe ilé ìtajà',
   'settings.shopNameRequired': 'A nílò orúkọ ilé ìtajà',
   'settings.planExport': 'Ètò & fífàjáde',
-  'settings.proTitle': 'DebtBook Pro',
+  'settings.proTitle': 'BashiBook Pro',
   'settings.proSubPro': 'Ṣàkóso ètò · CSV & àwọsánmà ṣí',
   'settings.proSubFree': 'CSV · àfípadà àwọsánmà · fi ìránlọ́wọ́ gbéga pamọ́',
   'settings.exportCsv': 'Fà CSV jáde',
@@ -124,8 +124,9 @@ export const yo: Record<MessageKey, string> = {
   'settings.syncAdvancedHelp':
     'Dátà wà lórí ẹ̀rọ yìí. Outbox ti ṣetán fún ìṣọ̀kan àwọsánmà — Flush kàn ṣàmì pé a ti ṣọ̀kan stub.',
   'settings.flushOutbox': 'Flush outbox (stub)',
-  'settings.aboutLine1': 'DebtBook · Nàìjíríà · {{lang}} · ₦',
+  'settings.aboutLine1': 'BashiBook · Nàìjíríà · {{lang}} · ₦',
   'settings.aboutLine2': 'Ìwé gbèsè offline fún oníṣòwò (udhar)',
+  'settings.aboutTip': '',
   'settings.language': 'Èdè',
   'settings.languageChanged': 'A ti yí èdè sí {{lang}}',
   'settings.langEnglish': 'English',
@@ -249,12 +250,12 @@ export const yo: Record<MessageKey, string> = {
   'money.hint': 'Náírà (₦) — ìmọ̀ràn: tẹ 3k fún ₦3,000',
   'money.quickAmounts': 'Iye kíákíá',
 
-  'pin.unlock': 'Ṣí DebtBook',
+  'pin.unlock': 'Ṣí BashiBook',
   'pin.enter': 'Tẹ PIN mẹ́rin rẹ',
   'pin.wrong': 'PIN kò tọ́',
   'pin.backspace': 'Pa',
 
-  'pro.title': 'DebtBook Pro',
+  'pro.title': 'BashiBook Pro',
   'pro.nigeriaPricing': 'Iye owó Nàìjíríà',
   'pro.perMonth': '₦1,500/oṣù',
   'pro.orYear': 'tàbí ₦12,000/ọdún · Paystack nígbà tí checkout bá ṣetán',
@@ -305,7 +306,7 @@ export const yo: Record<MessageKey, string> = {
   'statement.balanceOwed': 'GBÈSÈ TÓ KÙ: {{amount}}',
   'statement.shopOwes': 'ILÉ ÌTAJÀ JẸ́ ONÍBÀÁRÀ: {{amount}}',
   'statement.balanceSettled': 'ÌWỌ̀NTÚNWỌ̀NSÌ: Ti san (₦0.00)',
-  'statement.generated': 'DebtBook ṣẹ̀dá (offline)',
+  'statement.generated': 'BashiBook ṣẹ̀dá (offline)',
   'statement.shareTitle': 'Àkọọ́lẹ̀ {{name}}',
 
   'locale.name.en': 'English',

@@ -37,7 +37,7 @@ export function SetupPage({ onDone }: Props) {
 
   return (
     <div class="setup-screen">
-      <h1>DebtBook</h1>
+      <h1>BashiBook</h1>
       <p>{t('setup.tagline')}</p>
       <form onSubmit={submit}>
         <div class="field">
