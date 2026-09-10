@@ -1,8 +1,14 @@
 import { useEffect, useState } from 'preact/hooks';
 import { notifyChanged } from '../components/StatusBadge';
-import { getCustomer, softDeleteCustomer, upsertCustomer } from '../db/repo';
+import { getCustomer, listCustomers, softDeleteCustomer, upsertCustomer } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
+import {
+  isContactPickerSupported,
+  pickContacts,
+  type PickedContact,
+} from '../lib/contacts';
 import { navigate } from '../lib/router';
+import { normalizeNgWhatsAppDigits } from '../lib/sms';
 import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
@@ -26,6 +32,12 @@ function fromDateInput(v: string): number | null {
   return d.getTime();
 }
 
+/** Dedupe key only — storage keeps raw phone as today. */
+function phoneDedupeKey(raw: string | undefined): string | null {
+  if (!raw?.trim()) return null;
+  return normalizeNgWhatsAppDigits(raw) || raw.replace(/\D/g, '') || null;
+}
+
 export function CustomerFormPage({ id, toast }: Props) {
   const { t } = useLocale();
   const editing = Boolean(id);
@@ -35,6 +47,7 @@ export function CustomerFormPage({ id, toast }: Props) {
   const [dueDate, setDueDate] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [contactsSupported] = useState(() => isContactPickerSupported());
 
   useEffect(() => {
     if (!id) return;
@@ -50,6 +63,81 @@ export function CustomerFormPage({ id, toast }: Props) {
       setDueDate(toDateInput(c.dueAt));
     });
   }, [id]);
+
+  const applySingleContact = (c: PickedContact) => {
+    if (c.name) setName(c.name.slice(0, 80));
+    if (c.phone) setPhone(c.phone);
+  };
+
+  const addManyFromContacts = async (picked: PickedContact[]) => {
+    const withNames = picked.filter((c) => c.name.trim());
+    if (withNames.length === 0) {
+      toast(t('customerForm.contactsNone'));
+      return;
+    }
+    if (
+      !confirm(t('customerForm.contactsConfirm', { n: withNames.length }))
+    ) {
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const existing = await listCustomers();
+      const knownPhones = new Set<string>();
+      for (const c of existing) {
+        const key = phoneDedupeKey(c.phone);
+        if (key) knownPhones.add(key);
+      }
+      let added = 0;
+      let skipped = 0;
+      for (const c of withNames) {
+        const rawPhone = c.phone.trim() || undefined;
+        const key = phoneDedupeKey(rawPhone);
+        if (key && knownPhones.has(key)) {
+          skipped += 1;
+          continue;
+        }
+        await upsertCustomer({
+          name: c.name.slice(0, 80),
+          phone: rawPhone,
+        });
+        if (key) knownPhones.add(key);
+        added += 1;
+      }
+      notifyChanged();
+      if (added === 0) {
+        toast(t('customerForm.contactsAllDupes'));
+      } else if (skipped > 0) {
+        toast(t('customerForm.contactsAddedSome', { n: added, skipped }));
+      } else {
+        toast(t('customerForm.contactsAdded', { n: added }));
+      }
+      navigate('/');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : t('customerForm.saveFailed'),
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const fromContacts = async () => {
+    if (!contactsSupported || busy) return;
+    try {
+      // Multiple only on new customer; edit refills a single pick into fields
+      const picked = await pickContacts({ multiple: !editing });
+      if (picked.length === 0) return; // cancel / empty — silent
+      if (editing || picked.length === 1) {
+        applySingleContact(picked[0]);
+        return;
+      }
+      await addManyFromContacts(picked);
+    } catch {
+      toast(t('customerForm.contactsFailed'));
+    }
+  };
 
   const submit = async (e: Event) => {
     e.preventDefault();
@@ -109,6 +197,18 @@ export function CustomerFormPage({ id, toast }: Props) {
       </header>
       <main class="main">
         <form class="card" onSubmit={submit}>
+          {contactsSupported && (
+            <div class="btn-row" style={{ marginTop: 0, marginBottom: 12 }}>
+              <button
+                class="btn btn-secondary"
+                type="button"
+                disabled={busy}
+                onClick={fromContacts}
+              >
+                {t('customerForm.fromContacts')}
+              </button>
+            </div>
+          )}
           <div class="field">
             <label for="cname">{t('customerForm.name')}</label>
             <input
@@ -133,6 +233,9 @@ export function CustomerFormPage({ id, toast }: Props) {
               onInput={(e) => setPhone((e.target as HTMLInputElement).value)}
             />
             <div class="hint">{t('customerForm.phoneHint')}</div>
+            {!editing && !contactsSupported && (
+              <div class="hint">{t('customerForm.contactsUnsupportedTip')}</div>
+            )}
           </div>
           <div class="field">
             <label for="cdue">{t('customerForm.dueDate')}</label>
