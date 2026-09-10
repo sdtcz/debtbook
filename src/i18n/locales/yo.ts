@@ -163,6 +163,9 @@ export const yo: Record<MessageKey, string> = {
   'settings.languageChanged': 'A ti yí èdè sí {{lang}}',
 
   'settings.payMe': 'San mi',
+  'settings.payMeSubSetup': 'Ṣètò',
+  'settings.payMeSubConfigured': 'Ti ṣètò',
+  'payDetails.title': 'San mi',
   'settings.payMeHelp':
     'Àwọn oníbàárà máa rí àwọn wọ̀nyí nígbà tí o bá fi ọ̀nà San-mi ránṣẹ́',
   'settings.payBankName': 'Bánkì / wallet',
@@ -239,8 +242,8 @@ export const yo: Record<MessageKey, string> = {
   'customer.creditSale': '+ Tita gbèsè',
   'customer.payment': '− Ìsanwó',
   'customer.payMe': 'Ọ̀nà San-mi',
-  'customer.payMeNeedSetup': 'Kọ́kọ́ fi bánkì tàbí ọ̀nà ìsanwó kún Settings',
-  'customer.payMeGoSettings': 'Settings',
+  'customer.payMeNeedSetup': 'Kọ́kọ́ fi bánkì tàbí ọ̀nà ìsanwó kún',
+  'customer.payMeGoSettings': 'San mi',
 
   'customer.remind': 'Rán létí',
   'customer.statement': 'Àkọọ́lẹ̀',

@@ -165,6 +165,9 @@ export const ha: Record<MessageKey, string> = {
   'settings.payMe': 'Biya ni',
   'settings.payMeHelp':
     'Abokan ciniki suna samun waɗannan lokacin da ka aika hanyar Biya-ni',
+  'settings.payMeSubSetup': 'Saita',
+  'settings.payMeSubConfigured': 'An saita',
+  'payDetails.title': 'Biya ni',
   'settings.payBankName': 'Banki / wallet',
   'settings.payBankPlaceholder': 'misali Opay, GTBank, Palmpay',
   'settings.payAccountNumber': 'Lambar asusu',
@@ -239,8 +242,8 @@ export const ha: Record<MessageKey, string> = {
   'customer.creditSale': '+ Sayarwa bashi',
   'customer.payment': '− Biya',
   'customer.payMe': 'Hanyar Biya-ni',
-  'customer.payMeNeedSetup': 'Da farko ƙara banki ko hanyar biya a Saiti',
-  'customer.payMeGoSettings': 'Saiti',
+  'customer.payMeNeedSetup': 'Da farko ƙara banki ko hanyar biya',
+  'customer.payMeGoSettings': 'Biya ni',
 
   'customer.remind': 'Tunatar',
   'customer.statement': 'Bayani',

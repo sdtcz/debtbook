@@ -19,6 +19,7 @@ export type Route =
   | { name: 'entry-new'; id: string; type?: 'credit' | 'payment' }
   | { name: 'settings' }
   | { name: 'pro' }
+  | { name: 'pay-details' }
   | PayMeRoute;
 
 function parsePayMeFromQuery(queryPart: string | undefined): PayMeRoute {
@@ -53,6 +54,7 @@ export function parseHash(): Route {
 
   if (parts[0] === 'payme') return parsePayMeFromQuery(queryPart);
   if (parts[0] === 'setup') return { name: 'setup' };
+  if (parts[0] === 'pay-details') return { name: 'pay-details' };
   if (parts[0] === 'settings' && parts[1] === 'pro') return { name: 'pro' };
   if (parts[0] === 'settings') return { name: 'settings' };
   if (parts[0] === 'pro') return { name: 'pro' };

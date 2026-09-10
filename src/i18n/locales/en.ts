@@ -163,6 +163,9 @@ export const en = {
   'settings.payMe': 'Pay me',
   'settings.payMeHelp':
     'Customers get these when you send a Pay-me link',
+  'settings.payMeSubSetup': 'Set up',
+  'settings.payMeSubConfigured': 'Configured',
+  'payDetails.title': 'Pay me',
   'settings.payBankName': 'Bank / wallet',
   'settings.payBankPlaceholder': 'e.g. Opay, GTBank, Palmpay',
   'settings.payAccountNumber': 'Account number',
@@ -237,8 +240,8 @@ export const en = {
   'customer.creditSale': '+ Credit sale',
   'customer.payment': '− Payment',
   'customer.payMe': 'Pay-me link',
-  'customer.payMeNeedSetup': 'Add your bank or payment link in Settings first',
-  'customer.payMeGoSettings': 'Settings',
+  'customer.payMeNeedSetup': 'Add your bank or payment link first',
+  'customer.payMeGoSettings': 'Pay me',
 
   'customer.remind': 'Remind',
   'customer.statement': 'Statement',

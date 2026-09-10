@@ -17,6 +17,7 @@ import { CustomerFormPage } from './pages/CustomerFormPage';
 import { EntryFormPage } from './pages/EntryFormPage';
 import { HomePage } from './pages/HomePage';
 import { LandingPage } from './pages/LandingPage';
+import { PayDetailsPage } from './pages/PayDetailsPage';
 import { PayMePage } from './pages/PayMePage';
 import { ProPage } from './pages/ProPage';
 import { SettingsPage } from './pages/SettingsPage';
@@ -191,6 +192,9 @@ export function App() {
       break;
     case 'pro':
       page = <ProPage toast={toast} />;
+      break;
+    case 'pay-details':
+      page = <PayDetailsPage toast={toast} />;
       break;
     default:
       page = <HomePage locked={locked} toast={toast} />;

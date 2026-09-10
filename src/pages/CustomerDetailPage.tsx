@@ -107,7 +107,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
         ms: 5000,
         action: {
           label: t('customer.payMeGoSettings'),
-          onClick: () => navigate('/settings'),
+          onClick: () => navigate('/pay-details'),
         },
       });
       return;
