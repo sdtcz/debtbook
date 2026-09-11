@@ -59,6 +59,16 @@ export function clearForceApp(): void {
   }
 }
 
+
+/** True when this document is inside an iframe (landing phone preview). */
+export function isEmbeddedFrame(): boolean {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+}
+
 /** Same-origin URL that always loads the real app (for iframe + deep links). */
 export function appEmbedUrl(): string {
   const u = new URL(window.location.href);

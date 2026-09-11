@@ -1818,6 +1818,88 @@ button:active:not(:disabled),
   color: #64748b;
 }
 
+
+/* ── Desktop app phone stage (wide ?app=1 / Open app home) ─ */
+.desktop-app-stage {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 16px 36px;
+  overflow: hidden;
+  background: #020617;
+}
+
+.desktop-app-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.desktop-app-meta {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 12px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5eead4;
+}
+
+.desktop-app-phone {
+  position: relative;
+  z-index: 2;
+  width: min(390px, 100%);
+  height: min(780px, calc(100dvh - 140px));
+  border-radius: 40px;
+  padding: 12px;
+  background: linear-gradient(160deg, #1e293b 0%, #0f172a 55%, #020617 100%);
+  box-shadow:
+    0 0 0 1px rgba(45, 212, 191, 0.28),
+    0 0 0 8px rgba(15, 23, 42, 0.55),
+    0 32px 90px rgba(2, 6, 23, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.desktop-app-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 28px;
+  overflow: auto;
+  background: var(--bg);
+  -webkit-overflow-scrolling: touch;
+}
+
+.desktop-app-screen .app-shell,
+.desktop-app-screen .setup-screen {
+  max-width: none;
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+.desktop-app-caption {
+  position: relative;
+  z-index: 2;
+  margin-top: 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.desktop-app-stage .showcase-back-btn {
+  position: absolute;
+}
+
+
 /* Floating back-to-showcase (desktop forced app) */
 .showcase-back-btn {
   position: fixed;

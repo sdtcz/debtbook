@@ -12,9 +12,10 @@ import {
 } from './lib/deviceSync';
 import { getUnlockedRecoveryCode } from './lib/syncUnlock';
 import { isPayMeHash, parseHash, type Route } from './lib/router';
+import type { ComponentChildren } from 'preact';
 import {
   clearForceApp,
-  isLocalForceApp,
+  isEmbeddedFrame,
   isPhoneLikeViewport,
   shouldShowApp,
 } from './lib/viewportMode';
@@ -29,16 +30,68 @@ import { ProPage } from './pages/ProPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SetupPage } from './pages/SetupPage';
 
-function useAppMode(): [boolean, () => void, () => void, boolean] {
-  const [showApp, setShowApp] = useState(() => shouldShowApp() || isPayMeHash());
-  const [showShowcaseBack, setShowShowcaseBack] = useState(
-    () => isLocalForceApp() && !isPhoneLikeViewport(),
+function useDesktopAppStage(showApp: boolean): boolean {
+  const [on, setOn] = useState(
+    () => showApp && !isPhoneLikeViewport() && !isEmbeddedFrame(),
   );
+  useEffect(() => {
+    const recompute = () => {
+      setOn(showApp && !isPhoneLikeViewport() && !isEmbeddedFrame());
+    };
+    recompute();
+    const mqNarrow = window.matchMedia('(max-width: 640px)');
+    const mqCoarse = window.matchMedia('(pointer: coarse)');
+    const mqMid = window.matchMedia('(max-width: 900px)');
+    mqNarrow.addEventListener('change', recompute);
+    mqCoarse.addEventListener('change', recompute);
+    mqMid.addEventListener('change', recompute);
+    window.addEventListener('resize', recompute);
+    return () => {
+      mqNarrow.removeEventListener('change', recompute);
+      mqCoarse.removeEventListener('change', recompute);
+      mqMid.removeEventListener('change', recompute);
+      window.removeEventListener('resize', recompute);
+    };
+  }, [showApp]);
+  return on;
+}
+
+function DesktopAppStage({
+  onBack,
+  children,
+}: {
+  onBack: () => void;
+  children: ComponentChildren;
+}) {
+  return (
+    <div class="desktop-app-stage">
+      <div class="desktop-app-bg" aria-hidden="true">
+        <div class="landing-orb landing-orb-a" />
+        <div class="landing-orb landing-orb-b" />
+        <div class="landing-orb landing-orb-c" />
+        <div class="landing-grid" />
+        <div class="landing-noise" />
+        <div class="landing-naira-wm">₦</div>
+      </div>
+      <button type="button" class="showcase-back-btn" onClick={onBack}>
+        ← Showcase home
+      </button>
+      <div class="desktop-app-meta">Live app · phone preview</div>
+      <div class="desktop-app-phone">
+        <div class="phone-notch" aria-hidden="true" />
+        <div class="desktop-app-screen">{children}</div>
+      </div>
+      <div class="desktop-app-caption">Best on your phone · framed here for desktop</div>
+    </div>
+  );
+}
+
+function useAppMode(): [boolean, () => void, () => void] {
+  const [showApp, setShowApp] = useState(() => shouldShowApp() || isPayMeHash());
 
   useEffect(() => {
     const recompute = () => {
       setShowApp(shouldShowApp() || isPayMeHash());
-      setShowShowcaseBack(isLocalForceApp() && !isPhoneLikeViewport());
     };
     const mqNarrow = window.matchMedia('(max-width: 640px)');
     const mqCoarse = window.matchMedia('(pointer: coarse)');
@@ -59,20 +112,19 @@ function useAppMode(): [boolean, () => void, () => void, boolean] {
 
   const forceApp = useCallback(() => {
     setShowApp(true);
-    setShowShowcaseBack(isLocalForceApp() && !isPhoneLikeViewport());
   }, []);
 
   const backToShowcase = useCallback(() => {
     clearForceApp();
     setShowApp(shouldShowApp() || isPayMeHash());
-    setShowShowcaseBack(false);
   }, []);
 
-  return [showApp, forceApp, backToShowcase, showShowcaseBack];
+  return [showApp, forceApp, backToShowcase];
 }
 
 export function App() {
-  const [showApp, forceApp, backToShowcase, showShowcaseBack] = useAppMode();
+  const [showApp, forceApp, backToShowcase] = useAppMode();
+  const desktopStage = useDesktopAppStage(showApp);
   const [route, setRoute] = useState<Route>(parseHash());
   const [ready, setReady] = useState(false);
   const [hasShop, setHasShop] = useState(false);
@@ -210,33 +262,32 @@ export function App() {
     return <LandingPage onUseAppHere={forceApp} />;
   }
 
-  const showcaseBtn = showShowcaseBack ? (
-    <button type="button" class="showcase-back-btn" onClick={backToShowcase}>
-      ← Showcase home
-    </button>
-  ) : null;
+  const frame = (node: ComponentChildren) =>
+    desktopStage ? (
+      <DesktopAppStage onBack={backToShowcase}>{node}</DesktopAppStage>
+    ) : (
+      node
+    );
 
   if (!ready) {
-    return (
-      <>
-        {showcaseBtn}
-        <div class="setup-screen">
-          <h1>BashiBook</h1>
-          <p>{t('common.loading')}</p>
-        </div>
-      </>
+    return frame(
+      <div class="setup-screen">
+        <h1>BashiBook</h1>
+        <p>{t('common.loading')}</p>
+      </div>,
     );
   }
 
   if (!hasShop || route.name === 'setup') {
     return (
       <>
-        {showcaseBtn}
-        <SetupPage
-          onDone={() => {
-            setHasShop(true);
-          }}
-        />
+        {frame(
+          <SetupPage
+            onDone={() => {
+              setHasShop(true);
+            }}
+          />,
+        )}
         <Toast message={message} action={action} onDismiss={clearToast} />
       </>
     );
@@ -277,8 +328,7 @@ export function App() {
 
   return (
     <>
-      {showcaseBtn}
-      {page}
+      {frame(page)}
       {locked && pinHash && pinSalt && (
         <PinLock
           salt={pinSalt}
