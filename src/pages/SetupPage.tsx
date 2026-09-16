@@ -37,6 +37,10 @@ export function SetupPage({ onDone }: Props) {
 
   return (
     <div class="setup-screen">
+      <div class="setup-glow" aria-hidden="true" />
+      <div class="setup-crest" aria-hidden="true">
+        ₦
+      </div>
       <h1>BashiBook</h1>
       <p>{t('setup.tagline')}</p>
       <form onSubmit={submit}>

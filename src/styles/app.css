@@ -560,13 +560,58 @@ a {
 }
 
 .setup-screen {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 24px 20px;
+  padding: 28px 20px 36px;
   max-width: 480px;
   margin: 0 auto;
+}
+
+.setup-glow {
+  position: absolute;
+  top: -48px;
+  left: 50%;
+  z-index: 0;
+  width: 240px;
+  height: 240px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(15, 118, 110, 0.22) 0%,
+    rgba(15, 118, 110, 0.08) 42%,
+    transparent 70%
+  );
+}
+
+.setup-crest {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 0 18px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, var(--primary) 0%, #115e59 100%);
+  color: #fff;
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 10px 28px rgba(15, 118, 110, 0.28);
+}
+
+.setup-screen h1,
+.setup-screen p,
+.setup-screen form {
+  position: relative;
+  z-index: 1;
 }
 
 .setup-screen h1 {
@@ -577,7 +622,12 @@ a {
 
 .setup-screen p {
   color: var(--muted);
-  margin: 0 0 24px;
+  margin: 0 0 22px;
+  line-height: 1.45;
+}
+
+.setup-screen .btn-primary {
+  min-height: 48px;
 }
 
 .actions-grid {
