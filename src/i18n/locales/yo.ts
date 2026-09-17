@@ -42,6 +42,7 @@ export const yo: Record<MessageKey, string> = {
   'home.emptyFirstTitle': 'Fi oníbàárà àkọ́kọ́ kún un',
   'home.emptyFirstTip':
     'BashiBook wà fún àwọn oníbàárà gbèsè / udhar — àwọn tó ń ra nísinsìnyí tí wọ́n yóò san nígbà mìíràn.',
+  'home.emptyFirstHint': 'Ìwé rẹ wà lórí ẹ̀rọ yìí. Bẹ̀rẹ̀ pẹ̀lú orúkọ kan.',
   'home.addFirstCustomer': 'Fi oníbàárà àkọ́kọ́ kún un',
   'home.noMatches': 'Kò sí èyí tó bá a mu',
   'home.tryAnother': 'Gbìyànjú orúkọ tàbí ẹ̀rọ mìíràn.',

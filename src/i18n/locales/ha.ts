@@ -42,6 +42,7 @@ export const ha: Record<MessageKey, string> = {
   'home.emptyFirstTitle': 'Ƙara abokin ciniki na farko',
   'home.emptyFirstTip':
     'BashiBook na abokan ciniki na bashi / udhar ne — waɗanda suke saya yanzu su biya daga baya.',
+  'home.emptyFirstHint': 'Littafinka yana kan wannan waya. Fara da suna ɗaya.',
   'home.addFirstCustomer': 'Ƙara abokin ciniki na farko',
   'home.noMatches': 'Babu da ya dace',
   'home.tryAnother': 'Gwada wani suna ko waya.',

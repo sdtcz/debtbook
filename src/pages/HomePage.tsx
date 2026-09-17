@@ -457,8 +457,12 @@ export function HomePage({ locked, toast }: Props) {
 
         {!hasCustomers ? (
           <div class="empty empty-first-run">
+            <div class="empty-ledger-glyph" aria-hidden="true">
+              ₦
+            </div>
             <strong>{t('home.emptyFirstTitle')}</strong>
             <p class="empty-tip">{t('home.emptyFirstTip')}</p>
+            <p class="empty-hint">{t('home.emptyFirstHint')}</p>
             {!locked && (
               <button
                 class="btn btn-primary"

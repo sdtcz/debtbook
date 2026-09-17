@@ -40,6 +40,7 @@ export const en = {
   'home.emptyFirstTitle': 'Add your first customer',
   'home.emptyFirstTip':
     'BashiBook is for credit / udhar customers — people who buy now and pay later.',
+  'home.emptyFirstHint': 'Your book stays on this phone. Start with one name.',
   'home.addFirstCustomer': 'Add first customer',
   'home.noMatches': 'No matches',
   'home.tryAnother': 'Try another name or phone.',
