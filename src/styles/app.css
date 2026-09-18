@@ -1913,14 +1913,16 @@ button:active:not(:disabled),
 
 
 /* ── Desktop app phone stage (wide ?app=1 / Open app home) ─ */
+/* Roomy Stage: taller phone, single inner scroll, CTA stays visible */
 .desktop-app-stage {
   position: relative;
   min-height: 100dvh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 64px 16px 36px;
+  padding: 40px 16px 20px;
   overflow: hidden;
   background: #020617;
 }
@@ -1936,10 +1938,10 @@ button:active:not(:disabled),
 .desktop-app-meta {
   position: relative;
   z-index: 2;
-  margin-bottom: 12px;
-  font-size: 0.78rem;
+  margin-bottom: 10px;
+  font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: #5eead4;
 }
@@ -1947,15 +1949,18 @@ button:active:not(:disabled),
 .desktop-app-phone {
   position: relative;
   z-index: 2;
-  width: min(390px, 100%);
-  height: min(780px, calc(100dvh - 140px));
-  border-radius: 40px;
-  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  width: min(420px, calc(100vw - 48px));
+  height: min(844px, calc(100dvh - 96px));
+  max-height: calc(100dvh - 96px);
+  border-radius: 42px;
+  padding: 10px;
   background: linear-gradient(160deg, #1e293b 0%, #0f172a 55%, #020617 100%);
   box-shadow:
-    0 0 0 1px rgba(45, 212, 191, 0.28),
-    0 0 0 8px rgba(15, 23, 42, 0.55),
-    0 32px 90px rgba(2, 6, 23, 0.75),
+    0 0 0 1px rgba(45, 212, 191, 0.32),
+    0 0 0 8px rgba(15, 23, 42, 0.5),
+    0 36px 100px rgba(2, 6, 23, 0.8),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
 }
@@ -1963,11 +1968,11 @@ button:active:not(:disabled),
 .desktop-app-screen {
   position: relative;
   width: 100%;
-  height: 100%;
-  border-radius: 28px;
-  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  border-radius: 30px;
+  overflow: hidden;
   background: var(--bg);
-  -webkit-overflow-scrolling: touch;
 }
 
 .desktop-app-screen .app-shell,
@@ -1975,13 +1980,16 @@ button:active:not(:disabled),
   max-width: none;
   width: 100%;
   min-height: 100%;
+  height: 100%;
   margin: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .desktop-app-caption {
   position: relative;
   z-index: 2;
-  margin-top: 14px;
+  margin-top: 12px;
   font-size: 0.85rem;
   font-weight: 600;
   color: #94a3b8;
