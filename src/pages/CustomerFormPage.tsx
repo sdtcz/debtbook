@@ -66,6 +66,8 @@ export function CustomerFormPage({ id, toast }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [contactsSupported] = useState(() => isContactPickerSupported());
+  // Soft Start: collapsed on new; expanded when editing so existing fields aren't hidden
+  const [moreOpen, setMoreOpen] = useState(editing);
 
   useEffect(() => {
     if (!id) return;
@@ -87,6 +89,8 @@ export function CustomerFormPage({ id, toast }: Props) {
       } else {
         setCreditLimit('');
       }
+      // Prefer expanded on edit (existing optional fields visible)
+      setMoreOpen(true);
     });
   }, [id]);
 
@@ -240,17 +244,25 @@ export function CustomerFormPage({ id, toast }: Props) {
         <h1>{editing ? t('customerForm.edit') : t('customerForm.new')}</h1>
       </header>
       <main class="main">
-        <form class="card" onSubmit={submit}>
-          <div class="btn-row" style={{ marginTop: 0, marginBottom: 12 }}>
-            <button
-              class="btn btn-secondary"
-              type="button"
-              disabled={busy}
-              onClick={fromContacts}
-            >
-              {t('customerForm.fromContacts')}
-            </button>
-          </div>
+        <form class="card customer-form-soft" onSubmit={submit}>
+          {!editing && (
+            <>
+              <div class="contacts-hero">
+                <button
+                  class="btn btn-primary contacts-hero-cta"
+                  type="button"
+                  disabled={busy}
+                  onClick={fromContacts}
+                >
+                  📇 {t('customerForm.fromContacts')}
+                </button>
+                <p class="contacts-hero-tip">{t('customerForm.contactsHeroTip')}</p>
+              </div>
+              <div class="customer-form-or" role="presentation">
+                {t('customerForm.orType')}
+              </div>
+            </>
+          )}
           <div class="field">
             <label for="cname">{t('customerForm.name')}</label>
             <input
@@ -287,42 +299,66 @@ export function CustomerFormPage({ id, toast }: Props) {
             </div>
             <div class="hint">{t('customerForm.phoneHint')}</div>
           </div>
-          <div class="field">
-            <label for="cdue">{t('customerForm.dueDate')}</label>
-            <input
-              id="cdue"
-              class="input"
-              type="text"
-              inputMode="numeric"
-              autocomplete="off"
-              placeholder={t('customerForm.dueDatePlaceholder')}
-              value={dueDate}
-              onInput={(e) => setDueDate((e.target as HTMLInputElement).value)}
-            />
-            <div class="hint">
-              {t('customerForm.dueDateFormat')} · {t('customerForm.dueHint')}
+          <button
+            type="button"
+            class="more-options-toggle"
+            aria-expanded={moreOpen}
+            aria-controls="customer-more-options"
+            onClick={() => setMoreOpen((v) => !v)}
+          >
+            <span aria-hidden="true">{moreOpen ? '▾' : '▸'}</span>{' '}
+            {t('customerForm.moreOptions')}
+          </button>
+          {moreOpen && (
+            <div
+              id="customer-more-options"
+              class="more-options-panel"
+              role="region"
+              aria-label={t('customerForm.moreOptions')}
+            >
+              <div class="field">
+                <label for="cdue">{t('customerForm.dueDate')}</label>
+                <input
+                  id="cdue"
+                  class="input"
+                  type="text"
+                  inputMode="numeric"
+                  autocomplete="off"
+                  placeholder={t('customerForm.dueDatePlaceholder')}
+                  value={dueDate}
+                  onInput={(e) =>
+                    setDueDate((e.target as HTMLInputElement).value)
+                  }
+                />
+                <div class="hint">
+                  {t('customerForm.dueDatePlaceholder')} ·{' '}
+                  {t('customerForm.dueHintShort')}
+                </div>
+              </div>
+              <MoneyInput
+                id="climit"
+                label={t('customerForm.creditLimit')}
+                value={creditLimit}
+                onInput={setCreditLimit}
+              />
+              <div class="hint" style={{ marginTop: -4, marginBottom: 12 }}>
+                {t('customerForm.creditLimitHint')}
+              </div>
+              <div class="field">
+                <label for="cnote">{t('customerForm.note')}</label>
+                <textarea
+                  id="cnote"
+                  class="textarea"
+                  value={note}
+                  maxlength={200}
+                  placeholder={t('customerForm.notePlaceholder')}
+                  onInput={(e) =>
+                    setNote((e.target as HTMLTextAreaElement).value)
+                  }
+                />
+              </div>
             </div>
-          </div>
-          <MoneyInput
-            id="climit"
-            label={t('customerForm.creditLimit')}
-            value={creditLimit}
-            onInput={setCreditLimit}
-          />
-          <div class="hint" style={{ marginTop: -4, marginBottom: 12 }}>
-            {t('customerForm.creditLimitHint')}
-          </div>
-          <div class="field">
-            <label for="cnote">{t('customerForm.note')}</label>
-            <textarea
-              id="cnote"
-              class="textarea"
-              value={note}
-              maxlength={200}
-              placeholder={t('customerForm.notePlaceholder')}
-              onInput={(e) => setNote((e.target as HTMLTextAreaElement).value)}
-            />
-          </div>
+          )}
           {error && (
             <p style={{ color: 'var(--danger)', marginTop: 0 }}>{error}</p>
           )}

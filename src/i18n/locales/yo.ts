@@ -327,6 +327,12 @@ export const yo: Record<MessageKey, string> = {
   'customerForm.contactsUnsupportedTip': 'Ìmọ̀ràn: lórí Android Chrome o lè yan láti Contacts',
   'customerForm.contactsUnsupported': 'Yíyan olùbásọ̀rọ̀ ń ṣiṣẹ́ nínú Chrome lórí Android',
 
+  'customerForm.moreOptions': 'Àwọn àṣàyàn mìíràn (ọjọ́, òpin, àkọsílẹ̀)',
+  'customerForm.contactsHeroTip':
+    'Ó yára jù lórí Android Chrome — ó ń mú orúkọ àti ẹ̀rọ ìbáraẹnisọ̀rọ̀ papọ̀.',
+  'customerForm.orType': 'tàbí tẹ',
+  'customerForm.dueHintShort': 'Àmì Ti pẹ́ nígbà tí wọn ṣì jẹ gbèsè',
+
   'customerForm.creditLimit': 'Òpin gbèsè (₦, àyànfẹ́)',
   'customerForm.creditLimitHint': 'Yóò kìlọ̀ nígbà tí tita bá ju èyí lọ — o ṣì le kọ ọ́',
   'customerForm.creditLimitInvalid': 'Tẹ òpin gbèsè tó tọ́ (tàbí fi sílẹ̀)',

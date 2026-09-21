@@ -327,6 +327,12 @@ export const ha: Record<MessageKey, string> = {
   'customerForm.contactsUnsupportedTip': 'Shawara: a Android Chrome za ka iya zaɓa daga Contacts',
   'customerForm.contactsUnsupported': 'Zaɓen lambobin waya yana aiki a Chrome akan Android',
 
+  'customerForm.moreOptions': 'Ƙarin zaɓuɓɓuka (ranar biya, iyaka, bayani)',
+  'customerForm.contactsHeroTip':
+    'Mafi sauri a Android Chrome — yana ɗaukar suna da waya tare.',
+  'customerForm.orType': 'ko rubuta',
+  'customerForm.dueHintShort': 'Alamar Ya wuce lokaci idan har yanzu suna bin bashi',
+
   'customerForm.creditLimit': 'Iyakar bashi (₦, na zaɓi)',
   'customerForm.creditLimitHint': 'Zai yi gargaɗi idan sayarwa ta wuce wannan — har yanzu za ka iya rubutawa',
   'customerForm.creditLimitInvalid': 'Shigar da iyakar bashi mai kyau (ko barshi babu)',

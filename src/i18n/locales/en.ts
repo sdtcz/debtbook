@@ -325,6 +325,12 @@ export const en = {
   'customerForm.contactsUnsupportedTip': 'Tip: on Android Chrome you can pick from Contacts',
   'customerForm.contactsUnsupported': 'Contact pick works in Chrome on Android',
 
+  'customerForm.moreOptions': 'More options (due, limit, note)',
+  'customerForm.contactsHeroTip':
+    'Fastest on Android Chrome — picks name and phone together.',
+  'customerForm.orType': 'or type',
+  'customerForm.dueHintShort': 'Overdue badge when they still owe',
+
   'customerForm.creditLimit': 'Credit limit (₦, optional)',
   'customerForm.creditLimitHint': 'Soft warn when a credit sale would go past this — you can still record',
   'customerForm.creditLimitInvalid': 'Enter a valid credit limit (or leave blank)',
