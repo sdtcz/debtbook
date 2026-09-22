@@ -845,25 +845,87 @@ button:active:not(:disabled),
   color: #92400e;
 }
 
-.pro-hint {
+.pro-hint-soft {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: -4px 0 12px;
-  padding: 10px 4px 10px 8px;
-  font-size: 0.8rem;
-  color: var(--muted);
+  gap: 4px;
+  margin: -2px 0 12px;
+  padding: 4px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
 }
 
-.pro-hint a {
+.pro-hint-soft-link {
   flex: 1;
-  color: var(--muted);
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 8px 10px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 12px;
 }
 
-.pro-hint a:active {
+.pro-hint-soft-link:active {
+  background: rgba(13, 148, 136, 0.06);
+}
+
+.pro-hint-crest {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #ccfbf1,
+    #99f6e4 45%,
+    #5eead4
+  );
   color: var(--primary);
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow:
+    0 0 0 6px rgba(13, 148, 136, 0.08),
+    0 8px 18px rgba(13, 148, 136, 0.16);
+}
+
+.pro-hint-soft-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pro-hint-soft-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.25;
+  color: var(--text, #0f172a);
+}
+
+.pro-hint-soft-sub {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: #475569;
+  overflow-wrap: anywhere;
+}
+
+.pro-hint-soft-price {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: #ccfbf1;
+  padding: 6px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
 .pro-hint-dismiss {
@@ -876,7 +938,7 @@ button:active:not(:disabled),
   min-height: var(--tap-min);
   padding: 0;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

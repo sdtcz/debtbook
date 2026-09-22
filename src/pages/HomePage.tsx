@@ -383,8 +383,21 @@ export function HomePage({ locked, toast }: Props) {
         )}
 
         {!pro && !locked && !proHintDismissed && (
-          <div class="pro-hint">
-            <a href={href('/settings/pro')}>{t('home.proHint')}</a>
+          <div class="pro-hint-soft">
+            <a
+              class="pro-hint-soft-link"
+              href={href('/settings/pro')}
+              aria-label={`${t('home.proHintTitle')}: ${t('home.proHintSub')} · ${t('home.proHintPrice')}`}
+            >
+              <span class="pro-hint-crest" aria-hidden="true">
+                ★
+              </span>
+              <span class="pro-hint-soft-body">
+                <span class="pro-hint-soft-title">{t('home.proHintTitle')}</span>
+                <span class="pro-hint-soft-sub">{t('home.proHintSub')}</span>
+              </span>
+              <span class="pro-hint-soft-price">{t('home.proHintPrice')}</span>
+            </a>
             <button
               type="button"
               class="pro-hint-dismiss"
