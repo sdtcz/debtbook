@@ -189,6 +189,9 @@ export const yo: Record<MessageKey, string> = {
   'settings.payMeSubSetup': 'Ṣètò',
   'settings.payMeSubConfigured': 'Ti ṣètò',
   'payDetails.title': 'San mi',
+  'payDetails.moreOptions': 'Àwọn àṣàyàn mìíràn (ọ̀nà ìsanwó)',
+  'payDetails.previewLabel': 'Àwọn oníbàárà máa rí',
+  'payDetails.previewHint': 'Yóò hàn nínú WhatsApp / ọ̀nà San-mi',
   'settings.payMeHelp':
     'Àwọn oníbàárà máa rí àwọn wọ̀nyí nígbà tí o bá fi ọ̀nà San-mi ránṣẹ́',
   'settings.payBankName': 'Bánkì / wallet',
