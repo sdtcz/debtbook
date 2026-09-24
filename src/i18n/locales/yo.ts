@@ -355,6 +355,8 @@ export const yo: Record<MessageKey, string> = {
   'entry.paymentRecorded': 'A ti kọ ìsanwó',
   'entry.undone': 'A ti dá àkọsílẹ̀ padà',
   'entry.couldNotSave': 'Kò le fi pamọ́',
+  'entry.creditTip': 'Ó ń fi kún ohun tí wọ́n jẹ́ ẹ́. Àkọsílẹ̀ kúkúrú ń ràn ọ́ lọ́wọ́ láti rántí ẹrú.',
+  'entry.paymentTip': 'Ó ń dín ohun tí wọ́n jẹ́ ẹ́ kù. Àkọsílẹ̀ jẹ́ àyànfẹ́ — iye ló ṣe pàtàkì.',
 
   'entry.creditLimitWarn': 'Òpin {{limit}} · yóò jẹ́ {{wouldBe}}. Kọ ọ́ síbẹ̀?',
 

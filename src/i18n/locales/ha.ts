@@ -355,6 +355,8 @@ export const ha: Record<MessageKey, string> = {
   'entry.paymentRecorded': 'An rubuta biya',
   'entry.undone': 'An juyar shigarwa',
   'entry.couldNotSave': 'An kasa ajiyawa',
+  'entry.creditTip': 'Yana ƙara abin da suke baka. Ɗan bayani yana taimakawa ka tuna kayan.',
+  'entry.paymentTip': 'Yana rage abin da suke baka. Bayani na zaɓi — adadi ne mahimmi.',
 
   'entry.creditLimitWarn': 'Iyaka {{limit}} · zai zama {{wouldBe}}. A rubuta duk da haka?',
 

@@ -2724,3 +2724,100 @@ button:active:not(:disabled),
   margin-top: 4px;
   box-shadow: 0 8px 20px rgba(15, 118, 110, 0.28);
 }
+
+
+/* —— Soft Entry: credit / payment form —— */
+.entry-soft {
+  padding-top: 18px;
+}
+
+.entry-soft-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  background: linear-gradient(160deg, #f0fdfa 0%, #ecfeff 100%);
+}
+
+.entry-soft-hero.credit {
+  background: linear-gradient(160deg, #fef2f2 0%, #fff7ed 100%);
+  border-color: rgba(185, 28, 28, 0.18);
+}
+
+.entry-soft-hero.payment {
+  background: linear-gradient(160deg, #f0fdf4 0%, #ecfdf5 100%);
+  border-color: rgba(21, 128, 61, 0.18);
+}
+
+.entry-soft-hero-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.entry-soft-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.25rem;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 6px rgba(15, 118, 110, 0.08);
+}
+
+.entry-soft-hero.credit .entry-soft-avatar {
+  background: linear-gradient(145deg, var(--danger), #991b1b);
+  box-shadow: 0 0 0 6px rgba(185, 28, 28, 0.08);
+}
+
+.entry-soft-hero.payment .entry-soft-avatar {
+  background: linear-gradient(145deg, var(--ok), #166534);
+  box-shadow: 0 0 0 6px rgba(21, 128, 61, 0.08);
+}
+
+.entry-soft-hero-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.entry-soft-hero-name {
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.entry-soft-hero-tip {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.entry-soft-form {
+  margin: 0;
+  padding: 14px;
+}
+
+.entry-soft-save {
+  width: 100%;
+  min-height: var(--tap-min);
+  margin-top: 4px;
+}
+
+.entry-soft-hero.credit ~ .entry-soft-form .entry-soft-save.btn-danger,
+.entry-soft .entry-soft-save.btn-danger {
+  box-shadow: 0 8px 20px rgba(185, 28, 28, 0.28);
+}
+
+.entry-soft .entry-soft-save.btn-ok {
+  box-shadow: 0 8px 20px rgba(21, 128, 61, 0.28);
+}

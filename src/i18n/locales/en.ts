@@ -353,6 +353,8 @@ export const en = {
   'entry.paymentRecorded': 'Payment recorded',
   'entry.undone': 'Entry undone',
   'entry.couldNotSave': 'Could not save',
+  'entry.creditTip': 'Adds to what they owe. A short note helps you remember the goods.',
+  'entry.paymentTip': 'Reduces what they owe. Note optional — amount is what counts.',
 
   'entry.creditLimitWarn': 'Limit {{limit}} · would be {{wouldBe}}. Record anyway?',
 

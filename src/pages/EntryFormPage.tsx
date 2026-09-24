@@ -117,8 +117,28 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
           <div class="sub">{customerName}</div>
         </div>
       </header>
-      <main class="main">
-        <form class="card" onSubmit={submit}>
+      <main class="main entry-soft">
+        <section
+          class={`entry-soft-hero ${type === 'credit' ? 'credit' : 'payment'}`}
+          aria-label={
+            type === 'credit' ? t('entry.creditSale') : t('entry.payment')
+          }
+        >
+          <div class="entry-soft-hero-row">
+            <div class="entry-soft-avatar" aria-hidden="true">
+              ₦
+            </div>
+            <div class="entry-soft-hero-text">
+              <div class="entry-soft-hero-name">
+                {type === 'credit' ? t('entry.creditSale') : t('entry.payment')}
+              </div>
+              <p class="entry-soft-hero-tip">
+                {type === 'credit' ? t('entry.creditTip') : t('entry.paymentTip')}
+              </p>
+            </div>
+          </div>
+        </section>
+        <form class="card entry-soft-form" onSubmit={submit}>
           <div class="seg" role="group" aria-label={t('entry.type')}>
             <button
               type="button"
@@ -161,7 +181,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
           )}
 
           <button
-            class={`btn ${type === 'credit' ? 'btn-danger' : 'btn-ok'}`}
+            class={`btn entry-soft-save ${type === 'credit' ? 'btn-danger' : 'btn-ok'}`}
             type="submit"
             disabled={busy}
           >
