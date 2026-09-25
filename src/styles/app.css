@@ -2821,3 +2821,117 @@ button:active:not(:disabled),
 .entry-soft .entry-soft-save.btn-ok {
   box-shadow: 0 8px 20px rgba(21, 128, 61, 0.28);
 }
+
+
+/* —— Soft Balance: customer detail crest —— */
+.detail-soft {
+  padding-top: 18px;
+}
+
+.balance-soft-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 16px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  background: linear-gradient(160deg, #f0fdfa 0%, #ecfeff 100%);
+}
+
+.balance-soft-hero.debt {
+  background: linear-gradient(160deg, #fef2f2 0%, #fff7ed 100%);
+  border-color: rgba(185, 28, 28, 0.18);
+}
+
+.balance-soft-hero.credit {
+  background: linear-gradient(160deg, #f0fdf4 0%, #ecfdf5 100%);
+  border-color: rgba(21, 128, 61, 0.18);
+}
+
+.balance-soft-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.balance-soft-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.25rem;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 6px rgba(15, 118, 110, 0.08);
+}
+
+.balance-soft-hero.debt .balance-soft-avatar {
+  background: linear-gradient(145deg, var(--danger), #991b1b);
+  box-shadow: 0 0 0 6px rgba(185, 28, 28, 0.08);
+}
+
+.balance-soft-hero.credit .balance-soft-avatar {
+  background: linear-gradient(145deg, var(--ok), #166534);
+  box-shadow: 0 0 0 6px rgba(21, 128, 61, 0.08);
+}
+
+.balance-soft-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.balance-soft-kicker {
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  color: var(--muted);
+}
+
+.balance-soft-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-top: 2px;
+}
+
+.balance-soft-hero.zero .balance-soft-amount {
+  color: var(--muted);
+}
+
+.balance-soft-hero.debt .balance-soft-amount {
+  color: var(--danger);
+}
+
+.balance-soft-hero.credit .balance-soft-amount {
+  color: var(--ok);
+}
+
+.balance-soft-label {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.balance-soft-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.balance-soft-hints {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 2px;
+}

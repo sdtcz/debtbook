@@ -259,6 +259,7 @@ export const en = {
 
   'customer.notFound': 'Customer not found',
   'customer.edit': 'Edit',
+  'customer.balanceTitle': 'Balance',
   'customer.due': 'Due {{date}}',
   'customer.overdueSuffix': ' · overdue',
   'customer.overpaid': 'Overpaid — shop owes this customer',

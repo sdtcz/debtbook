@@ -213,34 +213,51 @@ export function CustomerDetailPage({ id, toast }: Props) {
         </button>
       </header>
 
-      <main class="main">
-        <div class={`card balance-hero ${tone}`}>
-          <div class={`amount`}>{formatNaira(Math.abs(balanceKobo))}</div>
-          <div class="label">{balanceLabel(balanceKobo)}</div>
-          {customer.dueAt && (
-            <div class="hint" style={{ marginTop: 6 }}>
-              {t('customer.due', { date: fmtDue(customer.dueAt) })}
-              {overdue ? t('customer.overdueSuffix') : ''}
+      <main class="main detail-soft">
+        <section
+          class={`balance-soft-hero ${tone}`}
+          aria-label={t('customer.balanceTitle')}
+        >
+          <div class="balance-soft-row">
+            <div class="balance-soft-avatar" aria-hidden="true">
+              ₦
+            </div>
+            <div class="balance-soft-text">
+              <div class="balance-soft-kicker">{t('customer.balanceTitle')}</div>
+              <div class="balance-soft-amount">
+                {formatNaira(Math.abs(balanceKobo))}
+              </div>
+              <p class="balance-soft-label">{balanceLabel(balanceKobo)}</p>
+            </div>
+          </div>
+          {(customer.dueAt ||
+            (customer.creditLimitKobo != null && customer.creditLimitKobo > 0) ||
+            tone === 'credit') && (
+            <div class="balance-soft-hints">
+              {customer.dueAt && (
+                <p class="balance-soft-hint">
+                  {t('customer.due', { date: fmtDue(customer.dueAt) })}
+                  {overdue ? t('customer.overdueSuffix') : ''}
+                </p>
+              )}
+              {customer.creditLimitKobo != null && customer.creditLimitKobo > 0 && (
+                <p class="balance-soft-hint">
+                  {t('customer.creditLimit', {
+                    amount: formatNaira(customer.creditLimitKobo),
+                  })}
+                  {headroom != null && headroom >= 0
+                    ? ` · ${t('customer.creditHeadroom', { amount: formatNaira(headroom) })}`
+                    : headroom != null
+                      ? ` · ${t('customer.creditOverBy', { amount: formatNaira(-headroom) })}`
+                      : ''}
+                </p>
+              )}
+              {tone === 'credit' && (
+                <p class="balance-soft-hint">{t('customer.overpaid')}</p>
+              )}
             </div>
           )}
-          {customer.creditLimitKobo != null && customer.creditLimitKobo > 0 && (
-            <div class="hint" style={{ marginTop: 6 }}>
-              {t('customer.creditLimit', {
-                amount: formatNaira(customer.creditLimitKobo),
-              })}
-              {headroom != null && headroom >= 0
-                ? ` · ${t('customer.creditHeadroom', { amount: formatNaira(headroom) })}`
-                : headroom != null
-                  ? ` · ${t('customer.creditOverBy', { amount: formatNaira(-headroom) })}`
-                  : ''}
-            </div>
-          )}
-          {tone === 'credit' && (
-            <div class="hint" style={{ marginTop: 6 }}>
-              {t('customer.overpaid')}
-            </div>
-          )}
-        </div>
+        </section>
 
         <div class="actions-grid">
           <button

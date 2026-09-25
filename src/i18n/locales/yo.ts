@@ -261,6 +261,7 @@ export const yo: Record<MessageKey, string> = {
 
   'customer.notFound': 'A kò rí oníbàárà',
   'customer.edit': 'Ṣàtúnṣe',
+  'customer.balanceTitle': 'Ìwọ̀ntúnwọ̀nsì',
   'customer.due': 'Ọjọ́ ìsanwó {{date}}',
   'customer.overdueSuffix': ' · ti pẹ́',
   'customer.overpaid': 'A san ju — ilé ìtajà jẹ́ oníbàárà yìí',

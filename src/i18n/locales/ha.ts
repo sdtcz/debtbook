@@ -261,6 +261,7 @@ export const ha: Record<MessageKey, string> = {
 
   'customer.notFound': 'Ba a sami abokin ciniki ba',
   'customer.edit': 'Gyara',
+  'customer.balanceTitle': "Ma'auni",
   'customer.due': 'Ranar biya {{date}}',
   'customer.overdueSuffix': ' · ya wuce lokaci',
   'customer.overpaid': 'An biya fiye — shago yana bin wannan abokin ciniki',
