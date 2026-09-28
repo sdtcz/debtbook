@@ -276,10 +276,15 @@ export function HomePage({ locked, toast }: Props) {
       <main class={`main ${locked ? 'locked-blur' : ''}`}>
         {loading ? (
           <div class="home-skeleton" aria-busy="true" aria-live="polite">
-            <div class="card total skel-total">
-              <div class="skel-line" />
-              <div class="skel-amount" />
-            </div>
+            <section class="total-soft-hero zero skel-total-soft" aria-hidden="true">
+              <div class="total-soft-row">
+                <div class="total-soft-avatar skel-soft-avatar" />
+                <div class="total-soft-text">
+                  <div class="skel-line skel-soft-kicker" />
+                  <div class="skel-amount skel-soft-amount" />
+                </div>
+              </div>
+            </section>
             <div class="skel skel-search" />
             <div class="skel skel-section" />
             <div class="skel skel-row" />
@@ -289,13 +294,25 @@ export function HomePage({ locked, toast }: Props) {
           </div>
         ) : (
           <>
-        <div class="card total">
-          <div class="label">{t('home.totalOutstanding')}</div>
-          <div class="amount">{locked ? '••••••' : formatNaira(total)}</div>
-          {!locked && hasCustomers && (
-            <div class="total-meta">{heroMeta}</div>
-          )}
-        </div>
+        <section
+          class={`total-soft-hero ${total > 0 ? 'debt' : 'zero'}`}
+          aria-label={t('home.totalOutstanding')}
+        >
+          <div class="total-soft-row">
+            <div class="total-soft-avatar" aria-hidden="true">
+              ₦
+            </div>
+            <div class="total-soft-text">
+              <div class="total-soft-kicker">{t('home.totalOutstanding')}</div>
+              <div class="total-soft-amount">
+                {locked ? '••••••' : formatNaira(total)}
+              </div>
+              {!locked && hasCustomers && (
+                <p class="total-soft-meta">{heroMeta}</p>
+              )}
+            </div>
+          </div>
+        </section>
 
         {!locked && chasePrompt && digest.count > 0 && (
           <div class="card chase-prompt" role="status">
