@@ -83,17 +83,22 @@ export function ProPage({ toast }: Props) {
         {pro && <span class="pro-badge">{t('common.pro')}</span>}
       </header>
       <main class="main settings-main">
-        <section class="card">
-          <div class="settings-group-label" style={{ marginTop: 0 }}>
-            {t('pro.nigeriaPricing')}
+        <section
+          class={`pro-soft-hero${pro ? ' active' : ''}`}
+          aria-label={t('pro.nigeriaPricing')}
+        >
+          <div class="pro-soft-row">
+            <div class="pro-soft-avatar" aria-hidden="true">
+              {pro ? '✓' : '★'}
+            </div>
+            <div class="pro-soft-text">
+              <div class="pro-soft-kicker">{t('pro.nigeriaPricing')}</div>
+              <div class="pro-soft-amount">{t('pro.perMonth')}</div>
+              <p class="pro-soft-meta">{t('pro.orYear')}</p>
+            </div>
           </div>
-          <p class="pro-hero-price">{t('pro.perMonth')}</p>
-          <p class="muted" style={{ marginTop: 0, marginBottom: 12 }}>
-            {t('pro.orYear')}
-          </p>
-
           {pro ? (
-            <div class="pro-status">
+            <div class="pro-soft-status">
               <span aria-hidden="true">✓</span>
               <span>
                 {t('pro.youreOnPro')}
@@ -106,14 +111,43 @@ export function ProPage({ toast }: Props) {
               </span>
             </div>
           ) : null}
+        </section>
 
-          <div class="settings-group-label">{t('pro.included')}</div>
-          <ul class="benefits">
-            <li>{t('pro.benefitCloud')}</li>
-            <li>{t('pro.benefitCsv')}</li>
-            <li>{t('pro.benefitBadge')}</li>
-            <li>{t('pro.benefitNoNag')}</li>
-            <li>{t('pro.benefitFree')}</li>
+        <section class="card pro-soft-card">
+          <div class="settings-group-label" style={{ marginTop: 0 }}>
+            {t('pro.included')}
+          </div>
+          <ul class="pro-soft-benefits">
+            <li>
+              <span class="pro-soft-check" aria-hidden="true">
+                ✓
+              </span>
+              <span>{t('pro.benefitCloud')}</span>
+            </li>
+            <li>
+              <span class="pro-soft-check" aria-hidden="true">
+                ✓
+              </span>
+              <span>{t('pro.benefitCsv')}</span>
+            </li>
+            <li>
+              <span class="pro-soft-check" aria-hidden="true">
+                ✓
+              </span>
+              <span>{t('pro.benefitBadge')}</span>
+            </li>
+            <li>
+              <span class="pro-soft-check" aria-hidden="true">
+                ✓
+              </span>
+              <span>{t('pro.benefitNoNag')}</span>
+            </li>
+            <li>
+              <span class="pro-soft-check" aria-hidden="true">
+                ✓
+              </span>
+              <span>{t('pro.benefitFree')}</span>
+            </li>
           </ul>
 
           {!pro && (
@@ -136,9 +170,7 @@ export function ProPage({ toast }: Props) {
                   {t('pro.paystack')}
                 </button>
               </div>
-              <p class="muted" style={{ fontSize: '0.85rem', marginBottom: 0 }}>
-                {t('pro.demoNote')}
-              </p>
+              <p class="pro-soft-note">{t('pro.demoNote')}</p>
             </>
           )}
         </section>
