@@ -666,17 +666,23 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
         <StatusBadge />
       </header>
       <main class="main settings-main">
-        <section class="settings-hero card">
-          <div class="settings-avatar" aria-hidden="true">
-            {initial}
-          </div>
-          <div class="settings-hero-text">
-            <div class="settings-hero-name">{name.trim() || t('settings.yourShop')}</div>
-            <div class="settings-hero-meta">
-              <span class={pro ? 'plan-pill plan-pill-pro' : 'plan-pill'}>
-                {entLabel}
-              </span>
-              <span class="muted">{expLabel}</span>
+        <section
+          class={`shop-soft-hero${pro ? ' active' : ''}`}
+          aria-label={t('settings.yourShop')}
+        >
+          <div class="shop-soft-row">
+            <div class="shop-soft-avatar" aria-hidden="true">
+              {initial}
+            </div>
+            <div class="shop-soft-text">
+              <div class="shop-soft-kicker">{t('settings.yourShop')}</div>
+              <div class="shop-soft-name">{name.trim() || t('settings.yourShop')}</div>
+              <div class="shop-soft-meta">
+                <span class={pro ? 'plan-pill plan-pill-pro' : 'plan-pill'}>
+                  {entLabel}
+                </span>
+                {expLabel ? <span>{expLabel}</span> : null}
+              </div>
             </div>
           </div>
         </section>

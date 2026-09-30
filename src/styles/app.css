@@ -3186,3 +3186,83 @@ button:active:not(:disabled),
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
+
+/* —— Soft Shop crest: Settings shop hero —— */
+.shop-soft-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 16px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  background: linear-gradient(160deg, #f0fdfa 0%, #ecfeff 100%);
+}
+
+.shop-soft-hero.active {
+  background: linear-gradient(160deg, #ecfdf5 0%, #f0fdfa 100%);
+  border-color: rgba(21, 128, 61, 0.18);
+}
+
+.shop-soft-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.shop-soft-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.25rem;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 6px rgba(15, 118, 110, 0.08);
+}
+
+.shop-soft-hero.active .shop-soft-avatar {
+  background: linear-gradient(145deg, var(--ok), #166534);
+  box-shadow: 0 0 0 6px rgba(21, 128, 61, 0.08);
+}
+
+.shop-soft-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.shop-soft-kicker {
+  font-weight: 800;
+  font-size: 0.95rem;
+  line-height: 1.25;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.shop-soft-name {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-top: 2px;
+  color: var(--text, #0f172a);
+  overflow-wrap: anywhere;
+}
+
+.shop-soft-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.35;
+  flex-wrap: wrap;
+  overflow-wrap: anywhere;
+}
+
