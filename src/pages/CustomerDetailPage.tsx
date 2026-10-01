@@ -305,32 +305,38 @@ export function CustomerDetailPage({ id, toast }: Props) {
         )}
 
         <div class="section-title">{t('customer.history')}</div>
-        <div class="card" style={{ paddingTop: 4, paddingBottom: 4 }}>
+        <div class="history-soft" aria-label={t('customer.history')}>
           {entries.length === 0 ? (
-            <div class="empty" style={{ padding: 20 }}>
-              {t('customer.noEntries')}
+            <div class="history-soft-empty">
+              <div class="history-soft-glyph" aria-hidden="true">
+                ₦
+              </div>
+              <strong>{t('customer.noEntriesTitle')}</strong>
+              <p>{t('customer.noEntries')}</p>
             </div>
           ) : (
             entries.map((e) => (
-              <div class="entry-row" key={e.id}>
-                <div class="left">
-                  <div class={`type ${e.type}`}>
+              <div class={`history-soft-row ${e.type}`} key={e.id}>
+                <div class="history-soft-avatar" aria-hidden="true">
+                  {e.type === 'credit' ? '+' : '−'}
+                </div>
+                <div class="history-soft-body">
+                  <div class="history-soft-type">
                     {e.type === 'credit'
                       ? t('customer.creditSaleLabel')
                       : t('customer.paymentLabel')}
                   </div>
-                  <div class="when">{fmtWhen(e.occurredAt)}</div>
-                  {e.note && <div class="note">{e.note}</div>}
+                  <div class="history-soft-when">{fmtWhen(e.occurredAt)}</div>
+                  {e.note && <div class="history-soft-note">{e.note}</div>}
                 </div>
-                <div>
-                  <div class={`amt ${e.type}`}>
+                <div class="history-soft-trail">
+                  <div class="history-soft-amt">
                     {e.type === 'credit' ? '+' : '−'}
                     {formatNaira(e.amountKobo)}
                   </div>
                   <button
                     type="button"
-                    class="icon-btn"
-                    style={{ color: 'var(--muted)', minHeight: 36, minWidth: 36 }}
+                    class="history-soft-del"
                     aria-label={t('customer.deleteEntry')}
                     onClick={() => removeEntry(e.id)}
                   >
