@@ -42,6 +42,14 @@ function fmtShortDate(ts: number): string {
   });
 }
 
+
+function nameInitial(name: string): string {
+  const trimmed = name.trim();
+  if (!trimmed) return '?';
+  // First grapheme-ish for Latin/NG names; fall back to first code unit
+  return trimmed.charAt(0).toUpperCase();
+}
+
 function rowStatusLine(
   row: CustomerBalance,
   t: (key: MessageKey, vars?: Record<string, string | number>) => string,
@@ -536,12 +544,18 @@ export function HomePage({ locked, toast }: Props) {
               );
               const status = rowStatusLine(row, t);
               return (
-                <div class="list-item-wrap" key={row.customer.id}>
+                <div
+                  class={`list-item-wrap soft-list-row ${tone}`}
+                  key={row.customer.id}
+                >
                   <a
-                    class="list-item"
+                    class="list-item soft-list-link"
                     href={href(`/customers/${row.customer.id}`)}
                   >
-                    <div class="meta">
+                    <div class="soft-list-avatar" aria-hidden="true">
+                      {nameInitial(row.customer.name)}
+                    </div>
+                    <div class="meta soft-list-meta">
                       <div class="name">
                         {row.customer.name}
                         {overdue && (
@@ -554,20 +568,22 @@ export function HomePage({ locked, toast }: Props) {
                           <span class="limit-badge near">{t('home.nearLimit')}</span>
                         )}
                       </div>
-                      <div class="hint">
+                      <div class="hint soft-list-hint">
                         {row.customer.phone || t('common.noPhone')} ·{' '}
                         {balanceLabel(row.balanceKobo)}
                       </div>
-                      {status && <div class="hint row-status">{status}</div>}
+                      {status && (
+                        <div class="hint row-status soft-list-hint">{status}</div>
+                      )}
                     </div>
-                    <div class={`amount-pill ${tone}`}>
+                    <div class={`amount-pill soft-list-pill ${tone}`}>
                       {locked
                         ? '••••'
                         : formatNaira(Math.abs(row.balanceKobo))}
                     </div>
                   </a>
                   {!locked && (
-                    <div class="quick-actions">
+                    <div class="quick-actions soft-list-qa">
                       <button
                         type="button"
                         class="qa-credit"

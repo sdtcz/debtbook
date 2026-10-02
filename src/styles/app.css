@@ -185,7 +185,7 @@ a {
 .list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .list-item {
@@ -3444,4 +3444,127 @@ button:active:not(:disabled),
 
 .history-soft-del:active {
   background: #e2e8f0;
+}
+
+
+/* —— Soft List crest: Home customer rows —— */
+.soft-list-row {
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: linear-gradient(160deg, #fff 0%, #f8fafc 100%);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+.soft-list-row.debt {
+  background: linear-gradient(160deg, #fff 0%, #fef2f2 100%);
+  border-color: rgba(185, 28, 28, 0.14);
+}
+
+.soft-list-row.credit {
+  background: linear-gradient(160deg, #fff 0%, #f0fdf4 100%);
+  border-color: rgba(21, 128, 61, 0.14);
+}
+
+.soft-list-row.zero {
+  background: linear-gradient(160deg, #fff 0%, #f0fdfa 100%);
+  border-color: rgba(15, 118, 110, 0.14);
+}
+
+.soft-list-row .soft-list-link {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  min-height: 64px;
+  background: transparent;
+}
+
+.soft-list-row .soft-list-link:active {
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.soft-list-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1;
+  background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+  box-shadow: 0 0 0 5px rgba(15, 118, 110, 0.08);
+}
+
+.soft-list-row.debt .soft-list-avatar {
+  background: linear-gradient(145deg, var(--danger), #991b1b);
+  box-shadow: 0 0 0 5px rgba(185, 28, 28, 0.08);
+}
+
+.soft-list-row.credit .soft-list-avatar {
+  background: linear-gradient(145deg, var(--ok), #166534);
+  box-shadow: 0 0 0 5px rgba(21, 128, 61, 0.08);
+}
+
+.soft-list-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.soft-list-row .name {
+  font-weight: 750;
+  font-size: 1.02rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.soft-list-hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+}
+
+.soft-list-pill {
+  align-self: center;
+}
+
+.soft-list-qa {
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  background: transparent;
+}
+
+.soft-list-row.debt .soft-list-qa {
+  border-top-color: rgba(185, 28, 28, 0.1);
+}
+
+.soft-list-row.credit .soft-list-qa {
+  border-top-color: rgba(21, 128, 61, 0.1);
+}
+
+.soft-list-row.zero .soft-list-qa {
+  border-top-color: rgba(15, 118, 110, 0.1);
+}
+
+.soft-list-qa button {
+  min-height: var(--tap);
+  background: transparent;
+  font-weight: 750;
+  font-size: 0.82rem;
+}
+
+.soft-list-qa button:active {
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.soft-list-qa .qa-credit {
+  color: var(--danger);
+}
+
+.soft-list-qa .qa-pay {
+  color: var(--ok);
 }
