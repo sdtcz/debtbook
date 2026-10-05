@@ -92,6 +92,7 @@ export const ha: Record<MessageKey, string> = {
   'home.chaseNoPhone': 'Babu waya',
   'home.chaseProgress': '{{current}} cikin {{total}}',
   'home.chaseClose': 'Rufe',
+  'home.chaseSent': 'An aika',
 
   'setup.tagline':
     'Littafin bashi na offline (udhar). Bayanai suna kan wannan waya — yana aiki ba intanet ba.',

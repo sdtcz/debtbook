@@ -22,8 +22,17 @@ export function ChaseAllSheet({ shopName, overdue, onClose, onToast }: Props) {
   const [doneIds, setDoneIds] = useState<Set<string>>(() => new Set());
   const [busy, setBusy] = useState(false);
 
+  const totalKobo = useMemo(
+    () => overdue.reduce((sum, r) => sum + Math.max(0, r.balanceKobo), 0),
+    [overdue],
+  );
   const current = withPhone[index];
   const finished = withPhone.length === 0 || index >= withPhone.length;
+  const progressPct =
+    withPhone.length === 0
+      ? 100
+      : Math.round((Math.min(doneIds.size, withPhone.length) / withPhone.length) * 100);
+  const initial = (name: string) => (name.trim().charAt(0) || '?').toUpperCase();
 
   const finishToast = () => {
     if (noPhoneCount > 0) {
@@ -78,10 +87,15 @@ export function ChaseAllSheet({ shopName, overdue, onClose, onToast }: Props) {
       }}
     >
       <div class="chase-sheet">
-        <div class="chase-sheet-head">
-          <div>
+        <div class="chase-sheet-head chase-soft-hero">
+          <div class="chase-soft-crest" aria-hidden="true">
+            ₦
+          </div>
+          <div class="chase-soft-meta">
+            <div class="chase-soft-kicker">{t('common.overdue')}</div>
             <div class="chase-sheet-title">
               {t('home.chaseSheetTitle', { n: overdue.length })}
+              {totalKobo > 0 ? ` · ${formatNaira(totalKobo)}` : ''}
             </div>
             {withPhone.length > 0 && (
               <div class="chase-sheet-sub">
@@ -101,10 +115,21 @@ export function ChaseAllSheet({ shopName, overdue, onClose, onToast }: Props) {
                 {t('home.chaseSkippedNoPhone', { n: noPhoneCount || overdue.length })}
               </div>
             )}
+            {withPhone.length > 0 && (
+              <div
+                class="chase-soft-progress"
+                role="progressbar"
+                aria-valuemin={0}
+                aria-valuemax={withPhone.length}
+                aria-valuenow={Math.min(doneIds.size, withPhone.length)}
+              >
+                <span style={{ width: `${progressPct}%` }} />
+              </div>
+            )}
           </div>
           <button
             type="button"
-            class="icon-btn"
+            class="icon-btn chase-soft-close"
             aria-label={t('home.chaseClose')}
             onClick={onClose}
           >
@@ -122,13 +147,13 @@ export function ChaseAllSheet({ shopName, overdue, onClose, onToast }: Props) {
               <div
                 key={row.customer.id}
                 class={
-                  isCurrent
-                    ? 'chase-row current'
-                    : done
-                      ? 'chase-row done'
-                      : 'chase-row'
+                  'chase-row' +
+                  (isCurrent ? ' current' : done ? ' done' : hasPhone ? '' : ' nophone')
                 }
               >
+                <div class="chase-row-avatar" aria-hidden="true">
+                  {done ? '✓' : initial(row.customer.name)}
+                </div>
                 <div class="chase-row-meta">
                   <div class="chase-row-name">{row.customer.name}</div>
                   <div class="chase-row-hint">
@@ -138,10 +163,16 @@ export function ChaseAllSheet({ shopName, overdue, onClose, onToast }: Props) {
                     · {formatNaira(row.balanceKobo)}
                   </div>
                 </div>
-                {hasPhone ? (
+                {done ? (
+                  <span class="chase-row-sent">{t('home.chaseSent')}</span>
+                ) : hasPhone ? (
                   <button
                     type="button"
-                    class="btn btn-secondary chase-row-btn"
+                    class={
+                      isCurrent
+                        ? 'btn btn-primary chase-row-btn'
+                        : 'btn btn-secondary chase-row-btn'
+                    }
                     disabled={busy}
                     onClick={() => {
                       const i = withPhone.findIndex(

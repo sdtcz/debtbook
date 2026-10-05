@@ -92,6 +92,7 @@ export const yo: Record<MessageKey, string> = {
   'home.chaseNoPhone': 'Kò sí fóònù',
   'home.chaseProgress': '{{current}} nínú {{total}}',
   'home.chaseClose': 'Padé',
+  'home.chaseSent': 'Ti fi ránṣẹ́',
 
   'setup.tagline':
     'Ìwé gbèsè offline rẹ fún udhar. Dátà wà lórí ẹ̀rọ yìí — ó ń ṣiṣẹ́ láìsí ayélujára.',

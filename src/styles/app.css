@@ -3568,3 +3568,182 @@ button:active:not(:disabled),
 .soft-list-qa .qa-pay {
   color: var(--ok);
 }
+
+
+/* —— Soft Chase crest: Chase-all overdue sheet —— */
+.chase-sheet {
+  border-radius: 20px 20px 0 0;
+  overflow: hidden;
+}
+
+.chase-soft-hero {
+  align-items: center;
+  gap: 12px;
+  padding: 16px 12px 14px 16px;
+  background: linear-gradient(160deg, #fff 0%, #fef2f2 100%);
+  border-bottom: 1px solid rgba(185, 28, 28, 0.14);
+}
+
+.chase-soft-crest {
+  width: 48px;
+  height: 48px;
+  border-radius: 13px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: #fff;
+  background: linear-gradient(145deg, var(--danger), #991b1b);
+  box-shadow: 0 0 0 6px rgba(185, 28, 28, 0.08);
+}
+
+.chase-soft-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.chase-soft-kicker {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--danger);
+}
+
+.chase-soft-hero .chase-sheet-title {
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+
+.chase-soft-hero .chase-sheet-sub {
+  color: #475569;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.chase-soft-progress {
+  height: 6px;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: rgba(185, 28, 28, 0.1);
+  overflow: hidden;
+}
+
+.chase-soft-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--danger);
+  transition: width 0.25s ease;
+}
+
+.chase-soft-close {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid var(--border);
+  font-size: 1.3rem;
+  color: #334155;
+}
+
+.chase-soft-close:active {
+  background: #f1f5f9;
+}
+
+.chase-sheet-list {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  padding: 10px 12px;
+}
+
+.chase-row {
+  gap: 12px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(185, 28, 28, 0.14);
+  background: linear-gradient(160deg, #fff 0%, #fef2f2 100%);
+}
+
+.chase-row-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  line-height: 1;
+  background: linear-gradient(145deg, var(--danger), #991b1b);
+  box-shadow: 0 0 0 5px rgba(185, 28, 28, 0.08);
+}
+
+.chase-row.current {
+  border: 2px solid var(--primary);
+  padding: 9px;
+  background: linear-gradient(160deg, #fff 0%, #f0fdfa 100%);
+}
+
+.chase-row.current .chase-row-avatar {
+  background: linear-gradient(145deg, var(--primary), var(--primary-dark));
+  box-shadow: 0 0 0 5px rgba(15, 118, 110, 0.1);
+}
+
+.chase-row.done {
+  opacity: 1;
+  border-color: rgba(21, 128, 61, 0.16);
+  background: linear-gradient(160deg, #fff 0%, #f0fdf4 100%);
+}
+
+.chase-row.done .chase-row-avatar {
+  background: linear-gradient(145deg, var(--ok), #166534);
+  box-shadow: 0 0 0 5px rgba(21, 128, 61, 0.08);
+}
+
+.chase-row.nophone {
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+}
+
+.chase-row.nophone .chase-row-avatar {
+  background: #e2e8f0;
+  color: #475569;
+  box-shadow: none;
+}
+
+.chase-row-name {
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.chase-row-hint {
+  color: #475569;
+  font-weight: 600;
+}
+
+.chase-row-sent {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--ok);
+  background: rgba(21, 128, 61, 0.1);
+}
+
+.chase-row-skip {
+  font-weight: 700;
+  color: #475569;
+}
+
+.chase-sheet-list {
+  grid-template-columns: minmax(0, 1fr);
+  overflow-x: hidden;
+}
+
+.chase-row .chase-row-btn {
+  width: auto;
+  min-width: 88px;
+}

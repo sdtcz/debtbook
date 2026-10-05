@@ -90,6 +90,7 @@ export const en = {
   'home.chaseNoPhone': 'No phone',
   'home.chaseProgress': '{{current}} of {{total}}',
   'home.chaseClose': 'Close',
+  'home.chaseSent': 'Sent',
 
   'setup.tagline':
     'Your offline credit ledger for book debt (udhar). Data stays on this phone — works without internet.',
