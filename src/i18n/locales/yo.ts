@@ -101,6 +101,9 @@ export const yo: Record<MessageKey, string> = {
   'setup.errorName': 'Tẹ orúkọ ilé ìtajà rẹ',
   'setup.start': 'Bẹ̀rẹ̀ síí kọ ìwé',
   'setup.couldNotSave': 'Kò le fi pamọ́',
+  'setup.welcome': 'Ẹ kú àbọ̀',
+  'setup.chipOffline': 'Kò nílò íńtánẹ́ẹ̀tì',
+  'setup.chipNaira': 'Náírà (₦)',
 
   'settings.title': 'Àwọn ètò',
   'settings.yourShop': 'Ilé ìtajà rẹ',

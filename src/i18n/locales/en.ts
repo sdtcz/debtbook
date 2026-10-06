@@ -99,6 +99,9 @@ export const en = {
   'setup.errorName': 'Enter your shop name',
   'setup.start': 'Start keeping books',
   'setup.couldNotSave': 'Could not save',
+  'setup.welcome': 'Welcome',
+  'setup.chipOffline': 'Works offline',
+  'setup.chipNaira': 'Naira (₦)',
 
   'settings.title': 'Settings',
   'settings.yourShop': 'Your shop',

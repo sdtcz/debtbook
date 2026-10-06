@@ -561,69 +561,114 @@ a {
 
 .setup-screen {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 28px 20px 36px;
+  gap: 16px;
+  padding: 20px 20px 36px;
   max-width: 480px;
   margin: 0 auto;
 }
 
-.setup-glow {
-  position: absolute;
-  top: -48px;
-  left: 50%;
-  z-index: 0;
-  width: 240px;
-  height: 240px;
-  transform: translateX(-50%);
-  pointer-events: none;
-  background: radial-gradient(
-    circle,
-    rgba(15, 118, 110, 0.22) 0%,
-    rgba(15, 118, 110, 0.08) 42%,
-    transparent 70%
-  );
+/* —— Soft Welcome crest: first-run Setup —— */
+.setup-lang {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.setup-lang-pill {
+  min-height: var(--tap-min);
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.setup-lang-pill.on {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.setup-lang-pill:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.35);
+  outline-offset: 2px;
+}
+
+.setup-soft-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  background: linear-gradient(160deg, #f0fdfa 0%, #ecfeff 100%);
 }
 
 .setup-crest {
-  position: relative;
-  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 56px;
   height: 56px;
-  margin: 0 0 18px;
+  margin: 0 0 6px;
   border-radius: 16px;
   background: linear-gradient(145deg, var(--primary) 0%, #115e59 100%);
   color: #fff;
   font-size: 1.55rem;
   font-weight: 800;
   line-height: 1;
-  box-shadow: 0 10px 28px rgba(15, 118, 110, 0.28);
+  box-shadow: 0 0 0 7px rgba(15, 118, 110, 0.09);
 }
 
-.setup-screen h1,
-.setup-screen p,
-.setup-screen form {
-  position: relative;
-  z-index: 1;
+.setup-kicker {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 .setup-screen h1 {
-  margin: 0 0 8px;
+  margin: 0;
   font-size: 1.75rem;
+  line-height: 1.15;
   color: var(--primary);
 }
 
 .setup-screen p {
   color: var(--muted);
-  margin: 0 0 22px;
+  margin: 0;
   line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.setup-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.setup-chips li {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  background: var(--surface);
+  color: var(--primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .setup-screen .btn-primary {

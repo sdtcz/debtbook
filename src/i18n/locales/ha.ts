@@ -101,6 +101,9 @@ export const ha: Record<MessageKey, string> = {
   'setup.errorName': 'Shigar da sunan shagonka',
   'setup.start': 'Fara rubuta littafi',
   'setup.couldNotSave': 'An kasa ajiyawa',
+  'setup.welcome': 'Barka da zuwa',
+  'setup.chipOffline': 'Babu buƙatar intanet',
+  'setup.chipNaira': 'Naira (₦)',
 
   'settings.title': 'Saiti',
   'settings.yourShop': 'Shagonka',
