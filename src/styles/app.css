@@ -1158,6 +1158,145 @@ button:active:not(:disabled),
   background: var(--primary-soft);
 }
 
+/* —— Soft Lock crest: PIN unlock overlay —— */
+.pin-card.pin-soft {
+  padding: 0;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.3);
+}
+
+.pin-soft-hero {
+  padding: 22px 18px 18px;
+  background: linear-gradient(160deg, #f0fdfa 0%, #ecfeff 100%);
+  border-bottom: 1px solid rgba(15, 118, 110, 0.14);
+  transition: background 0.2s ease;
+}
+
+.pin-soft.error .pin-soft-hero {
+  background: linear-gradient(160deg, #fff 0%, #fef2f2 100%);
+  border-bottom-color: rgba(185, 28, 28, 0.14);
+}
+
+.pin-soft-crest {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 10px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(145deg, var(--primary) 0%, #115e59 100%);
+  box-shadow: 0 0 0 7px rgba(15, 118, 110, 0.09);
+}
+
+.pin-soft.error .pin-soft-crest {
+  background: linear-gradient(145deg, var(--danger) 0%, #991b1b 100%);
+  box-shadow: 0 0 0 7px rgba(185, 28, 28, 0.08);
+}
+
+.pin-soft-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+  overflow-wrap: anywhere;
+}
+
+.pin-soft h2 {
+  margin: 4px 0 6px;
+  color: var(--text);
+  font-size: 1.3rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.pin-soft-hint {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.pin-soft-wrong {
+  display: inline-block;
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.pin-soft .pin-dots {
+  gap: 14px;
+  margin: 16px 0 2px;
+}
+
+.pin-soft .pin-dots span {
+  width: 16px;
+  height: 16px;
+  border-color: #94a3b8;
+  transition: background 0.12s ease, box-shadow 0.12s ease;
+}
+
+.pin-soft .pin-dots span.filled {
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.14);
+}
+
+.pin-soft.error .pin-dots span {
+  border-color: var(--danger);
+}
+
+.pin-dots.shake {
+  animation: pin-shake 0.36s ease;
+}
+
+@keyframes pin-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-7px); }
+  40% { transform: translateX(7px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin-dots.shake { animation: none; }
+}
+
+.pin-soft .pin-pad {
+  padding: 18px;
+  gap: 10px;
+}
+
+.pin-soft .pin-pad button {
+  min-height: 58px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  color: var(--text);
+  font-size: 1.4rem;
+}
+
+.pin-soft .pin-pad button:active {
+  background: var(--primary-soft);
+  border-color: rgba(15, 118, 110, 0.35);
+}
+
+.pin-soft .pin-pad button:focus-visible {
+  outline: 3px solid rgba(15, 118, 110, 0.35);
+  outline-offset: 2px;
+}
+
+.pin-soft .pin-pad button.pin-back {
+  background: transparent;
+  border-color: transparent;
+  color: #334155;
+  font-size: 1.25rem;
+}
+
 .locked-blur {
   filter: blur(6px);
   user-select: none;

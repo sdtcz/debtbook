@@ -130,6 +130,7 @@ export function App() {
   const [hasShop, setHasShop] = useState(false);
   const [pinHash, setPinHash] = useState<string | undefined>();
   const [pinSalt, setPinSalt] = useState<string | undefined>();
+  const [shopName, setShopName] = useState<string | undefined>();
   const [locked, setLocked] = useState(false);
   const { message, action, toast, clearToast } = useToast();
   const { t } = useLocale();
@@ -138,6 +139,7 @@ export function App() {
     const shop = await getShop();
     if (shop?.locale) initLocale(shop.locale);
     setHasShop(Boolean(shop?.name));
+    setShopName(shop?.name);
     setPinHash(shop?.pinHash);
     setPinSalt(shop?.pinSalt);
     setReady(true);
@@ -145,6 +147,7 @@ export function App() {
 
   const onPinChanged = useCallback(async () => {
     const shop = await getShop();
+    setShopName(shop?.name);
     setPinHash(shop?.pinHash);
     setPinSalt(shop?.pinSalt);
     if (!shop?.pinHash) setLocked(false);
@@ -333,6 +336,7 @@ export function App() {
         <PinLock
           salt={pinSalt}
           hash={pinHash}
+          shopName={shopName}
           onUnlock={() => setLocked(false)}
         />
       )}
