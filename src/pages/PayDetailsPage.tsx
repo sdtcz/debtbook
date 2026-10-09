@@ -77,16 +77,11 @@ export function PayDetailsPage({ toast }: Props) {
         <StatusBadge />
       </header>
       <main class="main settings-main pay-details-soft">
-        <section class="pay-soft-hero" aria-label={t('payDetails.title')}>
-          <div class="pay-soft-hero-row">
-            <div class="pay-soft-avatar" aria-hidden="true">
-              ₦
-            </div>
-            <div class="pay-soft-hero-text">
-              <div class="pay-soft-hero-name">{t('payDetails.title')}</div>
-              <p class="pay-soft-hero-tip">{t('settings.payMeHelp')}</p>
-            </div>
-          </div>
+        <section class="pay-crest-hero" aria-labelledby="pay-crest-title">
+          <div class="pay-crest" aria-hidden="true">₦</div>
+          <div class="pay-crest-kicker">{t('payDetails.kicker')}</div>
+          <h2 id="pay-crest-title">{t('payDetails.heroTitle')}</h2>
+          <p class="pay-crest-hint">{t('payDetails.heroHint')}</p>
         </section>
 
         <form class="card pay-soft-form" onSubmit={save}>
