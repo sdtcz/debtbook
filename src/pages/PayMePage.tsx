@@ -38,10 +38,18 @@ export function PayMePage({ route, toast }: Props) {
 
   return (
     <div class="payme-screen">
-      <div class="payme-card">
-        <div class="payme-brand">BashiBook</div>
-        <h1 class="payme-title">{t('payme.pageTitle')}</h1>
-        <p class="payme-shop">{shopName}</p>
+      <div class="payme-card payme-soft">
+        <section class="collect-crest-hero" aria-labelledby="collect-title">
+          <div class="collect-crest" aria-hidden="true">
+            ₦
+          </div>
+          <div class="collect-kicker">{t('payme.kicker')}</div>
+          <h1 id="collect-title" class="payme-title">
+            {t('payme.pageTitle')}
+          </h1>
+          <p class="collect-shop">{shopName}</p>
+          <p class="collect-hint">{t('payme.heroHint')}</p>
+        </section>
 
         <div class="payme-amount-block">
           <div class="payme-amount-label">{t('payme.amountDue')}</div>

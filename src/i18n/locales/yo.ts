@@ -409,6 +409,8 @@ export const yo: Record<MessageKey, string> = {
   'status.pendingTitle':
     'Àwọn àyípadà ń dúró ìṣọ̀kan nígbà tí a bá so backend',
 
+  'payme.kicker': 'San fún ilé ìtajà',
+  'payme.heroHint': 'Ṣe ìfiránṣẹ́ ní ìta app, lẹ́yìn náà sọ fún oníṣòwò.',
   'payme.pageTitle': 'Ìbéèrè ìsanwó',
   'payme.shopFallback': 'Ilé ìtajà',
   'payme.amountDue': 'Owó tó yẹ́ kó san',

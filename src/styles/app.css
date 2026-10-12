@@ -3991,3 +3991,76 @@ button:active:not(:disabled),
   border-radius: 14px;
 }
 .pay-details-soft .pay-soft-preview-hint { color: #475569; }
+
+
+/* —— Soft Collect crest: public Pay-me page —— */
+.payme-soft .collect-crest-hero {
+  margin: -4px -2px 16px;
+  padding: 20px 14px 16px;
+  text-align: center;
+  border-radius: 18px;
+  background: linear-gradient(160deg, #f0fdfa 0%, #ecfeff 100%);
+  border: 1px solid rgba(15, 118, 110, 0.14);
+}
+.payme-soft .collect-crest {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 10px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(145deg, var(--primary) 0%, #115e59 100%);
+  box-shadow: 0 0 0 7px rgba(15, 118, 110, 0.09);
+}
+.payme-soft .collect-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+  overflow-wrap: anywhere;
+}
+.payme-soft .payme-title {
+  margin: 4px 0 6px;
+  font-size: 1.3rem;
+  line-height: 1.25;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.payme-soft .collect-shop {
+  margin: 0;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.payme-soft .collect-hint {
+  margin: 6px 0 0;
+  color: #475569;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.payme-soft .payme-amount-block {
+  background: #f0fdfa;
+  border: 1px dashed rgba(15, 118, 110, 0.45);
+  border-radius: 14px;
+}
+.payme-soft .payme-amount-label {
+  color: #475569;
+}
+.payme-soft .payme-bank {
+  border-radius: 14px;
+}
+.payme-soft .payme-copy-btn,
+.payme-soft .payme-link-btn {
+  min-height: 48px;
+}
+.payme-soft .payme-note {
+  color: #475569;
+  text-align: center;
+  overflow-wrap: anywhere;
+}

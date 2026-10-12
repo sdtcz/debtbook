@@ -407,6 +407,8 @@ export const en = {
   'status.pendingTitle':
     'Changes queued for sync when a backend is connected',
 
+  'payme.kicker': 'Pay the shop',
+  'payme.heroHint': 'Transfer outside the app, then tell the shopkeeper.',
   'payme.pageTitle': 'Payment request',
   'payme.shopFallback': 'Shop',
   'payme.amountDue': 'Amount due',

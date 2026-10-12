@@ -409,6 +409,8 @@ export const ha: Record<MessageKey, string> = {
   'status.pendingTitle':
     'Canje-canje suna jiran daidaitawa idan an haɗa backend',
 
+  'payme.kicker': 'Biya shagon',
+  'payme.heroHint': 'Canja wuri a wajen app, sa\'an nan ka faɗa wa mai shago.',
   'payme.pageTitle': 'Buƙatar biya',
   'payme.shopFallback': 'Shago',
   'payme.amountDue': 'Adadin da ake biya',
