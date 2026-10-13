@@ -4064,3 +4064,130 @@ button:active:not(:disabled),
   text-align: center;
   overflow-wrap: anywhere;
 }
+
+
+/* —— Soft Glow crest: desktop landing —— */
+.landing-soft-glow .glow-crest-hero {
+  margin: 0 0 28px;
+  padding: 28px 24px 24px;
+  text-align: center;
+  border-radius: 24px;
+  background: linear-gradient(
+    160deg,
+    rgba(15, 118, 110, 0.22) 0%,
+    rgba(15, 23, 42, 0.55) 100%
+  );
+  border: 1px solid rgba(45, 212, 191, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(45, 212, 191, 0.06),
+    0 24px 48px rgba(2, 6, 23, 0.35);
+}
+
+.landing-soft-glow .glow-crest {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 14px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(145deg, #14b8a6 0%, #115e59 100%);
+  box-shadow:
+    0 0 0 8px rgba(45, 212, 191, 0.12),
+    0 12px 28px rgba(15, 118, 110, 0.35);
+}
+
+.landing-soft-glow .glow-kicker {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #5eead4;
+}
+
+.landing-soft-glow .glow-crest-hero .landing-title {
+  margin: 0 0 10px;
+  font-size: clamp(2.2rem, 4.4vw, 3.25rem);
+}
+
+.landing-soft-glow .glow-hint {
+  margin: 0 auto;
+  max-width: 34em;
+  color: #94a3b8;
+  line-height: 1.5;
+  font-size: 1.02rem;
+}
+
+.landing-features-soft .landing-feature-card {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(
+    160deg,
+    rgba(15, 118, 110, 0.14) 0%,
+    rgba(15, 23, 42, 0.55) 100%
+  );
+  border-color: rgba(45, 212, 191, 0.22);
+}
+
+.landing-features-soft .landing-feature-crest {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  font-size: 1.05rem;
+  line-height: 1;
+  color: #fff;
+  background: linear-gradient(145deg, #14b8a6, #0f766e);
+  box-shadow: 0 0 0 5px rgba(45, 212, 191, 0.12);
+}
+
+.landing-features-soft.landing-features-bento .landing-feature-card:last-child {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+.landing-qr-soft {
+  background: rgba(15, 118, 110, 0.14);
+  border: 1.5px dashed rgba(45, 212, 191, 0.45);
+  box-shadow: none;
+}
+
+.landing-qr-soft .landing-qr {
+  border: 1px solid rgba(45, 212, 191, 0.2);
+}
+
+@media (max-width: 640px) {
+  .landing-soft-glow .glow-crest-hero {
+    padding: 22px 16px 18px;
+    border-radius: 20px;
+  }
+
+  .landing-soft-glow .glow-crest {
+    width: 56px;
+    height: 56px;
+    font-size: 1.45rem;
+    box-shadow:
+      0 0 0 7px rgba(45, 212, 191, 0.12),
+      0 10px 24px rgba(15, 118, 110, 0.32);
+  }
+
+  .landing-features-soft.landing-features-bento .landing-feature-card:last-child {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-soft-glow .glow-crest,
+  .landing-features-soft .landing-feature-crest {
+    box-shadow: 0 0 0 5px rgba(45, 212, 191, 0.12);
+  }
+}

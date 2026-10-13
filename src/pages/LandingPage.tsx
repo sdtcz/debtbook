@@ -84,17 +84,22 @@ export function LandingPage({ onUseAppHere }: Props) {
       </nav>
 
       <div class="landing-shell">
-        <section class="landing-narrative">
-          <p class="landing-eyebrow">Offline credit ledger</p>
-          <h1 class="landing-title">
-            Track udhar.
-            <br />
-            <span class="landing-title-accent">Remind. Recover.</span>
-          </h1>
-          <p class="landing-pitch">
-            Offline credit / udhar ledger for Nigerian shopkeepers — track who owes what,
-            remind on WhatsApp, back up when you are ready.
-          </p>
+        <section class="landing-narrative landing-soft-glow">
+          <section class="glow-crest-hero" aria-labelledby="landing-title">
+            <div class="glow-crest" aria-hidden="true">
+              ₦
+            </div>
+            <p class="glow-kicker">Offline credit ledger</p>
+            <h1 id="landing-title" class="landing-title">
+              Track udhar.
+              <br />
+              <span class="landing-title-accent">Remind. Recover.</span>
+            </h1>
+            <p class="glow-hint">
+              Offline credit / udhar ledger for Nigerian shopkeepers — track who owes what,
+              remind on WhatsApp, back up when you are ready.
+            </p>
+          </section>
 
           <div class="landing-cta-row">
             <button type="button" class="landing-cta" onClick={openAppHome}>
@@ -108,10 +113,10 @@ export function LandingPage({ onUseAppHere }: Props) {
             </button>
           </div>
 
-          <ul class="landing-features landing-features-bento">
+          <ul class="landing-features landing-features-bento landing-features-soft">
             {FEATURES.map((f) => (
               <li key={f.title} class="landing-feature-card">
-                <span class="landing-feature-icon" aria-hidden="true">
+                <span class="landing-feature-crest" aria-hidden="true">
                   {f.icon}
                 </span>
                 <div class="landing-feature-body">
@@ -122,7 +127,7 @@ export function LandingPage({ onUseAppHere }: Props) {
             ))}
           </ul>
 
-          <div class="landing-qr-block">
+          <div class="landing-qr-block landing-qr-soft">
             <img
               class="landing-qr"
               src={qrSrc}
