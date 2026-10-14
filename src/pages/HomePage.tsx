@@ -512,20 +512,25 @@ export function HomePage({ locked, toast }: Props) {
             )}
           </div>
         ) : filtered.length === 0 ? (
-          <div class="empty">
+          <div class="match-soft-empty">
+            <div class="match-soft-glyph" aria-hidden="true">
+              ₦
+            </div>
             <strong>{t('home.noMatches')}</strong>
-            {query
-              ? t('home.tryAnother')
-              : filter === 'overdue'
-                ? t('home.nobodyOverdue')
-                : filter === 'owes'
-                  ? t('home.nobodyOwes')
-                  : t('home.nothingHere')}
+            <p>
+              {query
+                ? t('home.tryAnother')
+                : filter === 'overdue'
+                  ? t('home.nobodyOverdue')
+                  : filter === 'owes'
+                    ? t('home.nobodyOwes')
+                    : t('home.nothingHere')}
+            </p>
             {filterActive && (
               <div class="empty-actions">
                 <button
                   type="button"
-                  class="chip"
+                  class="chip match-soft-chip"
                   onClick={clearFilters}
                 >
                   {t('home.clearFilters')}

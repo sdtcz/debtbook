@@ -4191,3 +4191,79 @@ button:active:not(:disabled),
     box-shadow: 0 0 0 5px rgba(45, 212, 191, 0.12);
   }
 }
+
+
+/* —— Soft Match crest: Home filter/search no-matches empty —— */
+.match-soft-empty {
+  margin: 8px 0 24px;
+  padding: 22px 18px 20px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.match-soft-glyph {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  border-radius: 14px;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #ccfbf1,
+    #99f6e4 45%,
+    #5eead4
+  );
+  color: var(--primary);
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow:
+    0 0 0 6px rgba(13, 148, 136, 0.08),
+    0 8px 20px rgba(13, 148, 136, 0.16);
+}
+
+.match-soft-empty strong {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 750;
+  color: var(--text);
+  margin-bottom: 6px;
+  overflow-wrap: anywhere;
+}
+
+.match-soft-empty p {
+  margin: 0 auto;
+  max-width: 30ch;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.match-soft-empty .empty-actions {
+  margin-top: 16px;
+}
+
+.match-soft-chip {
+  min-height: var(--tap);
+  padding: 0 16px;
+  border-color: #99f6e4;
+  background: #f0fdfa;
+  color: var(--primary);
+}
+
+.match-soft-chip:active {
+  background: #ccfbf1;
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .match-soft-glyph {
+    box-shadow: 0 0 0 6px rgba(13, 148, 136, 0.08);
+  }
+}
