@@ -344,6 +344,11 @@ export const yo: Record<MessageKey, string> = {
   'customerForm.moreOptions': 'Àwọn àṣàyàn mìíràn (ọjọ́, òpin, àkọsílẹ̀)',
   'customerForm.contactsHeroTip':
     'Ó yára jù lórí Android Chrome — ó ń mú orúkọ àti ẹ̀rọ ìbáraẹnisọ̀rọ̀ papọ̀.',
+  'customerForm.inviteKicker': 'Ìwé gbèsè rẹ',
+  'customerForm.inviteTitle': 'Fi ẹnìkan kún ìwé rẹ',
+  'customerForm.inviteTip': 'Ta ló ń rà láwìn? Orúkọ tó — fóònù ń ràn lọ́wọ́ fún ìránnilétí.',
+  'customerForm.editKicker': 'Ṣàtúnṣe àlàyé',
+  'customerForm.editTip': 'Àyípadà kò ní kan ìtàn àti gbèsè wọn.',
   'customerForm.orType': 'tàbí tẹ',
   'customerForm.dueHintShort': 'Àmì Ti pẹ́ nígbà tí wọn ṣì jẹ gbèsè',
 

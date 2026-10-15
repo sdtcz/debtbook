@@ -344,6 +344,11 @@ export const ha: Record<MessageKey, string> = {
   'customerForm.moreOptions': 'Ƙarin zaɓuɓɓuka (ranar biya, iyaka, bayani)',
   'customerForm.contactsHeroTip':
     'Mafi sauri a Android Chrome — yana ɗaukar suna da waya tare.',
+  'customerForm.inviteKicker': 'Littafin bashinka',
+  'customerForm.inviteTitle': 'Ƙara wani a littafinka',
+  'customerForm.inviteTip': 'Wa ke saye bashi? Suna ya isa — waya na taimakawa da tunatarwa.',
+  'customerForm.editKicker': 'Sabunta bayanai',
+  'customerForm.editTip': 'Canje-canje ba sa taɓa tarihinsu da bashinsu.',
   'customerForm.orType': 'ko rubuta',
   'customerForm.dueHintShort': 'Alamar Ya wuce lokaci idan har yanzu suna bin bashi',
 

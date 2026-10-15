@@ -342,6 +342,11 @@ export const en = {
   'customerForm.moreOptions': 'More options (due, limit, note)',
   'customerForm.contactsHeroTip':
     'Fastest on Android Chrome — picks name and phone together.',
+  'customerForm.inviteKicker': 'Your credit book',
+  'customerForm.inviteTitle': 'Add someone to your book',
+  'customerForm.inviteTip': 'Who buys on credit? A name is enough — phone helps with reminders.',
+  'customerForm.editKicker': 'Update details',
+  'customerForm.editTip': 'Changes keep their history and balance.',
   'customerForm.orType': 'or type',
   'customerForm.dueHintShort': 'Overdue badge when they still owe',
 

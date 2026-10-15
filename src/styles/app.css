@@ -2845,6 +2845,105 @@ button:active:not(:disabled),
 }
 
 
+/* —— Soft Invite crest: New customer / Soft Start hero —— */
+.customer-form-soft .invite-crest-hero {
+  margin: -2px -2px 14px;
+  padding: 20px 14px 14px;
+  text-align: center;
+  border-radius: 20px;
+  background: linear-gradient(160deg, #f0fdfa 0%, #ecfeff 100%);
+  border: 1px solid rgba(15, 118, 110, 0.14);
+}
+.customer-form-soft .invite-crest {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 10px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(145deg, var(--primary) 0%, #115e59 100%);
+  box-shadow:
+    0 0 0 7px rgba(15, 118, 110, 0.09),
+    0 8px 20px rgba(15, 118, 110, 0.18);
+}
+.customer-form-soft .invite-crest svg {
+  display: block;
+}
+.customer-form-soft .invite-crest-kicker {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+  overflow-wrap: anywhere;
+}
+.customer-form-soft .invite-crest-hero h2 {
+  margin: 4px 0 6px;
+  font-size: 1.25rem;
+  line-height: 1.25;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.customer-form-soft .invite-crest-tip {
+  margin: 0 auto;
+  max-width: 34ch;
+  color: #475569;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+/* Contacts CTA folds into the crest — drop its own wash/border */
+.customer-form-soft .invite-crest-hero .contacts-hero {
+  margin: 14px 0 0;
+  padding: 0;
+  gap: 8px;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+.customer-form-soft .invite-crest-hero .contacts-hero-cta {
+  min-height: 48px;
+}
+.customer-form-soft .invite-crest-hero .contacts-hero-tip {
+  font-size: 0.78rem;
+  color: #475569;
+  overflow-wrap: anywhere;
+}
+.customer-form-soft .customer-form-or {
+  color: #64748b;
+}
+/* Edit: softer, smaller crest with the customer's initial */
+.customer-form-soft .invite-crest-edit {
+  padding: 16px 14px 14px;
+  background: linear-gradient(160deg, #f8fafc 0%, #f0fdfa 100%);
+  border-color: rgba(15, 118, 110, 0.12);
+}
+.customer-form-soft .invite-crest-edit .invite-crest {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  font-size: 1.3rem;
+  color: var(--primary);
+  background: radial-gradient(circle at 35% 30%, #ccfbf1, #99f6e4 55%, #5eead4);
+  box-shadow: 0 0 0 6px rgba(13, 148, 136, 0.08);
+}
+.customer-form-soft .invite-crest-edit h2 {
+  font-size: 1.1rem;
+}
+.customer-form-soft .field label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+}
+.customer-form-soft .input,
+.customer-form-soft > .btn-primary[type='submit'] {
+  min-height: 48px;
+}
+
 /* —— Soft Pay me: settings pay-details —— */
 .pay-details-soft {
   padding-top: 18px;

@@ -63,6 +63,8 @@ export function CustomerFormPage({ id, toast }: Props) {
   const [note, setNote] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [creditLimit, setCreditLimit] = useState('');
+  // Soft Invite crest: name as loaded (edit crest shows it, not live typing)
+  const [loadedName, setLoadedName] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [contactsSupported] = useState(() => isContactPickerSupported());
@@ -78,6 +80,7 @@ export function CustomerFormPage({ id, toast }: Props) {
         return;
       }
       setName(c.name);
+      setLoadedName(c.name);
       setPhone(c.phone || '');
       setNote(c.note || '');
       setDueDate(toDateDisplay(c.dueAt));
@@ -244,24 +247,71 @@ export function CustomerFormPage({ id, toast }: Props) {
         <h1>{editing ? t('customerForm.edit') : t('customerForm.new')}</h1>
       </header>
       <main class="main">
-        <form class="card customer-form-soft" onSubmit={submit}>
-          {!editing && (
+        <form
+          class={`card customer-form-soft${editing ? ' is-editing' : ''}`}
+          onSubmit={submit}
+        >
+          {!editing ? (
             <>
-              <div class="contacts-hero">
-                <button
-                  class="btn btn-primary contacts-hero-cta"
-                  type="button"
-                  disabled={busy}
-                  onClick={fromContacts}
-                >
-                  📇 {t('customerForm.fromContacts')}
-                </button>
-                <p class="contacts-hero-tip">{t('customerForm.contactsHeroTip')}</p>
-              </div>
+              <section
+                class="invite-crest-hero"
+                aria-labelledby="invite-crest-title"
+              >
+                <div class="invite-crest" aria-hidden="true">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="26"
+                    height="26"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <circle cx="9" cy="8" r="3.5" />
+                    <path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6" />
+                    <path d="M19 8v6M16 11h6" />
+                  </svg>
+                </div>
+                <div class="invite-crest-kicker">
+                  {t('customerForm.inviteKicker')}
+                </div>
+                <h2 id="invite-crest-title">{t('customerForm.inviteTitle')}</h2>
+                <p class="invite-crest-tip">{t('customerForm.inviteTip')}</p>
+                <div class="contacts-hero">
+                  <button
+                    class="btn btn-primary contacts-hero-cta"
+                    type="button"
+                    disabled={busy}
+                    onClick={fromContacts}
+                  >
+                    📇 {t('customerForm.fromContacts')}
+                  </button>
+                  <p class="contacts-hero-tip">
+                    {t('customerForm.contactsHeroTip')}
+                  </p>
+                </div>
+              </section>
               <div class="customer-form-or" role="presentation">
                 {t('customerForm.orType')}
               </div>
             </>
+          ) : (
+            <section
+              class="invite-crest-hero invite-crest-edit"
+              aria-labelledby="invite-crest-title"
+            >
+              <div class="invite-crest" aria-hidden="true">
+                {(loadedName.trim()[0] || '₦').toUpperCase()}
+              </div>
+              <div class="invite-crest-kicker">
+                {t('customerForm.editKicker')}
+              </div>
+              <h2 id="invite-crest-title">
+                {loadedName.trim() || t('customerForm.edit')}
+              </h2>
+              <p class="invite-crest-tip">{t('customerForm.editTip')}</p>
+            </section>
           )}
           <div class="field">
             <label for="cname">{t('customerForm.name')}</label>
