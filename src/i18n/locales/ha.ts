@@ -280,6 +280,12 @@ export const ha: Record<MessageKey, string> = {
 
   'customer.remind': 'Tunatar',
   'customer.statement': 'Bayani',
+  'customer.collectKicker': 'Karɓi kuɗi',
+  'customer.collectTitle': 'Karɓi {{amount}}',
+  'customer.collectHint': 'Tunatar da {{name}} a WhatsApp ko aika bayanan bankinka.',
+  'customer.collectShareKicker': 'Raba',
+  'customer.collectShareTitle': 'Aika bayani',
+  'customer.collectShareHint': 'Babu bashin da za a bi — aika wa {{name}} bayani idan ya tambaya.',
   'customer.undoLast': 'Juyar shigarwa ta ƙarshe',
   'customer.note': 'Bayani: {{note}}',
   'customer.history': 'Tarihi',

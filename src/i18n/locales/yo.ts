@@ -280,6 +280,12 @@ export const yo: Record<MessageKey, string> = {
 
   'customer.remind': 'Rán létí',
   'customer.statement': 'Àkọọ́lẹ̀',
+  'customer.collectKicker': 'Gba owó',
+  'customer.collectTitle': 'Gba {{amount}}',
+  'customer.collectHint': 'Rán {{name}} létí lórí WhatsApp tàbí fi àlàyé báǹkì rẹ ránṣẹ́.',
+  'customer.collectShareKicker': 'Pín',
+  'customer.collectShareTitle': 'Fi àkọọ́lẹ̀ ránṣẹ́',
+  'customer.collectShareHint': 'Kò sí gbèsè láti lépa — pín àkọọ́lẹ̀ pẹ̀lú {{name}} tí wọ́n bá béèrè.',
   'customer.undoLast': 'Dá àkọsílẹ̀ ìgbẹ̀yìn padà',
   'customer.note': 'Àkọsílẹ̀: {{note}}',
   'customer.history': 'Ìtàn',

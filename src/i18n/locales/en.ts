@@ -278,6 +278,12 @@ export const en = {
 
   'customer.remind': 'Remind',
   'customer.statement': 'Statement',
+  'customer.collectKicker': 'Get paid',
+  'customer.collectTitle': 'Collect {{amount}}',
+  'customer.collectHint': 'Nudge {{name}} on WhatsApp or send your bank details.',
+  'customer.collectShareKicker': 'Share',
+  'customer.collectShareTitle': 'Send the record',
+  'customer.collectShareHint': 'Nothing to chase — share a statement with {{name}} if they ask.',
   'customer.undoLast': 'Undo last entry',
   'customer.note': 'Note: {{note}}',
   'customer.history': 'History',

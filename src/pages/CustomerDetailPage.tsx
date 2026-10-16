@@ -274,21 +274,69 @@ export function CustomerDetailPage({ id, toast }: Props) {
           >
             {t('customer.payment')}
           </button>
-          <button class="btn btn-secondary" type="button" onClick={onRemind}>
-            {t('customer.remind')}
-          </button>
-          <button class="btn btn-outline" type="button" onClick={onStatement}>
-            {t('customer.statement')}
-          </button>
         </div>
 
-        {balanceKobo > 0 && (
-          <div class="btn-row" style={{ marginTop: 0, marginBottom: 12 }}>
-            <button class="btn btn-primary" type="button" onClick={onPayMe}>
-              {t('customer.payMe')}
+        <section
+          class={`collect-soft${balanceKobo > 0 ? '' : ' collect-soft-share'}`}
+          aria-label={
+            balanceKobo > 0
+              ? t('customer.collectKicker')
+              : t('customer.collectShareKicker')
+          }
+        >
+          <div class="collect-soft-head">
+            <div class="collect-soft-crest" aria-hidden="true">
+              {balanceKobo > 0 ? '₦' : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 3h7l5 5v13H7z" />
+                  <path d="M14 3v5h5M10 13h6M10 17h6" />
+                </svg>
+              )}
+            </div>
+            <div class="collect-soft-copy">
+              <div class="collect-soft-kicker">
+                {balanceKobo > 0
+                  ? t('customer.collectKicker')
+                  : t('customer.collectShareKicker')}
+              </div>
+              <div class="collect-soft-title">
+                {balanceKobo > 0
+                  ? t('customer.collectTitle', { amount: formatNaira(balanceKobo) })
+                  : t('customer.collectShareTitle')}
+              </div>
+              <p class="collect-soft-hint">
+                {balanceKobo > 0
+                  ? t('customer.collectHint', { name: customer.name })
+                  : t('customer.collectShareHint', { name: customer.name })}
+              </p>
+            </div>
+          </div>
+          <div class={`collect-soft-tiles${balanceKobo > 0 ? '' : ' two'}`}>
+            <button class="collect-tile" type="button" onClick={onRemind}>
+              <span class="collect-tile-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />
+                </svg>
+              </span>
+              <span class="collect-tile-label">{t('customer.remind')}</span>
+            </button>
+            {balanceKobo > 0 && (
+              <button class="collect-tile hero" type="button" onClick={onPayMe}>
+                <span class="collect-tile-icon naira" aria-hidden="true">₦</span>
+                <span class="collect-tile-label">{t('customer.payMe')}</span>
+              </button>
+            )}
+            <button class="collect-tile" type="button" onClick={onStatement}>
+              <span class="collect-tile-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 3h7l5 5v13H7z" />
+                  <path d="M14 3v5h5M10 13h6M10 17h6" />
+                </svg>
+              </span>
+              <span class="collect-tile-label">{t('customer.statement')}</span>
             </button>
           </div>
-        )}
+        </section>
 
         {canUndo && (
           <div class="btn-row" style={{ marginTop: 8 }}>
