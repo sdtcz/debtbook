@@ -379,6 +379,10 @@ export const ha: Record<MessageKey, string> = {
   'entry.paymentTip': 'Yana rage abin da suke baka. Bayani na zaɓi — adadi ne mahimmi.',
 
   'entry.creditLimitWarn': 'Iyaka {{limit}} · zai zama {{wouldBe}}. A rubuta duk da haka?',
+  'entry.kicker': 'Sabon shigarwa',
+  'entry.tallyNow': 'Saura yanzu',
+  'entry.tallyAfter': 'Bayan wannan',
+  'entry.tallyAria': 'Saura kafin da bayan wannan shigarwa',
 
   'money.placeholder': '0.00 ko 3k',
   'money.hint': 'Naira (₦) — shawara: rubuta 3k don ₦3,000',

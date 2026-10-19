@@ -379,6 +379,10 @@ export const yo: Record<MessageKey, string> = {
   'entry.paymentTip': 'Ó ń dín ohun tí wọ́n jẹ́ ẹ́ kù. Àkọsílẹ̀ jẹ́ àyànfẹ́ — iye ló ṣe pàtàkì.',
 
   'entry.creditLimitWarn': 'Òpin {{limit}} · yóò jẹ́ {{wouldBe}}. Kọ ọ́ síbẹ̀?',
+  'entry.kicker': 'Àkọsílẹ̀ tuntun',
+  'entry.tallyNow': 'Iyokù báyìí',
+  'entry.tallyAfter': 'Lẹ́yìn èyí',
+  'entry.tallyAria': 'Iyokù ṣáájú àti lẹ́yìn àkọsílẹ̀ yìí',
 
   'money.placeholder': '0.00 tàbí 3k',
   'money.hint': 'Náírà (₦) — ìmọ̀ràn: tẹ 3k fún ₦3,000',

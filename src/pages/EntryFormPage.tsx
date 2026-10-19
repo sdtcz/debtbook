@@ -9,7 +9,12 @@ import {
 } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
 import type { Customer, EntryType } from '../lib/types';
-import { formatNaira, parseNairaToKobo } from '../lib/money';
+import {
+  balanceLabel,
+  balanceTone,
+  formatNaira,
+  parseNairaToKobo,
+} from '../lib/money';
 import { navigate } from '../lib/router';
 import type { ToastAction } from '../hooks/useToast';
 
@@ -26,6 +31,8 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
   const [note, setNote] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customer, setCustomer] = useState<Customer | null>(null);
+  // Soft Tally crest: current balance (null until loaded)
+  const [balanceKobo, setBalanceKobo] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,6 +46,9 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
       setCustomerName(c.name);
       setCustomer(c);
     });
+    getCustomerBalance(customerId)
+      .then((b) => setBalanceKobo(b.balanceKobo))
+      .catch(() => setBalanceKobo(null));
   }, [customerId]);
 
   useEffect(() => {
@@ -99,6 +109,15 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
     }
   };
 
+  const typedKobo = parseNairaToKobo(amount);
+  const deltaKobo =
+    typedKobo !== null && typedKobo > 0
+      ? type === 'credit'
+        ? typedKobo
+        : -typedKobo
+      : 0;
+  const afterKobo = balanceKobo === null ? null : balanceKobo + deltaKobo;
+
   return (
     <div class="app-shell">
       <header class="topbar">
@@ -129,6 +148,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
               ₦
             </div>
             <div class="entry-soft-hero-text">
+              <div class="entry-soft-kicker">{t('entry.kicker')}</div>
               <div class="entry-soft-hero-name">
                 {type === 'credit' ? t('entry.creditSale') : t('entry.payment')}
               </div>
@@ -137,6 +157,27 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
               </p>
             </div>
           </div>
+          {balanceKobo !== null && afterKobo !== null && (
+            <div class="entry-tally" role="group" aria-label={t('entry.tallyAria')}>
+              <div class="entry-tally-cell">
+                <div class="entry-tally-label">{t('entry.tallyNow')}</div>
+                <div class={`entry-tally-amount ${balanceTone(balanceKobo)}`}>
+                  {formatNaira(Math.abs(balanceKobo))}
+                </div>
+                <div class="entry-tally-sub">{balanceLabel(balanceKobo)}</div>
+              </div>
+              <div class="entry-tally-arrow" aria-hidden="true">
+                →
+              </div>
+              <div class="entry-tally-cell after" aria-live="polite">
+                <div class="entry-tally-label">{t('entry.tallyAfter')}</div>
+                <div class={`entry-tally-amount ${balanceTone(afterKobo)}`}>
+                  {formatNaira(Math.abs(afterKobo))}
+                </div>
+                <div class="entry-tally-sub">{balanceLabel(afterKobo)}</div>
+              </div>
+            </div>
+          )}
         </section>
         <form class="card entry-soft-form" onSubmit={submit}>
           <div class="seg" role="group" aria-label={t('entry.type')}>

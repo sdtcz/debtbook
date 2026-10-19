@@ -377,6 +377,10 @@ export const en = {
   'entry.paymentTip': 'Reduces what they owe. Note optional — amount is what counts.',
 
   'entry.creditLimitWarn': 'Limit {{limit}} · would be {{wouldBe}}. Record anyway?',
+  'entry.kicker': 'New entry',
+  'entry.tallyNow': 'Balance now',
+  'entry.tallyAfter': 'After this',
+  'entry.tallyAria': 'Balance before and after this entry',
 
   'money.placeholder': '0.00 or 3k',
   'money.hint': 'Naira (₦) — tip: type 3k for ₦3,000',
