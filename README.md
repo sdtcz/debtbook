@@ -29,13 +29,13 @@ npm test
 | Encrypted cloud backup + multi-device sync | | ✓ |
 | Pro badge / hide upgrade nag | | ✓ |
 
-**Pricing:** ₦1,500/mo or ₦12,000/yr.
+**Pricing:** $1.99/mo or $15/yr (USD, Stripe Checkout subscription).
 
-**Try Pro tonight:** Settings → **BashiBook Pro** → **Activate Pro (demo)** — sets `plan=pro` for 30 days locally (no Paystack/Stripe keys needed).
+**Try Pro tonight:** Settings → **BashiBook Pro** → **Activate Pro (demo)** — sets `plan=pro` for 30 days locally (no Stripe keys needed).
 
 **Cloud backup / multi-device sync (Pro):** `api/cloud-backup.ts` stores encrypted blobs via [Vercel Blob](https://vercel.com/docs/storage/vercel-blob). Sync MVP reuses that snapshot channel: Unlock sync on a device (recovery code in IndexedDB only) → Sync now / auto-push. `GET ?id=&meta=1` returns timestamps without ciphertext. Requires `BLOB_READ_WRITE_TOKEN` (501 without it). Recovery code is never uploaded or logged.
 
-**Real payments (stub):** `api/checkout.ts` + `api/webhook.ts` document Paystack (preferred for NGN) and Stripe. They return 501 until `PAYSTACK_SECRET_KEY` / `STRIPE_SECRET_KEY` are set on Vercel — and still need a short wiring pass after that.
+**Real payments (Stripe):** `api/checkout.ts` creates a Stripe Checkout Session (subscription mode, inline `price_data`), `api/verify.ts` confirms it server-side (paid + active subscription) before Pro unlocks, and `api/webhook.ts` verifies `Stripe-Signature`. They return 501 until `STRIPE_SECRET_KEY` (checkout/verify) and `STRIPE_WEBHOOK_SECRET` (webhook) are set on Vercel. Webhook endpoint: `https://debtbook-neon.vercel.app/api/webhook` — events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.updated`, `customer.subscription.deleted`. The earlier Paystack flow is in git history (commit f805ac5).
 
 ## Features (v2)
 
@@ -75,9 +75,9 @@ api/           Vercel serverless stubs (checkout / webhook)
 - **Routing:** hash (`#/customers/:id`, `#/settings/pro`)  
 - **DB version 2:** optional `dueAt` on customers; `pinHash` / `pinSalt` / `entitlement` on shop  
 
-## Paystack note (Nigeria)
+## Payments note
 
-Prefer **Paystack** for NGN subscriptions. Stripe is optional. Never put secret keys in the PWA — only in Vercel env for `/api/*`. Until keys exist, **Activate Pro (demo)** is the supported path.
+Pro is billed in USD via **Stripe Checkout**. Never put secret keys in the PWA — only in Vercel env for `/api/*`. Until keys exist, **Activate Pro (demo)** is the supported path.
 
 ## License
 

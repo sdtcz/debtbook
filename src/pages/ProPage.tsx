@@ -12,7 +12,7 @@ import {
   rememberEmail,
   rememberedEmail,
   type ProBillingPlan,
-} from '../lib/paystackReturn';
+} from '../lib/checkoutReturn';
 import type { ShopProfile } from '../lib/types';
 import { navigate } from '../lib/router';
 import type { ToastAction } from '../hooks/useToast';
@@ -92,7 +92,7 @@ export function ProPage({ toast }: Props) {
     }
   };
 
-  // Returning from Paystack: #/pro?ref=… → verify server-side before unlocking.
+  // Returning from Stripe Checkout: #/pro?ref=… → verify server-side before unlocking.
   useEffect(() => {
     const check = () => {
       const ref = refFromHash(location.hash);

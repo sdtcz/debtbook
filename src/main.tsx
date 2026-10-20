@@ -2,9 +2,9 @@ import { render } from 'preact';
 import { App } from './App';
 import './styles/app.css';
 import { registerSW } from 'virtual:pwa-register';
-import { normalizePaystackReturnUrl } from './lib/paystackReturn';
+import { normalizeCheckoutReturnUrl } from './lib/checkoutReturn';
 
-normalizePaystackReturnUrl();
+normalizeCheckoutReturnUrl();
 
 registerSW({ immediate: true });
 

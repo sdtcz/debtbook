@@ -1,53 +1,23 @@
 declare const process: { env: Record<string, string | undefined> };
 
+import Stripe from 'stripe';
+
 /**
- * BashiBook Pro webhook (Vercel serverless).
+ * BashiBook Pro webhook (Vercel serverless) — Stripe.
  *
- * Paystack: verifies x-paystack-signature = HMAC-SHA512(raw body, PAYSTACK_SECRET_KEY).
- * Bad / missing signature → 401. charge.success → logged + 200 ack.
- * (Offline-first app: entitlement is applied on-device via /api/verify; the
- * webhook is the provider-side audit trail.)
- *
- * Stripe: still a stub (501). No secrets → 501.
+ * Verifies the Stripe-Signature header against the exact raw body with
+ * STRIPE_WEBHOOK_SECRET. Missing signature → 400, bad signature → 400.
+ * Handles:
+ *   checkout.session.completed / checkout.session.async_payment_succeeded
+ *     (fulfillment gated on payment_status === 'paid')
+ *   customer.subscription.updated / customer.subscription.deleted
+ * Offline-first app: entitlement is applied on-device via /api/verify; the
+ * webhook is the provider-side audit trail. No secret → 501.
+ * (Previous Paystack webhook: see git history, commit f805ac5.)
  */
 
-/** Ask Vercel not to pre-parse the body so the exact raw bytes can be signed. */
+/** Ask Vercel not to pre-parse the body so the exact raw bytes can be verified. */
 export const config = { api: { bodyParser: false } };
-
-function toHex(buf: ArrayBuffer): string {
-  return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('');
-}
-
-export async function hmacSha512Hex(secret: string, payload: Uint8Array | string): Promise<string> {
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    'raw',
-    enc.encode(secret),
-    { name: 'HMAC', hash: 'SHA-512' },
-    false,
-    ['sign'],
-  );
-  const data = typeof payload === 'string' ? enc.encode(payload) : payload;
-  return toHex(await crypto.subtle.sign('HMAC', key, data));
-}
-
-function timingSafeEqualStr(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  let diff = 0;
-  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
-  return diff === 0;
-}
-
-/** True only when signature is the hex HMAC-SHA512 of the raw body. */
-export async function verifyPaystackSignature(
-  secret: string,
-  rawBody: Uint8Array | string,
-  signature: string | undefined | null,
-): Promise<boolean> {
-  if (!secret || !signature || !/^[a-f0-9]{128}$/i.test(signature)) return false;
-  const expected = await hmacSha512Hex(secret, rawBody);
-  return timingSafeEqualStr(expected, signature.toLowerCase());
-}
 
 type Req = AsyncIterable<Uint8Array | string> & {
   method?: string;
@@ -77,67 +47,98 @@ async function readRaw(req: Req): Promise<Uint8Array> {
   return out;
 }
 
+export const HANDLED_EVENTS = [
+  'checkout.session.completed',
+  'checkout.session.async_payment_succeeded',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
+] as const;
+
+/** Verify signature + parse. Throws on a bad/missing signature. Exported for tests. */
+export async function constructStripeEvent(
+  raw: Uint8Array | string,
+  signature: string | undefined,
+  secret: string,
+): Promise<Stripe.Event> {
+  if (!signature) throw new Error('Missing Stripe-Signature header');
+  const payload = typeof raw === 'string' ? raw : new TextDecoder().decode(raw);
+  return Stripe.webhooks.constructEventAsync(payload, signature, secret);
+}
+
+/** Summarize an event for logs/acks (no PII beyond ids). Exported for tests. */
+export function describeEvent(event: Pick<Stripe.Event, 'type' | 'data'>): Record<string, unknown> {
+  const obj = event.data?.object as unknown as Record<string, unknown>;
+  switch (event.type) {
+    case 'checkout.session.completed':
+    case 'checkout.session.async_payment_succeeded': {
+      const s = obj as { id?: string; payment_status?: string; subscription?: unknown; metadata?: { plan?: string } };
+      return {
+        type: event.type,
+        session: s.id,
+        paid: s.payment_status === 'paid',
+        plan: s.metadata?.plan,
+        subscription: typeof s.subscription === 'string' ? s.subscription : undefined,
+      };
+    }
+    case 'customer.subscription.updated':
+    case 'customer.subscription.deleted': {
+      const sub = obj as { id?: string; status?: string; cancel_at_period_end?: boolean; metadata?: { plan?: string } };
+      return {
+        type: event.type,
+        subscription: sub.id,
+        status: sub.status,
+        cancelAtPeriodEnd: sub.cancel_at_period_end,
+        plan: sub.metadata?.plan,
+      };
+    }
+    default:
+      return { type: event.type, ignored: true };
+  }
+}
+
 export default async function handler(req: Req, res: Res) {
   if (req.method !== 'POST') {
     res.status(405).json({ ok: false, message: 'Method not allowed' });
     return;
   }
 
-  const paystackKey = process.env.PAYSTACK_SECRET_KEY;
-  const stripeSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
-  if (!paystackKey && !stripeSecret) {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) {
     res.status(501).json({
       ok: false,
-      message:
-        'Webhook stub — configure PAYSTACK_SECRET_KEY or STRIPE_WEBHOOK_SECRET to verify events.',
+      message: 'Webhook not configured. Set STRIPE_WEBHOOK_SECRET on Vercel.',
     });
     return;
   }
 
-  const sigHeader = req.headers?.['x-paystack-signature'];
+  const sigHeader = req.headers?.['stripe-signature'];
   const signature = Array.isArray(sigHeader) ? sigHeader[0] : sigHeader;
-
-  if (paystackKey && (signature || !stripeSecret)) {
-    let raw: Uint8Array;
-    try {
-      raw = await readRaw(req);
-    } catch {
-      res.status(400).json({ ok: false, message: 'Could not read body' });
-      return;
-    }
-    if (!(await verifyPaystackSignature(paystackKey, raw, signature))) {
-      res.status(401).json({ ok: false, message: 'Invalid signature' });
-      return;
-    }
-    let event: { event?: string; data?: { reference?: string; amount?: number; currency?: string; status?: string; metadata?: { plan?: string } } } = {};
-    try {
-      event = JSON.parse(new TextDecoder().decode(raw));
-    } catch {
-      res.status(400).json({ ok: false, message: 'Invalid JSON' });
-      return;
-    }
-    if (event.event === 'charge.success') {
-      const d = event.data || {};
-      console.log(
-        'paystack charge.success',
-        JSON.stringify({
-          reference: d.reference,
-          amount: d.amount,
-          currency: d.currency,
-          status: d.status,
-          plan: d.metadata?.plan,
-        }),
-      );
-    } else {
-      console.log('paystack event ignored', event.event);
-    }
-    res.status(200).json({ ok: true });
+  if (!signature) {
+    res.status(400).json({ ok: false, message: 'Missing Stripe-Signature header' });
     return;
   }
 
-  res.status(501).json({
-    ok: false,
-    message: 'Stripe webhook verification is not wired yet.',
-  });
+  let raw: Uint8Array;
+  try {
+    raw = await readRaw(req);
+  } catch {
+    res.status(400).json({ ok: false, message: 'Could not read body' });
+    return;
+  }
+
+  let event: Stripe.Event;
+  try {
+    event = await constructStripeEvent(raw, signature, secret);
+  } catch {
+    res.status(400).json({ ok: false, message: 'Invalid signature' });
+    return;
+  }
+
+  const summary = describeEvent(event);
+  if ((HANDLED_EVENTS as readonly string[]).includes(event.type)) {
+    console.log('stripe event', event.id, JSON.stringify(summary));
+  } else {
+    console.log('stripe event ignored', event.id, event.type);
+  }
+  res.status(200).json({ ok: true, received: true });
 }

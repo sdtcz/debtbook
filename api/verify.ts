@@ -1,83 +1,101 @@
 declare const process: { env: Record<string, string | undefined> };
 
+import Stripe from 'stripe';
+
 /**
- * BashiBook Pro payment verification (Vercel serverless).
+ * BashiBook Pro payment verification (Vercel serverless) — Stripe.
  *
- * GET ?reference=… → Paystack /transaction/verify/:reference (server-side)
- * Paid only if status === 'success', currency NGN and amount matches the plan.
- * → { ok: true, plan, paidAt, expiresAt } or { ok: false, code, message }
+ * GET ?reference=<Checkout Session id> (also accepts ?session_id=)
+ *   → stripe.checkout.sessions.retrieve(id, { expand: ['subscription'] })
+ * Pro only if the session is a complete subscription checkout with
+ * payment_status 'paid', USD amount matching the plan, and the subscription
+ * status 'active'.
+ * → { ok: true, plan, paidAt, expiresAt, reference } or { ok: false, code, message }
  *
  * Never trusts client claims of payment. No key → 501.
+ * (Previous Paystack verify: see git history, commit f805ac5.)
  */
 
 type ProPlan = 'monthly' | 'yearly';
 
-/** Keep in sync with api/checkout.ts (server-side price list, kobo). */
-const PLAN_AMOUNT_KOBO: Record<ProPlan, number> = {
-  monthly: 150_000,
-  yearly: 1_200_000,
+/** Keep in sync with api/checkout.ts (server-side price list, USD cents). */
+const PLAN_AMOUNT_CENTS: Record<ProPlan, number> = {
+  monthly: 199,
+  yearly: 1500,
 };
 
 const PLAN_DAYS: Record<ProPlan, number> = { monthly: 30, yearly: 365 };
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** Checkout Session ids look like cs_live_… / cs_test_… */
 export function isValidReference(ref: unknown): ref is string {
-  return typeof ref === 'string' && /^[A-Za-z0-9_.=-]{1,100}$/.test(ref);
+  return typeof ref === 'string' && /^cs_(live|test)_[A-Za-z0-9]{10,240}$/.test(ref);
 }
 
-export interface PaystackTx {
-  status?: string;
-  currency?: string;
-  amount?: number;
-  reference?: string;
-  paid_at?: string | null;
-  paidAt?: string | null;
-  metadata?: unknown;
+/** The subset of a Checkout Session we rely on (subscription expanded). */
+export interface StripeSessionLike {
+  id?: string;
+  mode?: string | null;
+  status?: string | null;
+  payment_status?: string | null;
+  currency?: string | null;
+  amount_total?: number | null;
+  created?: number;
+  metadata?: Record<string, string> | null;
+  subscription?:
+    | string
+    | {
+        status?: string;
+        start_date?: number;
+        items?: { data?: Array<{ current_period_start?: number; current_period_end?: number }> };
+      }
+    | null;
 }
 
 export type VerifyOutcome =
   | { ok: true; plan: ProPlan; paidAt: number; expiresAt: number; reference?: string }
   | { ok: false; code: string; message: string };
 
-function metaPlan(metadata: unknown): unknown {
-  let m = metadata;
-  if (typeof m === 'string') {
-    try {
-      m = JSON.parse(m);
-    } catch {
-      return undefined;
-    }
+/** Pure check of a retrieved Checkout Session. Exported for tests. */
+export function evaluateStripeSession(
+  s: StripeSessionLike | null | undefined,
+  now = Date.now(),
+): VerifyOutcome {
+  if (!s) return { ok: false, code: 'not_found', message: 'Payment not found' };
+  if (s.mode !== 'subscription') {
+    return { ok: false, code: 'bad_mode', message: 'Not a Pro subscription checkout' };
   }
-  return m && typeof m === 'object' ? (m as { plan?: unknown }).plan : undefined;
-}
-
-/** Pure check of a Paystack verify payload. Exported for tests. */
-export function evaluatePaystackTx(tx: PaystackTx | null | undefined, now = Date.now()): VerifyOutcome {
-  if (!tx) return { ok: false, code: 'not_found', message: 'Payment not found' };
-  if (tx.status !== 'success') {
-    return { ok: false, code: 'not_paid', message: `Payment not successful (${tx.status || 'unknown'})` };
+  if (s.payment_status !== 'paid' || s.status !== 'complete') {
+    return {
+      ok: false,
+      code: 'not_paid',
+      message: `Payment not successful (${s.payment_status || s.status || 'unknown'})`,
+    };
   }
-  if (tx.currency !== 'NGN') {
+  if ((s.currency || '').toLowerCase() !== 'usd') {
     return { ok: false, code: 'bad_currency', message: 'Unexpected currency' };
   }
-  const claimed = metaPlan(tx.metadata);
+  const claimed = s.metadata?.plan;
   const plan: ProPlan | undefined =
     claimed === 'monthly' || claimed === 'yearly'
       ? claimed
-      : (Object.keys(PLAN_AMOUNT_KOBO) as ProPlan[]).find((p) => PLAN_AMOUNT_KOBO[p] === tx.amount);
-  if (!plan || tx.amount !== PLAN_AMOUNT_KOBO[plan]) {
+      : (Object.keys(PLAN_AMOUNT_CENTS) as ProPlan[]).find((p) => PLAN_AMOUNT_CENTS[p] === s.amount_total);
+  if (!plan || s.amount_total !== PLAN_AMOUNT_CENTS[plan]) {
     return { ok: false, code: 'bad_amount', message: 'Amount does not match plan' };
   }
-  const paidRaw = tx.paid_at || tx.paidAt;
-  const parsed = paidRaw ? Date.parse(paidRaw) : NaN;
-  const paidAt = Number.isFinite(parsed) ? parsed : now;
-  return {
-    ok: true,
-    plan,
-    paidAt,
-    expiresAt: paidAt + PLAN_DAYS[plan] * DAY_MS,
-    reference: tx.reference,
-  };
+  const sub = s.subscription;
+  if (!sub || typeof sub === 'string') {
+    return { ok: false, code: 'no_subscription', message: 'Subscription not found' };
+  }
+  if (sub.status !== 'active') {
+    return { ok: false, code: 'not_active', message: `Subscription not active (${sub.status || 'unknown'})` };
+  }
+  const item = sub.items?.data?.[0];
+  const startSec = item?.current_period_start || sub.start_date || s.created;
+  const paidAt = startSec ? startSec * 1000 : now;
+  const fallbackExp = paidAt + PLAN_DAYS[plan] * DAY_MS;
+  const expiresAt = item?.current_period_end ? item.current_period_end * 1000 : fallbackExp;
+  return { ok: true, plan, paidAt, expiresAt, reference: s.id };
 }
 
 type Req = { method?: string; query?: Record<string, string | string[] | undefined> };
@@ -93,12 +111,12 @@ export default async function handler(req: Req, res: Res) {
     res.status(405).json({ ok: false, message: 'Method not allowed' });
     return;
   }
-  const key = process.env.PAYSTACK_SECRET_KEY;
+  const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {
-    res.status(501).json({ ok: false, code: 'not_configured', message: 'Paystack not configured' });
+    res.status(501).json({ ok: false, code: 'not_configured', message: 'Stripe not configured' });
     return;
   }
-  const raw = req.query?.reference ?? req.query?.trxref;
+  const raw = req.query?.reference ?? req.query?.session_id;
   const reference = Array.isArray(raw) ? raw[0] : raw;
   if (!isValidReference(reference)) {
     res.status(400).json({ ok: false, code: 'bad_reference', message: 'Missing or invalid reference' });
@@ -106,27 +124,18 @@ export default async function handler(req: Req, res: Res) {
   }
 
   try {
-    const r = await fetch(
-      `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
-      { headers: { Authorization: `Bearer ${key}` } },
-    );
-    const data = (await r.json().catch(() => null)) as
-      | { status?: boolean; message?: string; data?: PaystackTx }
-      | null;
-    if (!r.ok || !data?.status) {
-      // Unknown reference → 404 from Paystack
-      const notFound = r.status === 400 || r.status === 404;
-      res.status(notFound ? 404 : 502).json({
-        ok: false,
-        code: notFound ? 'not_found' : 'provider_error',
-        message: notFound ? 'Payment not found' : 'Could not verify payment. Try again.',
-      });
-      return;
-    }
-    const outcome = evaluatePaystackTx(data.data);
+    const stripe = new Stripe(key);
+    const session = await stripe.checkout.sessions.retrieve(reference, { expand: ['subscription'] });
+    const outcome = evaluateStripeSession(session as unknown as StripeSessionLike);
     res.status(outcome.ok ? 200 : 402).json(outcome);
   } catch (err) {
-    console.error('paystack verify error', (err as Error)?.message);
-    res.status(502).json({ ok: false, code: 'provider_unreachable', message: 'Paystack is unreachable. Try again.' });
+    const e = err as { statusCode?: number; code?: string; type?: string; message?: string };
+    const notFound = e?.statusCode === 404 || e?.code === 'resource_missing';
+    if (!notFound) console.error('stripe verify error', e?.type, e?.statusCode, e?.message);
+    res.status(notFound ? 404 : 502).json({
+      ok: false,
+      code: notFound ? 'not_found' : 'provider_error',
+      message: notFound ? 'Payment not found' : 'Could not verify payment. Try again.',
+    });
   }
 }

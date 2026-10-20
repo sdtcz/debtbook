@@ -1,23 +1,36 @@
 declare const process: { env: Record<string, string | undefined> };
 
+import Stripe from 'stripe';
+
 /**
- * BashiBook Pro checkout (Vercel serverless).
+ * BashiBook Pro checkout (Vercel serverless) — Stripe Checkout, subscription mode.
  *
  * POST { plan: 'monthly' | 'yearly', email }
- *   → Paystack /transaction/initialize (NGN, amount in kobo, metadata {plan})
- *   → { ok: true, authorization_url, reference }
+ *   → stripe.checkout.sessions.create (USD inline price_data, customer_email,
+ *     metadata {plan}, success_url ?session_id={CHECKOUT_SESSION_ID})
+ *   → { ok: true, provider: 'stripe', plan, authorization_url, url, reference }
  *
- * Secrets stay server-side (PAYSTACK_SECRET_KEY). Never sent to the client.
- * Stripe path is still a 501 stub. No key → 501.
+ * Secret stays server-side (STRIPE_SECRET_KEY). Never sent to the client.
+ * No key → 501. (Previous Paystack flow: see git history, commit f805ac5.)
  */
 
 export type ProPlan = 'monthly' | 'yearly';
 
-/** Server-side price list (kobo). Client claims are never trusted. */
-export const PLAN_AMOUNT_KOBO: Record<ProPlan, number> = {
-  monthly: 150_000, // ₦1,500
-  yearly: 1_200_000, // ₦12,000
+/** Server-side price list (USD cents). Client claims are never trusted. */
+export const PLAN_AMOUNT_CENTS: Record<ProPlan, number> = {
+  monthly: 199, // $1.99 / month
+  yearly: 1500, // $15 / year
 };
+
+export const PLAN_INTERVAL: Record<ProPlan, 'month' | 'year'> = {
+  monthly: 'month',
+  yearly: 'year',
+};
+
+export const PLAN_CURRENCY = 'usd';
+export const PRODUCT_NAME = 'BashiBook Pro';
+/** Dashboard label for this Checkout flow (8-letter random suffix). */
+export const INTEGRATION_IDENTIFIER = 'bashibook_pro_qkzvmtrw';
 
 export function isProPlan(v: unknown): v is ProPlan {
   return v === 'monthly' || v === 'yearly';
@@ -33,7 +46,7 @@ export function isValidEmail(v: unknown): v is string {
 
 const DEFAULT_ORIGIN = 'https://debtbook-neon.vercel.app';
 
-/** Callback origin from the request host, limited to safe hosts (no open redirect). */
+/** Return origin from the request host, limited to safe hosts (no open redirect). */
 export function callbackOrigin(headers: Record<string, string | string[] | undefined> | undefined): string {
   const pick = (k: string) => {
     const v = headers?.[k];
@@ -48,9 +61,42 @@ export function callbackOrigin(headers: Record<string, string | string[] | undef
   return DEFAULT_ORIGIN;
 }
 
-export function callbackUrl(origin: string): string {
-  // Paystack appends &trxref=…&reference=… to this URL on return.
-  return `${origin}/?app=1&paystack=1`;
+/** Stripe replaces {CHECKOUT_SESSION_ID} on redirect; the app rewrites it to #/pro?ref=… */
+export function successUrl(origin: string): string {
+  return `${origin}/?app=1&checkout=stripe&session_id={CHECKOUT_SESSION_ID}`;
+}
+
+export function cancelUrl(origin: string): string {
+  return `${origin}/?app=1#/pro`;
+}
+
+/** Pure builder for the Checkout Session params. Exported for tests. */
+export function buildSessionParams(
+  plan: ProPlan,
+  email: string,
+  origin: string,
+): Stripe.Checkout.SessionCreateParams {
+  const metadata = { plan, product: 'bashibook-pro' };
+  return {
+    mode: 'subscription',
+    customer_email: email,
+    line_items: [
+      {
+        quantity: 1,
+        price_data: {
+          currency: PLAN_CURRENCY,
+          unit_amount: PLAN_AMOUNT_CENTS[plan],
+          recurring: { interval: PLAN_INTERVAL[plan] },
+          product_data: { name: PRODUCT_NAME },
+        },
+      },
+    ],
+    metadata,
+    subscription_data: { metadata },
+    success_url: successUrl(origin),
+    cancel_url: cancelUrl(origin),
+    integration_identifier: INTEGRATION_IDENTIFIER,
+  };
 }
 
 type Req = {
@@ -76,6 +122,9 @@ function parseBody(body: unknown): { plan?: unknown; email?: unknown } {
   return typeof body === 'object' ? (body as { plan?: unknown; email?: unknown }) : {};
 }
 
+export const NOT_CONFIGURED_MESSAGE =
+  'Checkout not configured. Set STRIPE_SECRET_KEY on Vercel. Until then use Activate Pro (demo) in Settings → Pro.';
+
 export default async function handler(req: Req, res: Res) {
   res.setHeader?.('Cache-Control', 'no-store');
   if (req.method !== 'POST') {
@@ -85,85 +134,50 @@ export default async function handler(req: Req, res: Res) {
 
   const body = parseBody(req.body);
   const plan = body.plan ?? 'monthly';
-  const paystackKey = process.env.PAYSTACK_SECRET_KEY;
   const stripeKey = process.env.STRIPE_SECRET_KEY;
 
-  if (paystackKey) {
-    if (!isProPlan(plan)) {
-      res.status(400).json({ ok: false, code: 'bad_plan', message: 'Plan must be monthly or yearly' });
-      return;
-    }
-    if (!isValidEmail(body.email)) {
-      res.status(400).json({
-        ok: false,
-        code: 'email_required',
-        message: 'A valid email is required for Paystack checkout',
-      });
-      return;
-    }
-    const email = body.email.trim().toLowerCase();
-    try {
-      const r = await fetch('https://api.paystack.co/transaction/initialize', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${paystackKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          amount: PLAN_AMOUNT_KOBO[plan],
-          currency: 'NGN',
-          callback_url: callbackUrl(callbackOrigin(req.headers)),
-          metadata: { plan, product: 'bashibook-pro' },
-        }),
-      });
-      const data = (await r.json().catch(() => null)) as {
-        status?: boolean;
-        message?: string;
-        data?: { authorization_url?: string; reference?: string };
-      } | null;
-      if (!r.ok || !data?.status || !data.data?.authorization_url || !data.data.reference) {
-        console.error('paystack initialize failed', r.status, data?.message);
-        res.status(502).json({
-          ok: false,
-          code: 'provider_error',
-          message: 'Could not start Paystack checkout. Try again.',
-        });
-        return;
-      }
-      res.status(200).json({
-        ok: true,
-        provider: 'paystack',
-        plan,
-        authorization_url: data.data.authorization_url,
-        reference: data.data.reference,
-      });
-    } catch (err) {
-      console.error('paystack initialize error', (err as Error)?.message);
-      res.status(502).json({
-        ok: false,
-        code: 'provider_unreachable',
-        message: 'Paystack is unreachable. Try again.',
-      });
-    }
+  if (!stripeKey) {
+    res.status(501).json({ ok: false, code: 'not_configured', message: NOT_CONFIGURED_MESSAGE, plan });
     return;
   }
-
-  if (stripeKey) {
-    res.status(501).json({
+  if (!isProPlan(plan)) {
+    res.status(400).json({ ok: false, code: 'bad_plan', message: 'Plan must be monthly or yearly' });
+    return;
+  }
+  if (!isValidEmail(body.email)) {
+    res.status(400).json({
       ok: false,
-      message:
-        'Stripe key present but checkout not fully wired yet. Use Activate Pro (demo) or finish api/checkout.ts.',
-      provider: 'stripe',
-      plan,
+      code: 'email_required',
+      message: 'A valid email is required for checkout',
     });
     return;
   }
+  const email = body.email.trim().toLowerCase();
 
-  res.status(501).json({
-    ok: false,
-    message:
-      'Checkout not configured. Set PAYSTACK_SECRET_KEY (preferred for NGN) or STRIPE_SECRET_KEY. Until then use Activate Pro (demo) in Settings → Pro.',
-    plan,
-  });
+  try {
+    const stripe = new Stripe(stripeKey);
+    const session = await stripe.checkout.sessions.create(
+      buildSessionParams(plan, email, callbackOrigin(req.headers)),
+    );
+    if (!session.url) {
+      res.status(502).json({ ok: false, code: 'provider_error', message: 'Could not start checkout. Try again.' });
+      return;
+    }
+    res.status(200).json({
+      ok: true,
+      provider: 'stripe',
+      plan,
+      authorization_url: session.url,
+      url: session.url,
+      reference: session.id,
+    });
+  } catch (err) {
+    const e = err as { type?: string; message?: string; statusCode?: number };
+    console.error('stripe checkout create failed', e?.type, e?.statusCode, e?.message);
+    res.status(502).json({
+      ok: false,
+      code: 'provider_error',
+      message: 'Could not start secure checkout. Try again.',
+    });
+  }
 }
