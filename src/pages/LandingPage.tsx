@@ -1,5 +1,6 @@
 import { PUBLIC_APP_LABEL, PUBLIC_APP_URL } from '../config';
 import { appEmbedUrl, setForceApp } from '../lib/viewportMode';
+import { QrCode } from '../components/QrCode';
 
 const FEATURES = [
   {
@@ -36,7 +37,6 @@ type Props = {
 export function LandingPage({ onUseAppHere }: Props) {
   // Canonical public URL (src/config.ts) — never the raw deployment host.
   const href = `${PUBLIC_APP_URL}/`;
-  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=168x168&margin=8&data=${encodeURIComponent(href)}`;
   const embed = typeof window !== 'undefined' ? appEmbedUrl() : '/?app=1#/';
 
   const openAppHome = () => {
@@ -128,14 +128,7 @@ export function LandingPage({ onUseAppHere }: Props) {
           </ul>
 
           <div class="landing-qr-block landing-qr-soft">
-            <img
-              class="landing-qr"
-              src={qrSrc}
-              width={168}
-              height={168}
-              alt="QR code to open BashiBook"
-              loading="lazy"
-            />
+            <QrCode class="landing-qr" value={href} size={168} label="QR code to open BashiBook" />
             <div class="landing-qr-meta">
               <p class="landing-qr-label">Scan to open on your phone</p>
               <a class="landing-url" href={href}>
