@@ -27,6 +27,7 @@ import { EntryFormPage } from './pages/EntryFormPage';
 import { HomePage } from './pages/HomePage';
 import { LandingPage } from './pages/LandingPage';
 import { PayDetailsPage } from './pages/PayDetailsPage';
+import { PosterPage } from './pages/PosterPage';
 import { PayMePage } from './pages/PayMePage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { ProPage } from './pages/ProPage';
@@ -388,6 +389,9 @@ export function App() {
       break;
     case 'pay-details':
       page = <PayDetailsPage toast={toast} />;
+      break;
+    case 'poster':
+      page = <PosterPage />;
       break;
     case 'privacy':
       page = <PrivacyPage />;

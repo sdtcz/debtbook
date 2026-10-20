@@ -100,6 +100,16 @@ export function buildPayMePageUrl(opts: {
   return `${origin}/#/payme?${q.toString()}`;
 }
 
+/**
+ * Link for the printable counter poster: the shop's Pay-me page with no
+ * customer or amount (customers pay what they owe), tagged src=poster.
+ */
+export function buildPosterUrl(shop: PayMeShopFields, origin = PUBLIC_APP_URL): string {
+  const base = origin.replace(/\/+$/, '');
+  const url = buildPayMePageUrl({ origin: base, shop, amountKobo: 0 });
+  return url.replace(`${base}/#/`, `${base}/?src=poster#/`);
+}
+
 export type PayMeSendResult = 'whatsapp' | 'sms' | 'share' | 'clipboard' | 'none';
 
 /** WhatsApp-first send (like remindCustomer); includes payme page URL when origin known. */

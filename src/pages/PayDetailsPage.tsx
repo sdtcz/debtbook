@@ -3,6 +3,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { notifyChanged, StatusBadge } from '../components/StatusBadge';
 import { getShop, setShopPayMe } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
+import { navigate } from '../lib/router';
 import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
@@ -188,6 +189,26 @@ export function PayDetailsPage({ toast }: Props) {
             {busy ? t('common.saving') : t('settings.payMeSave')}
           </button>
         </form>
+
+        <section class="card poster-entry" aria-labelledby="poster-entry-title">
+          <div class="poster-entry-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18h2M18 14h2" />
+            </svg>
+          </div>
+          <div class="poster-entry-copy">
+            <h2 id="poster-entry-title">{t('poster.cardTitle')}</h2>
+            <p>{t('poster.cardBody')}</p>
+          </div>
+          <button
+            type="button"
+            class="btn btn-secondary poster-entry-btn"
+            disabled={!ready}
+            onClick={() => navigate('/pay-details/poster')}
+          >
+            {t('poster.cardBtn')}
+          </button>
+        </section>
       </main>
     </div>
   );

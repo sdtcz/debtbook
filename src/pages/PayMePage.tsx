@@ -52,15 +52,19 @@ export function PayMePage({ route, toast }: Props) {
           <p class="collect-hint">{t('payme.heroHint')}</p>
         </section>
 
-        <div class="payme-amount-block">
-          <div class="payme-amount-label">{t('payme.amountDue')}</div>
-          <div class="payme-amount">{formatNaira(amount)}</div>
-          {route.customer.trim() ? (
-            <div class="payme-customer">
-              {t('payme.forCustomer', { name: route.customer.trim() })}
-            </div>
-          ) : null}
-        </div>
+        {amount > 0 ? (
+          <div class="payme-amount-block">
+            <div class="payme-amount-label">{t('payme.amountDue')}</div>
+            <div class="payme-amount">{formatNaira(amount)}</div>
+            {route.customer.trim() ? (
+              <div class="payme-customer">
+                {t('payme.forCustomer', { name: route.customer.trim() })}
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <p class="payme-any-amount">{t('payme.anyAmount')}</p>
+        )}
 
         {hasBank ? (
           <div class="payme-bank card">

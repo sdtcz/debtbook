@@ -5054,3 +5054,214 @@ a.btn.payme-cta-btn {
 .stmt-range .bb-choice-title {
   font-size: 1rem;
 }
+
+/* ── QR poster (Pay me → Make QR poster) ─────────────────────────────── */
+.poster-entry {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 12px;
+  align-items: start;
+  margin-top: 14px;
+}
+.poster-entry-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.poster-entry-copy h2 {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+.poster-entry-copy p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+.poster-entry-btn {
+  grid-column: 1 / -1;
+  min-height: 44px;
+}
+.poster-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.poster-print-btn {
+  min-height: 48px;
+}
+.poster-print-hint {
+  margin: 0;
+  font-size: 0.82rem;
+}
+.poster-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+}
+.poster-empty p {
+  margin: 0;
+  color: var(--muted);
+}
+.poster-preview {
+  container-type: inline-size;
+}
+.poster-sheet {
+  position: relative;
+  aspect-ratio: 210 / 297;
+  width: 100%;
+  background: #fff;
+  color: #0f172a;
+  border-radius: 6px;
+  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.14);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 8.1vw 6.3vw 5.4vw;
+  padding: 9cqw 7cqw 6cqw;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.poster-band {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2.34vw;
+  height: 2.6cqw;
+  background: #0f766e;
+}
+.poster-shop {
+  margin: 0;
+  font-size: 6.66vw;
+  font-size: 7.4cqw;
+  font-weight: 800;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+.poster-headline {
+  margin: 2.16vw 0 0;
+  margin: 2.4cqw 0 0;
+  font-size: 8.64vw;
+  font-size: 9.6cqw;
+  font-weight: 900;
+  color: #0f766e;
+  line-height: 1.05;
+}
+.poster-sub {
+  margin: 1.8vw 0 0;
+  margin: 2cqw 0 0;
+  font-size: 3.15vw;
+  font-size: 3.5cqw;
+  color: #334155;
+  max-width: 80%;
+}
+.poster-qr-wrap {
+  margin: 3.6vw 0 0;
+  margin: 4cqw 0 0;
+  padding: 1.44vw;
+  padding: 1.6cqw;
+  border: 0.54vw solid #0f766e;
+  border: 0.6cqw solid #0f766e;
+  border-radius: 2.7vw;
+  border-radius: 3cqw;
+}
+.poster-qr {
+  display: block;
+  width: 41.4vw;
+  width: 46cqw;
+  height: 41.4vw;
+  height: 46cqw;
+}
+.poster-bank {
+  margin-top: 3.6vw;
+  margin-top: 4cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 0.54vw;
+  gap: 0.6cqw;
+  font-size: 3.6vw;
+  font-size: 4cqw;
+}
+.poster-bank-label {
+  font-size: 2.7vw;
+  font-size: 3cqw;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #475569;
+}
+.poster-acct {
+  font-size: 5.4vw;
+  font-size: 6cqw;
+  letter-spacing: 0.06em;
+}
+.poster-balance {
+  margin: auto 0 0;
+  font-size: 2.88vw;
+  font-size: 3.2cqw;
+  color: #334155;
+  max-width: 85%;
+}
+.poster-foot {
+  margin: 1.44vw 0 0;
+  margin: 1.6cqw 0 0;
+  font-size: 2.16vw;
+  font-size: 2.4cqw;
+  color: #64748b;
+}
+.payme-any-amount {
+  margin: 12px 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+  /* Only the poster prints: hide every branch that does not contain it… */
+  body *:not(:has(.poster-sheet)):not(.poster-sheet):not(.poster-sheet *) {
+    display: none !important;
+  }
+  /* …and flatten the ancestors so the sheet lands at the page origin. */
+  body *:has(.poster-sheet) {
+    display: block !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    height: auto !important;
+    transform: none !important;
+    animation: none !important;
+    box-shadow: none !important;
+    background: #fff !important;
+    overflow: visible !important;
+  }
+  .poster-preview {
+    width: 210mm !important;
+    container-type: inline-size;
+  }
+  .poster-sheet {
+    width: 210mm;
+    height: 296mm;
+    border-radius: 0;
+    box-shadow: none;
+    break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

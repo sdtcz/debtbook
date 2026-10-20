@@ -136,3 +136,18 @@ describe('parsePayMeQuery', () => {
     expect(p.customer).toBe('C');
   });
 });
+
+describe('buildPosterUrl', () => {
+  it('links to the shop Pay-me page with no amount/customer, tagged src=poster', async () => {
+    const { buildPosterUrl, parsePayMeQuery } = await import('./payMe');
+    const url = buildPosterUrl(
+      { name: 'Mama Ngozi & Sons', payBankName: 'Opay', payAccountNumber: '8012345678', payAccountName: 'Ngozi Okafor' },
+      'https://example.app/',
+    );
+    expect(url.startsWith('https://example.app/?src=poster#/payme?')).toBe(true);
+    const q = parsePayMeQuery(url.split('#/payme')[1]);
+    expect(q).toMatchObject({ shop: 'Mama Ngozi & Sons', amountKobo: 0, bank: 'Opay', acct: '8012345678', name: 'Ngozi Okafor', customer: '' });
+    const attr = new URL(url).searchParams.get('src');
+    expect(attr).toBe('poster');
+  });
+});
