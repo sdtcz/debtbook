@@ -15,6 +15,7 @@ import {
   setChaseReminderPrefs,
   setCloudBackupMeta,
   setPin,
+  setPinBeforeDelete,
   setShopLocale,
 } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
@@ -58,6 +59,7 @@ import {
   type FeedbackTopicId,
 } from '../lib/feedback';
 import { hashPin, isValidPin, randomSalt } from '../lib/pin';
+import { guardDelete } from '../lib/pinGuard';
 import { navigate } from '../lib/router';
 import { signOutAndErase, signOutKeepData } from '../lib/session';
 import {
@@ -90,6 +92,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
   const [busy, setBusy] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [hasPin, setHasPin] = useState(false);
+  const [pinBeforeDelete, setPinBeforeDeleteState] = useState(false);
   const [showPinForm, setShowPinForm] = useState(false);
   const [syncUnlocked, setSyncUnlocked] = useState(false);
   const [syncPendingLocal, setSyncPendingLocal] = useState(false);
@@ -129,6 +132,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
     if (s) {
       setName(s.name);
       setHasPin(Boolean(s.pinHash && s.pinSalt));
+      setPinBeforeDeleteState(Boolean(s.pinBeforeDelete && s.pinHash && s.pinSalt));
       setPro(isPro(s));
       const e = getEntitlement(s);
       setEntLabel(e.plan === 'pro' ? t('common.pro') : t('common.free'));
@@ -218,6 +222,19 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
     }
   };
 
+  const togglePinBeforeDelete = async () => {
+    if (!hasPin) {
+      toast(t('settings.pinBeforeDeleteNeedPin'));
+      return;
+    }
+    const next = !pinBeforeDelete;
+    if (!next && !(await guardDelete(getShop))) return;
+    await setPinBeforeDelete(next);
+    setPinBeforeDeleteState(next);
+    notifyChanged();
+    toast(next ? t('settings.pinBeforeDeleteOnToast') : t('settings.pinBeforeDeleteOffToast'));
+  };
+
   const savePin = async () => {
     if (!isValidPin(pinInput)) {
       toast(t('settings.pinMustBe4'));
@@ -236,6 +253,9 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
 
   const removePin = async () => {
     if (!confirm(t('settings.removePinConfirm'))) return;
+    // When "Ask PIN before deleting" is on, removing the PIN needs the PIN too
+    // (otherwise anyone holding the unlocked phone could switch the guard off).
+    if (!(await guardDelete(getShop))) return;
     await clearPin();
     setShowPinForm(false);
     onPinChanged?.();
@@ -992,6 +1012,28 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
               </div>
             </div>
           )}
+          <button
+            type="button"
+            class="settings-row pin-delete-row"
+            role="switch"
+            aria-checked={pinBeforeDelete}
+            aria-disabled={!hasPin}
+            onClick={togglePinBeforeDelete}
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              🗑️
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">{t('settings.pinBeforeDelete')}</span>
+              <span class="settings-row-sub">
+                {hasPin ? t('settings.pinBeforeDeleteSub') : t('settings.pinBeforeDeleteNeedPin')}
+              </span>
+            </span>
+            <span class="settings-row-trail">
+              <span class={pinBeforeDelete ? 'status-dot on' : 'status-dot'} />
+              {pinBeforeDelete ? t('common.on') : t('common.off')}
+            </span>
+          </button>
         </div>
 
         <div class="settings-group-label">{t('settings.backup')}</div>

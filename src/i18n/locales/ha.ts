@@ -634,6 +634,14 @@ export const ha: Record<MessageKey, string> = {
   'poster.qrLabel': "Lambar QR don biyan {{shop}}",
   'payme.anyAmount': "Biya adadin da kake bi. Tambayi shagon idan ba ka tabbata ba.",
 
+  'settings.pinBeforeDelete': "Nemi PIN kafin gogewa",
+  'settings.pinBeforeDeleteSub': "Ana buƙata don cire abokin ciniki, goge shigarwa ko share wannan wayar",
+  'settings.pinBeforeDeleteNeedPin': "Fara kunna kulle PIN",
+  'settings.pinBeforeDeleteOnToast': "Za a nemi PIN kafin gogewa",
+  'settings.pinBeforeDeleteOffToast': "Ba za a ƙara neman PIN kafin gogewa ba",
+  'pin.deleteTitle': "Shigar da PIN don gogewa",
+  'pin.deleteHint': "Wannan yana kare littafinka idan wani yana amfani da wayar.",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

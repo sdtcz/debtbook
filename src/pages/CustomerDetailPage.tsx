@@ -21,6 +21,7 @@ import { hasPayMeDetails, sendPayMeRequest } from '../lib/payMe';
 import { buildEntryReceiptMessage, remindCustomer, sendTextToCustomer } from '../lib/sms';
 import { buildStatement, shareOrCopyText } from '../lib/statement';
 import { navigate } from '../lib/router';
+import { guardDelete } from '../lib/pinGuard';
 import { StatementPdfSheet } from '../components/StatementPdfSheet';
 import type { StatementRange } from '../lib/statementPdf';
 
@@ -179,6 +180,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
 
   const removeEntry = async (entryId: string) => {
     if (!confirm(t('customer.deleteEntryConfirm'))) return;
+    if (!(await guardDelete(getShop))) return;
     await softDeleteEntry(entryId);
     notifyChanged();
     toast(t('customer.entryDeleted'));

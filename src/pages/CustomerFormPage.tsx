@@ -2,7 +2,8 @@ import { BackButton } from '../components/BackButton';
 import { useEffect, useState } from 'preact/hooks';
 import { MoneyInput } from '../components/MoneyInput';
 import { notifyChanged } from '../components/StatusBadge';
-import { getCustomer, listCustomers, softDeleteCustomer, upsertCustomer } from '../db/repo';
+import { getCustomer, getShop, listCustomers, softDeleteCustomer, upsertCustomer } from '../db/repo';
+import { guardDelete } from '../lib/pinGuard';
 import { useLocale } from '../hooks/useLocale';
 import {
   isContactPickerSupported,
@@ -224,6 +225,7 @@ export function CustomerFormPage({ id, toast }: Props) {
     if (!confirm(t('customerForm.removeConfirm'))) {
       return;
     }
+    if (!(await guardDelete(getShop))) return;
     setBusy(true);
     try {
       await softDeleteCustomer(id);

@@ -5265,3 +5265,17 @@ a.btn.payme-cta-btn {
     print-color-adjust: exact;
   }
 }
+
+/* PIN pad Cancel (Ask PIN before deleting) */
+.pin-cancel {
+  display: block;
+  width: calc(100% - 32px);
+  min-height: 44px;
+  margin: 4px 16px 16px;
+}
+.pin-prompt-host .pin-overlay {
+  z-index: 120;
+}
+.pin-delete-row[aria-disabled='true'] {
+  opacity: 0.7;
+}

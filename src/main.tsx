@@ -1,5 +1,6 @@
 import { render } from 'preact';
 import { App } from './App';
+import { PinPromptHost } from './components/PinPromptHost';
 import './styles/app.css';
 import { registerSW } from 'virtual:pwa-register';
 import { normalizeCheckoutReturnUrl } from './lib/checkoutReturn';
@@ -27,4 +28,8 @@ document.addEventListener('click', (e) => {
 const root = document.getElementById('app');
 if (root) {
   render(<App />, root);
+  const pinHost = document.createElement('div');
+  pinHost.id = 'pin-prompt-root';
+  document.body.appendChild(pinHost);
+  render(<PinPromptHost />, pinHost);
 }

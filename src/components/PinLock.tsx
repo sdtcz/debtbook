@@ -7,9 +7,14 @@ interface Props {
   hash: string;
   shopName?: string;
   onUnlock: () => void;
+  /** Override the heading (default: Unlock) — used by "Ask PIN before deleting". */
+  title?: string;
+  hint?: string;
+  /** When set, shows a Cancel button (and Escape closes). */
+  onCancel?: () => void;
 }
 
-export function PinLock({ salt, hash, shopName, onUnlock }: Props) {
+export function PinLock({ salt, hash, shopName, onUnlock, title, hint, onCancel }: Props) {
   const { t } = useLocale();
   const [digits, setDigits] = useState('');
   const [error, setError] = useState(false);
@@ -35,6 +40,16 @@ export function PinLock({ salt, hash, shopName, onUnlock }: Props) {
     };
   }, [digits, salt, hash, onUnlock]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (/^[0-9]$/.test(e.key)) press(e.key);
+      else if (e.key === 'Backspace') back();
+      else if (e.key === 'Escape' && onCancel) onCancel();
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onCancel]);
+
   const press = (d: string) => {
     setError(false);
     setDigits((prev) => (prev.length < 4 ? prev + d : prev));
@@ -45,7 +60,7 @@ export function PinLock({ salt, hash, shopName, onUnlock }: Props) {
   const name = shopName?.trim();
 
   return (
-    <div class="pin-overlay" role="dialog" aria-modal="true" aria-label={t('pin.unlock')}>
+    <div class="pin-overlay" role="dialog" aria-modal="true" aria-label={title || t('pin.unlock')}>
       <div class={`pin-card pin-soft${error ? ' error' : ''}`}>
         <section class="pin-soft-hero">
           <div class="pin-soft-crest" aria-hidden="true">
@@ -55,13 +70,13 @@ export function PinLock({ salt, hash, shopName, onUnlock }: Props) {
             </svg>
           </div>
           {name && <div class="pin-soft-kicker">{name}</div>}
-          <h2>{t('pin.unlock')}</h2>
+          <h2>{title || t('pin.unlock')}</h2>
           {error ? (
             <p class="pin-soft-wrong" role="alert">
               {t('pin.wrong')}
             </p>
           ) : (
-            <p class="pin-soft-hint">{t('pin.enter')}</p>
+            <p class="pin-soft-hint">{hint || t('pin.enter')}</p>
           )}
           <div key={shake} class={`pin-dots${shake ? ' shake' : ''}`} aria-hidden="true">
             {[0, 1, 2, 3].map((i) => (
@@ -86,6 +101,11 @@ export function PinLock({ salt, hash, shopName, onUnlock }: Props) {
             ),
           )}
         </div>
+        {onCancel && (
+          <button type="button" class="btn btn-ghost pin-cancel" onClick={onCancel}>
+            {t('common.cancel')}
+          </button>
+        )}
       </div>
     </div>
   );

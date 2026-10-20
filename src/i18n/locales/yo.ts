@@ -634,6 +634,14 @@ export const yo: Record<MessageKey, string> = {
   'poster.qrLabel': "Kóòdù QR láti san fún {{shop}}",
   'payme.anyAmount': "San iye tí o jẹ. Béèrè lọ́wọ́ ilé ìtajà tí o kò bá dá ọ lójú.",
 
+  'settings.pinBeforeDelete': "Béèrè PIN kí o tó paarẹ́",
+  'settings.pinBeforeDeleteSub': "Ó nílò láti yọ oníbàárà, pa àkọsílẹ̀ rẹ́ tàbí nu fóònù yìí",
+  'settings.pinBeforeDeleteNeedPin': "Kọ́kọ́ tan títì PIN",
+  'settings.pinBeforeDeleteOnToast': "A ó béèrè PIN kí o tó paarẹ́",
+  'settings.pinBeforeDeleteOffToast': "A kò ní béèrè PIN mọ́ kí o tó paarẹ́",
+  'pin.deleteTitle': "Tẹ PIN láti paarẹ́",
+  'pin.deleteHint': "Èyí ń dáàbò bo ìwé rẹ bí ẹlòmíràn bá ń lo fóònù náà.",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

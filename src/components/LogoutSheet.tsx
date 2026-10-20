@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { useLocale } from '../hooks/useLocale';
+import { getShop } from '../db/repo';
+import { guardDelete } from '../lib/pinGuard';
 
 interface Props {
   cloudEnabled: boolean;
@@ -72,7 +74,10 @@ export function LogoutSheet({ cloudEnabled, hasPin, onKeep, onErase, onClose }: 
           disabled={busy}
           onClick={() => {
             if (!confirm(t('logout.eraseConfirm'))) return;
-            void run(onErase);
+            void (async () => {
+              if (!(await guardDelete(getShop))) return;
+              await run(onErase);
+            })();
           }}
         >
           <span class="bb-choice-title">{t('logout.eraseTitle')}</span>

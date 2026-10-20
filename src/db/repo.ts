@@ -42,6 +42,7 @@ export async function updateShopFields(
       ShopProfile,
       | 'pinHash'
       | 'pinSalt'
+      | 'pinBeforeDelete'
       | 'entitlement'
       | 'name'
       | 'cloudBackupEnabled'
@@ -67,6 +68,7 @@ export async function updateShopFields(
   if (shouldClear) {
     delete shop.pinHash;
     delete shop.pinSalt;
+    delete shop.pinBeforeDelete;
   }
   await db.put('shop', shop);
   await enqueueOutbox('shop', shop.id, 'upsert', shop);
@@ -83,6 +85,10 @@ export async function clearPin(): Promise<ShopProfile> {
   const shop = await updateShopFields({ clearPin: true });
   await touchLocalChange();
   return shop;
+}
+
+export async function setPinBeforeDelete(on: boolean): Promise<ShopProfile> {
+  return updateShopFields({ pinBeforeDelete: on });
 }
 
 export async function setEntitlement(entitlement: Entitlement): Promise<ShopProfile> {

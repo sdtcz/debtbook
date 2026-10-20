@@ -632,6 +632,14 @@ export const en = {
   'poster.qrLabel': "QR code to pay {{shop}}",
   'payme.anyAmount': "Pay the amount you owe. Ask the shop if you are not sure.",
 
+  'settings.pinBeforeDelete': "Ask PIN before deleting",
+  'settings.pinBeforeDeleteSub': "Needed to remove a customer, delete an entry or erase this phone",
+  'settings.pinBeforeDeleteNeedPin': "Turn on PIN lock first",
+  'settings.pinBeforeDeleteOnToast': "PIN will be asked before deleting",
+  'settings.pinBeforeDeleteOffToast': "PIN no longer asked before deleting",
+  'pin.deleteTitle': "Enter PIN to delete",
+  'pin.deleteHint': "This keeps your book safe if someone else is using the phone.",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

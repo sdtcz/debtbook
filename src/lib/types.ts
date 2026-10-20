@@ -18,6 +18,8 @@ export interface ShopProfile {
   /** SHA-256 hex of salt+pin; unset = no lock */
   pinHash?: string;
   pinSalt?: string;
+  /** Ask for the PIN before deleting a customer/entry or erasing this phone (default off) */
+  pinBeforeDelete?: boolean;
   entitlement?: Entitlement;
   /** Pro cloud backup enabled on this device */
   cloudBackupEnabled?: boolean;

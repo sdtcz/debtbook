@@ -13,6 +13,7 @@ import {
 } from './lib/deviceSync';
 import { getUnlockedRecoveryCode } from './lib/syncUnlock';
 import { isPayMeHash, navigate, parseHash, type Route } from './lib/router';
+import { guardDelete } from './lib/pinGuard';
 import { isSignedOut, signIn, signOutAndErase } from './lib/session';
 import type { ComponentChildren } from 'preact';
 import {
@@ -333,7 +334,10 @@ export function App() {
             }}
             onErase={() => {
               if (!confirm(tNow('logout.eraseConfirm'))) return;
-              void eraseDevice();
+              void (async () => {
+                if (!(await guardDelete(getShop))) return;
+                await eraseDevice();
+              })();
             }}
           />,
         )}
