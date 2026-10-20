@@ -7,7 +7,7 @@ import { useLocale } from '../hooks/useLocale';
 import type { MessageKey } from '../i18n';
 import { formatNaira } from '../lib/money';
 import { buildReport, buildSupplierReport, type ReportPeriod } from '../lib/reports';
-import { href } from '../lib/router';
+import { href, navigate } from '../lib/router';
 import { shareOrCopyText } from '../lib/statement';
 import type { Customer, Entry, Supplier, SupplierEntry } from '../lib/types';
 import type { ToastAction } from '../hooks/useToast';
@@ -86,9 +86,13 @@ export function ReportsPage({ locked, toast }: Props) {
   const share = async () => {
     const lines = [
       t('reports.messageTitle', { shop: shopName || 'BashiBook', period: periodLabel }),
-      t('reports.messageCredit', { amount: formatNaira(report.creditGivenKobo) }),
-      t('reports.messageCollected', { amount: formatNaira(report.collectedKobo) }),
-      t('reports.messageOutstanding', { amount: formatNaira(report.outstandingKobo) }),
+      ...(customers.length
+        ? [
+            t('reports.messageCredit', { amount: formatNaira(report.creditGivenKobo) }),
+            t('reports.messageCollected', { amount: formatNaira(report.collectedKobo) }),
+            t('reports.messageOutstanding', { amount: formatNaira(report.outstandingKobo) }),
+          ]
+        : []),
       ...(suppliers.length
         ? [t('reports.messageIOwe', { amount: formatNaira(supReport.iOweKobo) })]
         : []),
@@ -100,6 +104,119 @@ export function ReportsPage({ locked, toast }: Props) {
     else toast(t('reports.shareFailed'));
   };
 
+  const hasCustomers = customers.length > 0;
+  const entriesLabel = (n: number) => (n === 1 ? t('reports.entry1') : t('reports.entries', { n }));
+
+  const customerSection = (
+    <>
+      <div class="report-grid">
+        <div class="card report-tile debt">
+          <div class="report-label">{t('reports.creditGiven')}</div>
+          <div class="report-amount">{money(report.creditGivenKobo)}</div>
+          <div class="report-hint">{entriesLabel(report.creditCount)}</div>
+        </div>
+        <div class="card report-tile ok">
+          <div class="report-label">{t('reports.collected')}</div>
+          <div class="report-amount">{money(report.collectedKobo)}</div>
+          <div class="report-hint">{report.payingCustomers === 1 ? t('reports.payers1') : t('reports.payers', { n: report.payingCustomers })}</div>
+        </div>
+      </div>
+
+      <div class="card report-wide">
+        <div class="report-label">{t('reports.outstanding')}</div>
+        <div class="report-amount">{money(report.outstandingKobo)}</div>
+        <div class="report-label" style={{ marginTop: 10 }}>
+          {t('reports.collectionRate')}
+        </div>
+        {report.collectionRatePct === null ? (
+          <div class="report-hint">{t('reports.noCredit')}</div>
+        ) : (
+          <div class="report-bar" aria-label={`${report.collectionRatePct}%`}>
+            <span style={{ width: `${report.collectionRatePct}%` }} />
+            <em>{report.collectionRatePct}%</em>
+          </div>
+        )}
+      </div>
+
+      <div class="settings-group-label">{t('reports.topDebtors')}</div>
+      <div class="card settings-list">
+        {report.topDebtors.length === 0 ? (
+          <div class="empty" style={{ padding: 16 }}>
+            {t('reports.nobodyOwes')}
+          </div>
+        ) : (
+          report.topDebtors.map((d) => (
+            <a
+              key={d.customer.id}
+              class="settings-row report-debtor"
+              href={href(`/customers/${d.customer.id}`)}
+            >
+              <span class="settings-row-body">
+                <span class="settings-row-title">{d.customer.name}</span>
+                <span class="settings-row-sub">{d.customer.phone || t('common.noPhone')}</span>
+              </span>
+              <span class="settings-row-trail">
+                {money(d.balanceKobo)}
+                <span class="chev" aria-hidden="true">
+                  ›
+                </span>
+              </span>
+            </a>
+          ))
+        )}
+      </div>
+    </>
+  );
+
+  const supplierSection = (
+    <>
+      <div class="settings-group-label">{t('reports.suppliersTitle')}</div>
+      <section class="card report-wide report-iowe" aria-label={t('reports.suppliersTitle')}>
+        {suppliers.length === 0 ? (
+          <div class="report-hint">
+            {t('reports.noSuppliers')}{' '}
+            <a href={href('/suppliers')}>{t('reports.openSuppliers')}</a>
+          </div>
+        ) : (
+          <>
+            <div class="report-label">{t('reports.iOweSuppliers')}</div>
+            <div class="report-amount iowe">{money(supReport.iOweKobo)}</div>
+            <div class="report-grid report-iowe-grid">
+              <div>
+                <div class="report-label">{t('reports.purchasedOnCredit')}</div>
+                <div class="report-sub-amount">{money(supReport.purchasedKobo)}</div>
+                <div class="report-hint">{entriesLabel(supReport.purchaseCount)}</div>
+              </div>
+              <div>
+                <div class="report-label">{t('reports.paidSuppliers')}</div>
+                <div class="report-sub-amount">{money(supReport.paidKobo)}</div>
+                <div class="report-hint">{entriesLabel(supReport.paymentCount)}</div>
+              </div>
+            </div>
+            {supReport.topCreditors.length > 0 && (
+              <div class="settings-list report-creditors">
+                {supReport.topCreditors.map((d) => (
+                  <a key={d.supplier.id} class="settings-row report-debtor" href={href(`/suppliers/${d.supplier.id}`)}>
+                    <span class="settings-row-body">
+                      <span class="settings-row-title">{d.supplier.name}</span>
+                      <span class="settings-row-sub">{t('supplier.youOwe')}</span>
+                    </span>
+                    <span class="settings-row-trail">
+                      {money(d.balanceKobo)}
+                      <span class="chev" aria-hidden="true">
+                        ›
+                      </span>
+                    </span>
+                  </a>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </section>
+    </>
+  );
+
   return (
     <div class="app-shell">
       <header class="topbar">
@@ -107,7 +224,7 @@ export function ReportsPage({ locked, toast }: Props) {
         <h1>{t('reports.title')}</h1>
       </header>
       <main class="main settings-main reports-main">
-        <div class="chip-row" role="radiogroup" aria-label={t('reports.periodLabel')}>
+        <div class="chip-row report-seg" role="radiogroup" aria-label={t('reports.periodLabel')}>
           {PERIODS.map((p) => (
             <button
               key={p.id}
@@ -132,113 +249,37 @@ export function ReportsPage({ locked, toast }: Props) {
             }}
           />
         ) : customers.length === 0 && suppliers.length === 0 ? (
-          <div class="empty">
-            <strong>{t('reports.title')}</strong>
-            <p>{t('reports.empty')}</p>
-          </div>
+          <section class="report-crest-hero" aria-labelledby="report-crest-title">
+            <div class="report-crest" aria-hidden="true">
+              <ReportGlyph />
+            </div>
+            <div class="report-crest-kicker">{t('reports.kicker')}</div>
+            <h2 id="report-crest-title">{t('reports.emptyTitle')}</h2>
+            <p class="report-crest-hint">{t('reports.emptyHint')}</p>
+            <div class="report-crest-actions">
+              <button type="button" class="btn btn-primary" onClick={() => navigate('/customers/new')}>
+                {t('reports.addCustomer')}
+              </button>
+              <button type="button" class="btn report-crest-alt" onClick={() => navigate('/suppliers/new')}>
+                {t('reports.addSupplier')}
+              </button>
+            </div>
+          </section>
         ) : (
           <>
-            <div class="report-grid">
-              <div class="card report-tile debt">
-                <div class="report-label">{t('reports.creditGiven')}</div>
-                <div class="report-amount">{money(report.creditGivenKobo)}</div>
-                <div class="report-hint">{t('reports.entries', { n: report.creditCount })}</div>
+            {hasCustomers ? customerSection : supplierSection}
+            {hasCustomers ? supplierSection : (
+              <div class="card report-nudge">
+                <span class="report-nudge-crest" aria-hidden="true">₦</span>
+                <span class="report-nudge-body">
+                  <strong>{t('reports.noCustomersTitle')}</strong>
+                  <span>{t('reports.noCustomersHint')}</span>
+                </span>
+                <button type="button" class="report-nudge-cta" onClick={() => navigate('/customers/new')}>
+                  {t('reports.addShort')}
+                </button>
               </div>
-              <div class="card report-tile ok">
-                <div class="report-label">{t('reports.collected')}</div>
-                <div class="report-amount">{money(report.collectedKobo)}</div>
-                <div class="report-hint">{t('reports.payers', { n: report.payingCustomers })}</div>
-              </div>
-            </div>
-
-            <div class="card report-wide">
-              <div class="report-label">{t('reports.outstanding')}</div>
-              <div class="report-amount">{money(report.outstandingKobo)}</div>
-              <div class="report-label" style={{ marginTop: 10 }}>
-                {t('reports.collectionRate')}
-              </div>
-              {report.collectionRatePct === null ? (
-                <div class="report-hint">{t('reports.noCredit')}</div>
-              ) : (
-                <div class="report-bar" aria-label={`${report.collectionRatePct}%`}>
-                  <span style={{ width: `${report.collectionRatePct}%` }} />
-                  <em>{report.collectionRatePct}%</em>
-                </div>
-              )}
-            </div>
-
-            <div class="settings-group-label">{t('reports.topDebtors')}</div>
-            <div class="card settings-list">
-              {report.topDebtors.length === 0 ? (
-                <div class="empty" style={{ padding: 16 }}>
-                  {t('reports.nobodyOwes')}
-                </div>
-              ) : (
-                report.topDebtors.map((d) => (
-                  <a
-                    key={d.customer.id}
-                    class="settings-row report-debtor"
-                    href={href(`/customers/${d.customer.id}`)}
-                  >
-                    <span class="settings-row-body">
-                      <span class="settings-row-title">{d.customer.name}</span>
-                      <span class="settings-row-sub">{d.customer.phone || t('common.noPhone')}</span>
-                    </span>
-                    <span class="settings-row-trail">
-                      {money(d.balanceKobo)}
-                      <span class="chev" aria-hidden="true">
-                        ›
-                      </span>
-                    </span>
-                  </a>
-                ))
-              )}
-            </div>
-
-            <div class="settings-group-label">{t('reports.suppliersTitle')}</div>
-            <section class="card report-wide report-iowe" aria-label={t('reports.suppliersTitle')}>
-              {suppliers.length === 0 ? (
-                <div class="report-hint">
-                  {t('reports.noSuppliers')}{' '}
-                  <a href={href('/suppliers')}>{t('reports.openSuppliers')}</a>
-                </div>
-              ) : (
-                <>
-                  <div class="report-label">{t('reports.iOweSuppliers')}</div>
-                  <div class="report-amount iowe">{money(supReport.iOweKobo)}</div>
-                  <div class="report-grid report-iowe-grid">
-                    <div>
-                      <div class="report-label">{t('reports.purchasedOnCredit')}</div>
-                      <div class="report-sub-amount">{money(supReport.purchasedKobo)}</div>
-                      <div class="report-hint">{t('reports.entries', { n: supReport.purchaseCount })}</div>
-                    </div>
-                    <div>
-                      <div class="report-label">{t('reports.paidSuppliers')}</div>
-                      <div class="report-sub-amount">{money(supReport.paidKobo)}</div>
-                      <div class="report-hint">{t('reports.entries', { n: supReport.paymentCount })}</div>
-                    </div>
-                  </div>
-                  {supReport.topCreditors.length > 0 && (
-                    <div class="settings-list report-creditors">
-                      {supReport.topCreditors.map((d) => (
-                        <a key={d.supplier.id} class="settings-row report-debtor" href={href(`/suppliers/${d.supplier.id}`)}>
-                          <span class="settings-row-body">
-                            <span class="settings-row-title">{d.supplier.name}</span>
-                            <span class="settings-row-sub">{t('supplier.youOwe')}</span>
-                          </span>
-                          <span class="settings-row-trail">
-                            {money(d.balanceKobo)}
-                            <span class="chev" aria-hidden="true">
-                              ›
-                            </span>
-                          </span>
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-            </section>
+            )}
 
             {!locked && (
               <button class="btn btn-secondary" type="button" onClick={share} style={{ marginTop: 14 }}>
@@ -249,5 +290,13 @@ export function ReportsPage({ locked, toast }: Props) {
         )}
       </main>
     </div>
+  );
+}
+
+function ReportGlyph() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <path d="M5 20v-8M12 20V5M19 20v-6" />
+    </svg>
   );
 }
