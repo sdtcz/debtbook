@@ -4638,3 +4638,62 @@ button:active:not(:disabled),
   margin-top: 6px;
   color: #475569;
 }
+
+/* —— Soft Pro pay: Paystack checkout on Pro page —— */
+.pro-pay {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.pro-pay .field {
+  margin-bottom: 10px;
+}
+
+.pro-pay .input {
+  min-height: var(--tap-min, 44px);
+}
+
+.pro-pay .input-error {
+  border-color: var(--danger);
+}
+
+.pro-pay-error {
+  color: var(--danger) !important;
+  font-weight: 600;
+}
+
+.pro-pay-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pro-pay-buttons .btn {
+  min-height: var(--tap-min, 44px);
+}
+
+.pro-pay-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f0fdfa;
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.pro-pay-status.ok {
+  background: #ecfdf5;
+  color: var(--ok);
+}
+
+.pro-pay-status.error {
+  background: #fef2f2;
+  color: var(--danger);
+}

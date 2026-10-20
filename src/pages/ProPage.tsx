@@ -1,8 +1,18 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { notifyChanged } from '../components/StatusBadge';
 import { getShop, setEntitlement } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
 import { demoProEntitlement, getEntitlement, isPro } from '../lib/entitlement';
+import {
+  clearRefFromHash,
+  entitlementFromPayment,
+  isVerifiedPayment,
+  looksLikeEmail,
+  refFromHash,
+  rememberEmail,
+  rememberedEmail,
+  type ProBillingPlan,
+} from '../lib/paystackReturn';
 import type { ShopProfile } from '../lib/types';
 import { navigate } from '../lib/router';
 import type { ToastAction } from '../hooks/useToast';
@@ -36,37 +46,117 @@ export function ProPage({ toast }: Props) {
     }
   };
 
-  const tryCheckout = async () => {
+  const [email, setEmail] = useState(rememberedEmail);
+  const [emailError, setEmailError] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [verifyMsg, setVerifyMsg] = useState<
+    { kind: 'ok' | 'error' | 'offline'; text: string; ref?: string } | null
+  >(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+
+  const verifyReference = async (ref: string) => {
+    setVerifying(true);
+    setVerifyMsg(null);
+    try {
+      const res = await fetch(
+        `/api/verify?reference=${encodeURIComponent(ref)}`,
+        { cache: 'no-store' },
+      );
+      const body = (await res.json().catch(() => null)) as unknown;
+      if (res.ok && isVerifiedPayment(body)) {
+        const current = getEntitlement(await getShop());
+        const ent = entitlementFromPayment(body, current);
+        await setEntitlement(ent);
+        notifyChanged();
+        await refresh();
+        clearRefFromHash();
+        const text = t('pro.paidSuccess', {
+          date: new Date(ent.exp || Date.now()).toLocaleDateString('en-NG'),
+        });
+        setVerifyMsg({ kind: 'ok', text });
+        toast(text, { ms: 5000 });
+        return;
+      }
+      if (res.status >= 500 && res.status !== 501) {
+        setVerifyMsg({ kind: 'offline', text: t('pro.verifyOffline'), ref });
+        return;
+      }
+      clearRefFromHash();
+      const text = t('pro.verifyFailed', { ref });
+      setVerifyMsg({ kind: 'error', text });
+      toast(text, { ms: 6000 });
+    } catch {
+      setVerifyMsg({ kind: 'offline', text: t('pro.verifyOffline'), ref });
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  // Returning from Paystack: #/pro?ref=… → verify server-side before unlocking.
+  useEffect(() => {
+    const check = () => {
+      const ref = refFromHash(location.hash);
+      if (ref) verifyReference(ref);
+    };
+    check();
+    window.addEventListener('hashchange', check);
+    return () => window.removeEventListener('hashchange', check);
+  }, []);
+
+  const tryCheckout = async (plan: ProBillingPlan) => {
+    const addr = email.trim();
+    if (!looksLikeEmail(addr)) {
+      setEmailError(true);
+      toast(t('pro.emailRequired'));
+      emailRef.current?.focus();
+      return;
+    }
+    setEmailError(false);
+    rememberEmail(addr);
     setBusy(true);
+    let redirecting = false;
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: 'monthly' }),
+        body: JSON.stringify({ plan, email: addr }),
       });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
+      const body = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        code?: string;
+        message?: string;
+        authorization_url?: string;
+      };
+      if (!res.ok || !body.ok) {
+        if (body.code === 'email_required') {
+          setEmailError(true);
+          toast(t('pro.emailRequired'));
+          return;
+        }
         toast(
-          (body as { message?: string }).message ||
-            t('pro.checkoutNotConfigured'),
+          res.status === 501
+            ? t('pro.checkoutNotConfigured')
+            : body.message || t('pro.checkoutUnavailable'),
         );
         return;
       }
-      const data = (await res.json()) as { url?: string };
-      if (data.url) {
-        window.location.href = data.url;
+      if (body.authorization_url && /^https:\/\//.test(body.authorization_url)) {
+        redirecting = true;
+        toast(t('pro.redirecting'));
+        window.location.href = body.authorization_url;
       } else {
         toast(t('pro.noCheckoutUrl'));
       }
     } catch {
       toast(t('pro.checkoutUnavailable'));
     } finally {
-      setBusy(false);
+      if (!redirecting) setBusy(false);
     }
   };
 
   const ent = getEntitlement(shop);
   const pro = isPro(shop);
+  const canPay = !pro || ent.source === 'demo';
 
   return (
     <div class="app-shell">
@@ -150,28 +240,84 @@ export function ProPage({ toast }: Props) {
             </li>
           </ul>
 
-          {!pro && (
-            <>
-              <button
-                class="btn btn-primary"
-                type="button"
-                disabled={busy}
-                onClick={activateDemo}
-              >
-                {t('pro.tryFree')}
-              </button>
-              <div class="btn-row">
+          {verifying && (
+            <p class="pro-pay-status" role="status">
+              {t('pro.verifying')}
+            </p>
+          )}
+          {verifyMsg && !verifying && (
+            <div
+              class={`pro-pay-status ${verifyMsg.kind === 'ok' ? 'ok' : 'error'}`}
+              role={verifyMsg.kind === 'ok' ? 'status' : 'alert'}
+            >
+              <span>{verifyMsg.text}</span>
+              {verifyMsg.kind === 'offline' && verifyMsg.ref && (
                 <button
                   class="btn btn-secondary"
                   type="button"
-                  disabled={busy}
-                  onClick={tryCheckout}
+                  onClick={() => verifyReference(verifyMsg.ref!)}
                 >
-                  {t('pro.paystack')}
+                  {t('pro.retryVerify')}
+                </button>
+              )}
+            </div>
+          )}
+
+          {!pro && (
+            <button
+              class="btn btn-primary"
+              type="button"
+              disabled={busy || verifying}
+              onClick={activateDemo}
+            >
+              {t('pro.tryFree')}
+            </button>
+          )}
+
+          {canPay && (
+            <div class="pro-pay">
+              <div class="field">
+                <label for="pro-pay-email">{t('pro.emailLabel')}</label>
+                <input
+                  id="pro-pay-email"
+                  ref={emailRef}
+                  class={`input${emailError ? ' input-error' : ''}`}
+                  type="email"
+                  inputMode="email"
+                  autocomplete="email"
+                  placeholder={t('pro.emailPlaceholder')}
+                  value={email}
+                  aria-invalid={emailError}
+                  onInput={(e) => {
+                    setEmail((e.target as HTMLInputElement).value);
+                    if (emailError) setEmailError(false);
+                  }}
+                />
+                {emailError && (
+                  <div class="hint pro-pay-error">{t('pro.emailRequired')}</div>
+                )}
+              </div>
+              <div class="pro-pay-buttons">
+                <button
+                  class="btn btn-secondary"
+                  type="button"
+                  disabled={busy || verifying}
+                  onClick={() => tryCheckout('monthly')}
+                >
+                  {t('pro.payMonthly')}
+                </button>
+                <button
+                  class="btn btn-secondary"
+                  type="button"
+                  disabled={busy || verifying}
+                  onClick={() => tryCheckout('yearly')}
+                >
+                  {t('pro.payYearly')}
                 </button>
               </div>
-              <p class="pro-soft-note">{t('pro.demoNote')}</p>
-            </>
+              <p class="pro-soft-note">{t('pro.securedBy')}</p>
+              {!pro && <p class="pro-soft-note">{t('pro.demoNote')}</p>}
+            </div>
           )}
         </section>
       </main>
