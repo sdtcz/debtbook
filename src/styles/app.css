@@ -5040,3 +5040,17 @@ a.btn.payme-cta-btn {
   font-size: 0.72rem;
   margin-top: 10px;
 }
+
+/* Statement PDF button (customer detail) */
+.statement-pdf-btn {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.stmt-range .bb-choice-title {
+  font-size: 1rem;
+}

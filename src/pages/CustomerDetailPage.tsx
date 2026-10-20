@@ -21,6 +21,18 @@ import { hasPayMeDetails, sendPayMeRequest } from '../lib/payMe';
 import { buildEntryReceiptMessage, remindCustomer, sendTextToCustomer } from '../lib/sms';
 import { buildStatement, shareOrCopyText } from '../lib/statement';
 import { navigate } from '../lib/router';
+import { StatementPdfSheet } from '../components/StatementPdfSheet';
+import type { StatementRange } from '../lib/statementPdf';
+
+// PDF code is loaded on demand (kept out of the main bundle for 2G/3G users).
+let pdfModules: Promise<[typeof import('../lib/statementPdf'), typeof import('../lib/pdf')]> | null = null;
+function loadPdfModules() {
+  pdfModules ??= Promise.all([import('../lib/statementPdf'), import('../lib/pdf')]);
+  pdfModules.catch(() => {
+    pdfModules = null;
+  });
+  return pdfModules;
+}
 import { isOverdue } from '../db/repo';
 import type { ToastAction } from '../hooks/useToast';
 
@@ -55,6 +67,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
   const [loading, setLoading] = useState(true);
   const [canUndo, setCanUndo] = useState(false);
   const [recentEntry, setRecentEntry] = useState<Entry | null>(null);
+  const [pdfOpen, setPdfOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -139,6 +152,28 @@ export function CustomerDetailPage({ id, toast }: Props) {
     else if (result === 'clipboard') toast(t('customer.statementCopied'));
     else {
       window.prompt('Copy statement:', text);
+    }
+  };
+
+  const onStatementPdf = async (range: StatementRange) => {
+    if (!customer || !shop) return;
+    try {
+      const [{ buildStatementData, buildStatementPdf, resolveRange, statementFilename }, { shareOrDownloadFile }] =
+        await loadPdfModules();
+      const { from, to } = resolveRange(range);
+      const data = buildStatementData(entries, { from, to });
+      const bytes = buildStatementPdf({ shopName: shop.name, customer, data, generatedAt: to });
+      const result = await shareOrDownloadFile(
+        bytes,
+        statementFilename(customer.name, to),
+        'application/pdf',
+        t('statement.shareTitle', { name: customer.name }),
+      );
+      setPdfOpen(false);
+      if (result === 'shared') toast(t('customer.statementPdfShared'));
+      else if (result === 'downloaded') toast(t('customer.statementPdfDownloaded'));
+    } catch {
+      toast(t('customer.statementPdfFailed'));
     }
   };
 
@@ -349,6 +384,20 @@ export function CustomerDetailPage({ id, toast }: Props) {
               <span class="collect-tile-label">{t('customer.statement')}</span>
             </button>
           </div>
+          <button
+            class="btn btn-secondary statement-pdf-btn"
+            type="button"
+            onClick={() => {
+              void loadPdfModules().catch(() => undefined);
+              setPdfOpen(true);
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7 3h7l5 5v13H7z" />
+              <path d="M14 3v5h5M12 11v7M9 15l3 3 3-3" />
+            </svg>
+            {t('customer.statementPdf')}
+          </button>
         </section>
 
         {canUndo && (
@@ -422,6 +471,13 @@ export function CustomerDetailPage({ id, toast }: Props) {
           )}
         </div>
       </main>
+      {pdfOpen && (
+        <StatementPdfSheet
+          customerName={customer.name}
+          onPick={onStatementPdf}
+          onClose={() => setPdfOpen(false)}
+        />
+      )}
     </div>
   );
 }
