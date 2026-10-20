@@ -1,5 +1,5 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
-import type { Customer, Entry, OutboxItem, ShopProfile } from '../lib/types';
+import type { Customer, Entry, OutboxItem, ShopProfile, Supplier, SupplierEntry } from '../lib/types';
 
 export interface SyncUnlockRecord {
   /** Always 'shop' for single-shop MVP */
@@ -35,6 +35,17 @@ export interface DebtBookDB extends DBSchema {
     value: OutboxItem;
     indexes: { 'by-status': string; 'by-created': number };
   };
+  /** v4: supplier ledger ("I owe"), separate from customers. */
+  suppliers: {
+    key: string;
+    value: Supplier;
+    indexes: { 'by-name': string; 'by-updated': number };
+  };
+  supplierEntries: {
+    key: string;
+    value: SupplierEntry;
+    indexes: { 'by-supplier': string; 'by-updated': number };
+  };
   /** Device-local sync unlock (recovery code). Never synced to cloud. */
   syncUnlock: {
     key: string;
@@ -43,8 +54,9 @@ export interface DebtBookDB extends DBSchema {
 }
 
 const DB_NAME = 'debtbook'; // KEEP: IndexedDB name — renaming would wipe existing user data
-/** v3: syncUnlock store for multi-device sync unlock on this device */
-const DB_VERSION = 3;
+/** v3: syncUnlock store for multi-device sync unlock on this device
+ *  v4: suppliers + supplierEntries stores (additive; existing stores untouched) */
+export const DB_VERSION = 4;
 
 let dbPromise: Promise<IDBPDatabase<DebtBookDB>> | null = null;
 
@@ -80,6 +92,23 @@ export function getDb(): Promise<IDBPDatabase<DebtBookDB>> {
             db.createObjectStore('syncUnlock', { keyPath: 'id' });
           }
         }
+        if (oldVersion < 4) {
+          if (!db.objectStoreNames.contains('suppliers')) {
+            const ss = db.createObjectStore('suppliers', { keyPath: 'id' });
+            ss.createIndex('by-name', 'name');
+            ss.createIndex('by-updated', 'updatedAt');
+          }
+          if (!db.objectStoreNames.contains('supplierEntries')) {
+            const se = db.createObjectStore('supplierEntries', { keyPath: 'id' });
+            se.createIndex('by-supplier', 'supplierId');
+            se.createIndex('by-updated', 'updatedAt');
+          }
+        }
+      },
+      blocking() {
+        // A newer tab wants to upgrade: let it, and reopen lazily here.
+        void dbPromise?.then((d) => d.close());
+        dbPromise = null;
       },
     });
   }

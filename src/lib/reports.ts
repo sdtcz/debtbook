@@ -1,5 +1,5 @@
 /** Offline business summary — pure functions over local entries (no network). */
-import type { Customer, Entry } from './types';
+import type { Customer, Entry, Supplier, SupplierEntry } from './types';
 
 export type ReportPeriod = 'today' | 'week' | 'month' | 'all';
 
@@ -89,4 +89,57 @@ export function buildReport(
     outstandingKobo,
     topDebtors: debtors.slice(0, topN),
   };
+}
+
+/* ── Supplier side ("I owe") — reported separately, never netted ───────── */
+
+export interface SupplierReportSummary {
+  /** Bought on credit from suppliers during the period */
+  purchasedKobo: number;
+  /** Paid to suppliers during the period */
+  paidKobo: number;
+  purchaseCount: number;
+  paymentCount: number;
+  /** What I owe suppliers now (positive balances only, all time) */
+  iOweKobo: number;
+  topCreditors: { supplier: Supplier; balanceKobo: number }[];
+}
+
+export function buildSupplierReport(
+  suppliers: Supplier[],
+  entries: SupplierEntry[],
+  period: ReportPeriod,
+  now = Date.now(),
+  topN = 5,
+): SupplierReportSummary {
+  const fromMs = periodStart(period, now);
+  const live = new Map(suppliers.filter((s) => !s.deletedAt).map((s) => [s.id, s]));
+  const balances = new Map<string, number>();
+  let purchasedKobo = 0;
+  let paidKobo = 0;
+  let purchaseCount = 0;
+  let paymentCount = 0;
+  for (const e of entries) {
+    if (e.deletedAt || !live.has(e.supplierId)) continue;
+    const signed = e.type === 'purchase' ? e.amountKobo : -e.amountKobo;
+    balances.set(e.supplierId, (balances.get(e.supplierId) || 0) + signed);
+    if (e.occurredAt < fromMs || e.occurredAt > now) continue;
+    if (e.type === 'purchase') {
+      purchasedKobo += e.amountKobo;
+      purchaseCount += 1;
+    } else {
+      paidKobo += e.amountKobo;
+      paymentCount += 1;
+    }
+  }
+  let iOweKobo = 0;
+  const top: { supplier: Supplier; balanceKobo: number }[] = [];
+  balances.forEach((bal, id) => {
+    if (bal > 0) {
+      iOweKobo += bal;
+      top.push({ supplier: live.get(id)!, balanceKobo: bal });
+    }
+  });
+  top.sort((a, b) => b.balanceKobo - a.balanceKobo);
+  return { purchasedKobo, paidKobo, purchaseCount, paymentCount, iOweKobo, topCreditors: top.slice(0, topN) };
 }

@@ -1,4 +1,4 @@
-import type { BackupPayload, Customer, Entry, ShopProfile } from './types';
+import type { BackupPayload, Customer, Entry, ShopProfile, Supplier, SupplierEntry } from './types';
 import { getDb, resetDbCache } from '../db/schema';
 import { enqueueOutbox } from '../db/outbox';
 
@@ -7,12 +7,16 @@ export async function exportBackup(): Promise<BackupPayload> {
   const shop = (await db.get('shop', 'shop')) || null;
   const customers = await db.getAll('customers');
   const entries = await db.getAll('entries');
+  const suppliers = await db.getAll('suppliers');
+  const supplierEntries = await db.getAll('supplierEntries');
   return {
     version: 1,
     exportedAt: Date.now(),
     shop,
     customers,
     entries,
+    suppliers,
+    supplierEntries,
   };
 }
 
@@ -34,7 +38,9 @@ function isBackupPayload(data: unknown): data is BackupPayload {
   return (
     d.version === 1 &&
     Array.isArray(d.customers) &&
-    Array.isArray(d.entries)
+    Array.isArray(d.entries) &&
+    (d.suppliers === undefined || Array.isArray(d.suppliers)) &&
+    (d.supplierEntries === undefined || Array.isArray(d.supplierEntries))
   );
 }
 
@@ -42,12 +48,22 @@ function isBackupPayload(data: unknown): data is BackupPayload {
 export async function importBackup(data: unknown): Promise<{
   customers: number;
   entries: number;
+  suppliers: number;
+  supplierEntries: number;
+  /** False when the backup predates suppliers (local suppliers were kept). */
+  suppliersReplaced: boolean;
 }> {
   if (!isBackupPayload(data)) {
     throw new Error('Invalid backup file');
   }
   const db = await getDb();
-  const tx = db.transaction(['shop', 'customers', 'entries'], 'readwrite');
+  // Older backups have no supplier fields: keep this phone's suppliers as-is
+  // rather than wiping them (nothing is lost on restore or cloud pull).
+  const hasSuppliers = Array.isArray(data.suppliers) || Array.isArray(data.supplierEntries);
+  const tx = db.transaction(
+    ['shop', 'customers', 'entries', 'suppliers', 'supplierEntries'],
+    'readwrite',
+  );
 
   // Clear existing
   await tx.objectStore('customers').clear();
@@ -66,12 +82,28 @@ export async function importBackup(data: unknown): Promise<{
   for (const e of data.entries as Entry[]) {
     if (e?.id) await tx.objectStore('entries').put(e);
   }
+  if (hasSuppliers) {
+    await tx.objectStore('suppliers').clear();
+    await tx.objectStore('supplierEntries').clear();
+    for (const s of (data.suppliers || []) as Supplier[]) {
+      if (s?.id) await tx.objectStore('suppliers').put(s);
+    }
+    for (const e of (data.supplierEntries || []) as SupplierEntry[]) {
+      if (e?.id && e.supplierId) await tx.objectStore('supplierEntries').put(e);
+    }
+  }
   await tx.done;
 
   if (data.shop) {
     await enqueueOutbox('shop', 'shop', 'upsert', data.shop);
   }
-  return { customers: data.customers.length, entries: data.entries.length };
+  return {
+    customers: data.customers.length,
+    entries: data.entries.length,
+    suppliers: data.suppliers?.length ?? 0,
+    supplierEntries: data.supplierEntries?.length ?? 0,
+    suppliersReplaced: hasSuppliers,
+  };
 }
 
 export async function readJsonFile(file: File): Promise<unknown> {

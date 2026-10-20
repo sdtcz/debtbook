@@ -77,7 +77,7 @@ export interface Entry {
 }
 
 export type OutboxOp = 'upsert' | 'delete';
-export type OutboxEntity = 'shop' | 'customer' | 'entry';
+export type OutboxEntity = 'shop' | 'customer' | 'entry' | 'supplier' | 'supplierEntry';
 
 /** Queued mutation for future backend sync (LWW-ready) */
 export interface OutboxItem {
@@ -103,10 +103,54 @@ export interface CustomerBalance {
   lastPaymentAt?: number;
 }
 
+/**
+ * Supplier ledger ("I owe"): kept in separate stores from customers so
+ * "they owe me" and "I owe" can never mix.
+ */
+export interface Supplier {
+  id: string;
+  name: string;
+  phone?: string;
+  note?: string;
+  createdAt: number;
+  updatedAt: number;
+  deletedAt?: number;
+}
+
+/** purchase = bought on credit (I owe more); payment = I paid the supplier. */
+export type SupplierEntryType = 'purchase' | 'payment';
+
+export interface SupplierEntry {
+  id: string;
+  supplierId: string;
+  type: SupplierEntryType;
+  amountKobo: number;
+  note?: string;
+  occurredAt: number;
+  createdAt: number;
+  updatedAt: number;
+  deletedAt?: number;
+}
+
+export interface SupplierBalance {
+  supplier: Supplier;
+  /** Positive = I owe the supplier; negative = supplier owes me (overpaid). */
+  balanceKobo: number;
+  purchaseTotalKobo: number;
+  paymentTotalKobo: number;
+  entryCount: number;
+}
+
 export interface BackupPayload {
   version: 1;
   exportedAt: number;
   shop: ShopProfile | null;
   customers: Customer[];
   entries: Entry[];
+  /**
+   * Added Oct 2026. Optional so older backups (and older app versions) stay
+   * valid: a backup without these fields leaves local suppliers untouched.
+   */
+  suppliers?: Supplier[];
+  supplierEntries?: SupplierEntry[];
 }

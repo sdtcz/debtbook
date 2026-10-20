@@ -29,6 +29,12 @@ import { HomePage } from './pages/HomePage';
 import { LandingPage } from './pages/LandingPage';
 import { PayDetailsPage } from './pages/PayDetailsPage';
 import { PosterPage } from './pages/PosterPage';
+import { lazyPage } from './components/LazyPage';
+
+const SuppliersPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SuppliersPage));
+const SupplierFormPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SupplierFormPage));
+const SupplierDetailPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SupplierDetailPage));
+const SupplierEntryPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SupplierEntryPage));
 import { PayMePage } from './pages/PayMePage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { ProPage } from './pages/ProPage';
@@ -403,6 +409,21 @@ export function App() {
       break;
     case 'poster':
       page = <PosterPage />;
+      break;
+    case 'suppliers':
+      page = <SuppliersPage />;
+      break;
+    case 'supplier-new':
+      page = <SupplierFormPage toast={toast} />;
+      break;
+    case 'supplier-edit':
+      page = <SupplierFormPage key={`se-${route.id}`} id={route.id} toast={toast} />;
+      break;
+    case 'supplier':
+      page = <SupplierDetailPage key={`s-${route.id}`} id={route.id} toast={toast} />;
+      break;
+    case 'supplier-entry':
+      page = <SupplierEntryPage key={`sen-${route.id}`} supplierId={route.id} initialType={route.type} toast={toast} />;
       break;
     case 'privacy':
       page = <PrivacyPage />;

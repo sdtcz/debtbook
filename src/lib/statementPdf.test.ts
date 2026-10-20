@@ -138,3 +138,23 @@ describe('buildStatementPdf', () => {
     expect(big).toContain(`(Page 1 of ${pageCount})`);
   });
 });
+
+describe('supplier statement PDF', () => {
+  const lines = [
+    { id: 'p1', type: 'purchase' as const, amountKobo: 800000, occurredAt: t0, createdAt: t0, updatedAt: t0, note: 'Rice x5' },
+    { id: 'p2', type: 'payment' as const, amountKobo: 300000, occurredAt: t0 + day, createdAt: t0, updatedAt: t0 },
+  ];
+  const data = buildStatementData(lines, { to: t0 + 10 * day });
+  const s = pdfText(
+    buildStatementPdf({ shopName: 'Shop', customer: { name: 'Alhaji Musa' }, data, generatedAt: t0 + 10 * day, kind: 'supplier' }),
+  );
+  it('uses supplier wording and the I-owe balance', () => {
+    expect(data.closingKobo).toBe(500000);
+    expect(s).toContain('(Supplier Statement)');
+    expect(s).toContain('(SUPPLIER)');
+    expect(s).toContain('(I owe this supplier)');
+    expect(s).toContain('(Bought on credit - Rice x5)');
+    expect(s).toContain('(NGN 5,000.00)');
+    expect(s).not.toContain('(Total owed)');
+  });
+});

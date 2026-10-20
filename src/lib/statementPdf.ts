@@ -1,11 +1,23 @@
 import { t } from '../i18n';
-import type { Customer, Entry } from './types';
+import type { Customer } from './types';
+
+/** Customer entries (credit/payment) or supplier entries (purchase/payment). */
+export interface LedgerLine {
+  id: string;
+  type: 'credit' | 'payment' | 'purchase';
+  amountKobo: number;
+  note?: string;
+  occurredAt: number;
+  createdAt: number;
+  deletedAt?: number;
+}
+export type StatementKind = 'customer' | 'supplier';
 import { A4, PdfPage, buildPdf, fitText } from './pdf';
 
 export type StatementRange = 'all' | 'last30' | 'thisMonth';
 
 export interface StatementRow {
-  entry: Entry;
+  entry: LedgerLine;
   /** Running balance in kobo after this entry (positive = customer owes shop). */
   balanceKobo: number;
 }
@@ -38,13 +50,14 @@ export function resolveRange(range: StatementRange, now = Date.now()): { from: n
   return { from: null, to: now };
 }
 
-function delta(e: Entry): number {
-  return e.type === 'credit' ? e.amountKobo : -e.amountKobo;
+/** Credit sales / purchases on credit raise the balance; payments lower it. */
+function delta(e: LedgerLine): number {
+  return e.type === 'payment' ? -e.amountKobo : e.amountKobo;
 }
 
 /** Sort live entries oldest-first and compute running balances for a period. */
 export function buildStatementData(
-  entries: Entry[],
+  entries: LedgerLine[],
   opts: { from?: number | null; to?: number } = {},
 ): StatementData {
   const to = opts.to ?? Date.now();
@@ -63,8 +76,8 @@ export function buildStatementData(
       opening = bal;
       continue;
     }
-    if (e.type === 'credit') cr += e.amountKobo;
-    else pay += e.amountKobo;
+    if (e.type === 'payment') pay += e.amountKobo;
+    else cr += e.amountKobo;
     rows.push({ entry: e, balanceKobo: bal });
   }
   const start = from ?? (rows[0]?.entry.occurredAt ?? to);
@@ -108,8 +121,11 @@ export function buildStatementPdf(opts: {
   customer: Pick<Customer, 'name' | 'phone'>;
   data: StatementData;
   generatedAt?: number;
+  /** 'supplier' = what I owe a supplier (default 'customer'). */
+  kind?: StatementKind;
 }): Uint8Array {
   const { data, customer } = opts;
+  const sup = opts.kind === 'supplier';
   const gen = opts.generatedAt ?? Date.now();
   const M = 40;
   const R = A4.w - M;
@@ -122,9 +138,9 @@ export function buildStatementPdf(opts: {
     page.rect(M, y - 6, R - M, 20, [0.94, 0.97, 0.96]);
     page.text(col.date, y, t('pdf.colDate'), 8.5, { bold: true, color: MUTED });
     page.text(col.details, y, t('pdf.colDetails'), 8.5, { bold: true, color: MUTED });
-    page.text(col.credit, y, t('pdf.colCredit'), 8.5, { bold: true, color: MUTED, align: 'right' });
+    page.text(col.credit, y, sup ? t('pdf.colPurchase') : t('pdf.colCredit'), 8.5, { bold: true, color: MUTED, align: 'right' });
     page.text(col.payment, y, t('pdf.colPayment'), 8.5, { bold: true, color: MUTED, align: 'right' });
-    page.text(col.balance, y, t('pdf.colBalance'), 8.5, { bold: true, color: MUTED, align: 'right' });
+    page.text(col.balance, y, sup ? t('pdf.colIOwe') : t('pdf.colBalance'), 8.5, { bold: true, color: MUTED, align: 'right' });
     y -= 22;
   };
 
@@ -136,9 +152,9 @@ export function buildStatementPdf(opts: {
       page.rect(0, A4.h - 8, A4.w, 8, TEAL);
       page.text(M, y, fitText(opts.shopName || 'BashiBook', 20, R - M, true), 20, { bold: true });
       y -= 22;
-      page.text(M, y, t('statement.title'), 12, { color: TEAL, bold: true });
+      page.text(M, y, sup ? t('pdf.supplierTitle') : t('statement.title'), 12, { color: TEAL, bold: true });
       y -= 26;
-      page.text(M, y, t('pdf.customer'), 8.5, { color: MUTED });
+      page.text(M, y, sup ? t('pdf.supplier') : t('pdf.customer'), 8.5, { color: MUTED });
       page.text(300, y, t('pdf.period'), 8.5, { color: MUTED });
       y -= 14;
       page.text(M, y, fitText(customer.name, 12, 250, true), 12, { bold: true });
@@ -175,12 +191,19 @@ export function buildStatementPdf(opts: {
   for (const r of data.rows) {
     ensure(ROW);
     const e = r.entry;
-    const label = e.type === 'credit' ? t('customer.creditSaleLabel') : t('customer.paymentLabel');
+    const label =
+      e.type === 'purchase'
+        ? t('supplier.purchaseLabel')
+        : e.type === 'credit'
+          ? t('customer.creditSaleLabel')
+          : sup
+            ? t('supplier.paymentLabel')
+            : t('customer.paymentLabel');
     const details = e.note ? `${label} - ${e.note}` : label;
     page.line(M, y + ROW - 5, R, y + ROW - 5, [0.92, 0.94, 0.96], 0.4);
     page.text(col.date, y, pdfDate(e.occurredAt), 9);
     page.text(col.details, y, fitText(details, 9, col.credit - col.details - 58), 9);
-    if (e.type === 'credit') page.text(col.credit, y, pdfMoney(e.amountKobo, false), 9, { align: 'right', color: RED });
+    if (e.type !== 'payment') page.text(col.credit, y, pdfMoney(e.amountKobo, false), 9, { align: 'right', color: RED });
     else page.text(col.payment, y, pdfMoney(e.amountKobo, false), 9, { align: 'right', color: GREEN });
     page.text(col.balance, y, pdfMoney(r.balanceKobo, false), 9, { align: 'right', bold: true });
     y -= ROW;
@@ -194,7 +217,17 @@ export function buildStatementPdf(opts: {
   page.text(col.payment, y, pdfMoney(data.paymentTotalKobo, false), 9, { align: 'right', color: GREEN });
   y -= 30;
   const closing = data.closingKobo;
-  const totalLabel = closing > 0 ? t('pdf.totalOwed') : closing < 0 ? t('pdf.shopOwes') : t('pdf.settled');
+  const totalLabel = sup
+    ? closing > 0
+      ? t('pdf.iOweSupplier')
+      : closing < 0
+        ? t('pdf.supplierOwesMe')
+        : t('pdf.settled')
+    : closing > 0
+      ? t('pdf.totalOwed')
+      : closing < 0
+        ? t('pdf.shopOwes')
+        : t('pdf.settled');
   page.rect(M, y - 10, R - M, 32, closing > 0 ? [0.99, 0.95, 0.95] : [0.93, 0.98, 0.96]);
   page.text(M + 12, y, totalLabel, 12, { bold: true });
   page.text(R - 12, y, pdfMoney(Math.abs(closing)), 14, { bold: true, align: 'right', color: closing > 0 ? RED : GREEN });
@@ -204,5 +237,5 @@ export function buildStatementPdf(opts: {
     p.text(M, M, t('pdf.footer'), 8, { color: MUTED });
     p.text(R, M, t('pdf.page', { n: String(i + 1), total: String(pages.length) }), 8, { color: MUTED, align: 'right' });
   });
-  return buildPdf(pages, `${t('statement.title')} - ${customer.name}`);
+  return buildPdf(pages, `${sup ? t('pdf.supplierTitle') : t('statement.title')} - ${customer.name}`);
 }

@@ -113,3 +113,20 @@ describe('encrypt / decrypt', () => {
     expect(decoded.includes('Ada')).toBe(false);
   });
 });
+
+describe('cloud sync carries the supplier ledger', () => {
+  it('encrypt/decrypt round-trips suppliers and supplier entries', async () => {
+    const code = generateRecoveryCode();
+    const payload: BackupPayload = {
+      ...samplePayload(),
+      suppliers: [{ id: 's1', name: 'Depot', createdAt: 1, updatedAt: 1 }],
+      supplierEntries: [
+        { id: 'se1', supplierId: 's1', type: 'purchase', amountKobo: 700000, occurredAt: 1, createdAt: 1, updatedAt: 1 },
+      ],
+    };
+    const enc = await encryptBackup(payload, code);
+    const out = await decryptBackup(enc, code);
+    expect(out.suppliers).toEqual(payload.suppliers);
+    expect(out.supplierEntries).toEqual(payload.supplierEntries);
+  });
+});

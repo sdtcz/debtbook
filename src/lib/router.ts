@@ -21,6 +21,11 @@ export type Route =
   | { name: 'pro' }
   | { name: 'pay-details' }
   | { name: 'poster' }
+  | { name: 'suppliers' }
+  | { name: 'supplier-new' }
+  | { name: 'supplier'; id: string }
+  | { name: 'supplier-edit'; id: string }
+  | { name: 'supplier-entry'; id: string; type?: 'purchase' | 'payment' }
   | { name: 'privacy' }
   | { name: 'reports' }
   | PayMeRoute;
@@ -57,6 +62,16 @@ export function parseHash(): Route {
 
   if (parts[0] === 'payme') return parsePayMeFromQuery(queryPart);
   if (parts[0] === 'setup') return { name: 'setup' };
+  if (parts[0] === 'suppliers') {
+    if (!parts[1]) return { name: 'suppliers' };
+    if (parts[1] === 'new') return { name: 'supplier-new' };
+    if (parts[2] === 'edit') return { name: 'supplier-edit', id: parts[1] };
+    if (parts[2] === 'entry') {
+      const type = parts[3] === 'payment' ? 'payment' : parts[3] === 'purchase' ? 'purchase' : undefined;
+      return { name: 'supplier-entry', id: parts[1], type };
+    }
+    return { name: 'supplier', id: parts[1] };
+  }
   if (parts[0] === 'pay-details' && parts[1] === 'poster') return { name: 'poster' };
   if (parts[0] === 'pay-details') return { name: 'pay-details' };
   if (parts[0] === 'privacy') return { name: 'privacy' };

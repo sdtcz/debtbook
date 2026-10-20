@@ -14,6 +14,8 @@ export function activeTab(route: Route): TabId | null {
   switch (route.name) {
     case 'home':
     case 'customer':
+    case 'suppliers':
+    case 'supplier':
       return 'home';
     case 'pay-details':
       return 'pay';

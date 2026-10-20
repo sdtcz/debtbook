@@ -1,5 +1,6 @@
 import { downloadJson, exportBackup } from '../lib/backup';
 import { LoadError } from '../components/LoadError';
+import { getSupplierBalances } from '../db/suppliers';
 import {
   dismissBackupNudge,
   dismissInviteCard,
@@ -95,6 +96,7 @@ export function HomePage({ locked, toast }: Props) {
   const [filter, setFilter] = useState<FilterChip>('all');
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
+  const [iOwe, setIOwe] = useState<{ total: number; count: number } | null>(null);
   const [proHintDismissed, setProHintDismissed] = useState(() => {
     try {
       return localStorage.getItem(PRO_HINT_KEY) === '1';
@@ -125,6 +127,10 @@ export function HomePage({ locked, toast }: Props) {
       setRows(dash.customers);
       setTotal(dash.totalOutstandingKobo);
       setLoadFailed(false);
+      // Supplier side ("I owe") — never mixed into the customer total above.
+      getSupplierBalances()
+        .then((r) => setIOwe({ total: r.totalIOweKobo, count: r.suppliers.length }))
+        .catch(() => setIOwe(null));
     } catch {
       setLoadFailed(true);
     } finally {
@@ -337,6 +343,26 @@ export function HomePage({ locked, toast }: Props) {
             </div>
           </div>
         </section>
+
+        {iOwe && (
+          <a class={`iowe-home-card${iOwe.total > 0 ? ' owing' : ''}`} href={href('/suppliers')}>
+            <span class="iowe-home-icon" aria-hidden="true">
+              📦
+            </span>
+            <span class="iowe-home-body">
+              <span class="iowe-home-kicker">{t('home.iOweSuppliers')}</span>
+              <span class="iowe-home-sub">
+                {iOwe.count === 0
+                  ? t('home.iOweSuppliersEmpty')
+                  : t('home.iOweSuppliersCount', { n: iOwe.count })}
+              </span>
+            </span>
+            <span class="iowe-home-amount">{locked ? '••••' : formatNaira(iOwe.total)}</span>
+            <span class="chev" aria-hidden="true">
+              ›
+            </span>
+          </a>
+        )}
 
         {!locked && chasePrompt && digest.count > 0 && (
           <div class="card chase-prompt" role="status">

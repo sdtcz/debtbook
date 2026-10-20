@@ -5322,3 +5322,88 @@ a.btn.payme-cta-btn {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------- Suppliers ("I owe") — amber tone, kept visually apart from customers ---------- */
+.iowe-hero {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 4px;
+}
+.iowe-hero.owing { background: #fef3c7; border-color: #fcd34d; }
+.iowe-hero.compact { padding: 12px 14px; }
+.iowe-hero-kicker { font-size: 0.85rem; font-weight: 700; color: #78350f; text-transform: uppercase; letter-spacing: 0.03em; }
+.iowe-hero-amount { font-size: 2rem; font-weight: 800; color: #78350f; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.iowe-hero.compact .iowe-hero-amount { font-size: 1.5rem; }
+.iowe-hero-hint { margin: 6px 0 0; color: #713f12; font-size: 0.92rem; }
+.iowe-hero-after { margin: 8px 0 0; font-weight: 700; color: #78350f; }
+.supplier-empty { text-align: center; }
+.supplier-empty-glyph { font-size: 2.2rem; margin-bottom: 6px; }
+.supplier-list, .supplier-history { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.supplier-row {
+  display: flex; align-items: center; gap: 12px;
+  min-height: 60px; padding: 10px 12px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  color: var(--text); text-decoration: none; box-shadow: var(--shadow);
+}
+.supplier-avatar {
+  width: 40px; height: 40px; flex: none; border-radius: 50%;
+  background: #fef3c7; color: #78350f; display: grid; place-items: center; font-weight: 800;
+}
+.supplier-row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.supplier-row-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.supplier-row-sub { color: var(--muted); font-size: 0.85rem; }
+.supplier-pill {
+  flex: none; padding: 4px 10px; border-radius: 999px; font-weight: 700; font-variant-numeric: tabular-nums;
+  background: #f1f5f9; color: var(--muted);
+}
+.supplier-pill.owing { background: #fef3c7; color: #78350f; }
+.supplier-add-btn { margin-top: 14px; width: 100%; }
+.supplier-form { display: grid; gap: 12px; margin-top: 12px; }
+.supplier-form-tip { margin: 0; color: var(--muted); font-size: 0.9rem; }
+.form-error { margin: 0; color: var(--danger); font-weight: 600; }
+.supplier-remove { color: var(--danger); min-height: var(--tap); }
+.btn-iowe { background: #b45309; border-color: #b45309; color: #fff; min-height: var(--tap); }
+.btn-iowe:hover { background: #92400e; }
+.seg button.active.iowe { background: #b45309; border-color: #b45309; color: #fff; }
+.supplier-hist-row {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+}
+.supplier-hist-sign {
+  width: 32px; height: 32px; flex: none; border-radius: 50%; display: grid; place-items: center; font-weight: 800;
+}
+.supplier-hist-row.purchase .supplier-hist-sign { background: #fef3c7; color: #78350f; }
+.supplier-hist-row.payment .supplier-hist-sign { background: var(--ok-soft); color: var(--ok); }
+.supplier-hist-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.supplier-hist-type { font-weight: 700; }
+.supplier-hist-when, .supplier-hist-note { color: var(--muted); font-size: 0.85rem; }
+.supplier-hist-note { overflow-wrap: anywhere; }
+.supplier-hist-amt { font-weight: 800; font-variant-numeric: tabular-nums; }
+.supplier-hist-row.purchase .supplier-hist-amt { color: #92400e; }
+.supplier-hist-row.payment .supplier-hist-amt { color: var(--ok); }
+
+/* Home card */
+.iowe-home-card {
+  display: flex; align-items: center; gap: 12px; margin-top: 12px; min-height: 60px; padding: 12px 14px;
+  background: #fffbeb; border: 1px solid #fde68a; border-radius: var(--radius);
+  color: var(--text); text-decoration: none;
+}
+.iowe-home-card.owing { background: #fef3c7; border-color: #fcd34d; }
+.iowe-home-icon { font-size: 1.4rem; flex: none; }
+.iowe-home-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.iowe-home-kicker { font-weight: 700; color: #78350f; }
+.iowe-home-sub { color: #713f12; font-size: 0.85rem; }
+.iowe-home-amount { font-weight: 800; color: #78350f; font-variant-numeric: tabular-nums; }
+.iowe-home-card .chev { color: #78350f; }
+
+/* Reports supplier section */
+.report-amount.iowe { color: #78350f; }
+.report-iowe { background: #fffbeb; border-color: #fde68a; }
+.report-iowe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.report-sub-amount { font-weight: 800; font-variant-numeric: tabular-nums; }
+.report-creditors { margin-top: 12px; }
+.report-creditors { background: var(--surface); border: 1px solid #fde68a; border-radius: 10px; overflow: hidden; }
+.report-creditors .settings-row { text-decoration: none; color: var(--text); }
+.iowe-home-card { margin-bottom: 12px; }

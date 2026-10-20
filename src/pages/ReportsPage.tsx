@@ -2,13 +2,14 @@ import { useEffect, useMemo, useState } from 'preact/hooks';
 import { LoadError } from '../components/LoadError';
 import { BackButton } from '../components/BackButton';
 import { getShop, listAllEntries, listCustomers } from '../db/repo';
+import { listAllSupplierEntries, listSuppliers } from '../db/suppliers';
 import { useLocale } from '../hooks/useLocale';
 import type { MessageKey } from '../i18n';
 import { formatNaira } from '../lib/money';
-import { buildReport, type ReportPeriod } from '../lib/reports';
+import { buildReport, buildSupplierReport, type ReportPeriod } from '../lib/reports';
 import { href } from '../lib/router';
 import { shareOrCopyText } from '../lib/statement';
-import type { Customer, Entry } from '../lib/types';
+import type { Customer, Entry, Supplier, SupplierEntry } from '../lib/types';
 import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
@@ -28,6 +29,8 @@ export function ReportsPage({ locked, toast }: Props) {
   const [period, setPeriod] = useState<ReportPeriod>('week');
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [supplierEntries, setSupplierEntries] = useState<SupplierEntry[]>([]);
   const [shopName, setShopName] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -36,9 +39,15 @@ export function ReportsPage({ locked, toast }: Props) {
   useEffect(() => {
     let alive = true;
     const load = async () => {
-      let c, e, s;
+      let c, e, s, sp, se;
       try {
-        [c, e, s] = await Promise.all([listCustomers(), listAllEntries(), getShop()]);
+        [c, e, s, sp, se] = await Promise.all([
+          listCustomers(),
+          listAllEntries(),
+          getShop(),
+          listSuppliers(),
+          listAllSupplierEntries(),
+        ]);
       } catch {
         if (alive) {
           setLoadFailed(true);
@@ -50,6 +59,8 @@ export function ReportsPage({ locked, toast }: Props) {
       setLoadFailed(false);
       setCustomers(c);
       setEntries(e);
+      setSuppliers(sp);
+      setSupplierEntries(se);
       setShopName(s?.name || '');
       setLoading(false);
     };
@@ -65,6 +76,10 @@ export function ReportsPage({ locked, toast }: Props) {
     () => buildReport(customers, entries, period),
     [customers, entries, period],
   );
+  const supReport = useMemo(
+    () => buildSupplierReport(suppliers, supplierEntries, period),
+    [suppliers, supplierEntries, period],
+  );
   const money = (k: number) => (locked ? '••••' : formatNaira(k));
   const periodLabel = t(PERIODS.find((p) => p.id === period)!.key);
 
@@ -74,6 +89,9 @@ export function ReportsPage({ locked, toast }: Props) {
       t('reports.messageCredit', { amount: formatNaira(report.creditGivenKobo) }),
       t('reports.messageCollected', { amount: formatNaira(report.collectedKobo) }),
       t('reports.messageOutstanding', { amount: formatNaira(report.outstandingKobo) }),
+      ...(suppliers.length
+        ? [t('reports.messageIOwe', { amount: formatNaira(supReport.iOweKobo) })]
+        : []),
       '— BashiBook',
     ];
     const r = await shareOrCopyText(lines.join('\n'), t('reports.title'));
@@ -113,7 +131,7 @@ export function ReportsPage({ locked, toast }: Props) {
               setReloadKey((k) => k + 1);
             }}
           />
-        ) : customers.length === 0 ? (
+        ) : customers.length === 0 && suppliers.length === 0 ? (
           <div class="empty">
             <strong>{t('reports.title')}</strong>
             <p>{t('reports.empty')}</p>
@@ -176,6 +194,51 @@ export function ReportsPage({ locked, toast }: Props) {
                 ))
               )}
             </div>
+
+            <div class="settings-group-label">{t('reports.suppliersTitle')}</div>
+            <section class="card report-wide report-iowe" aria-label={t('reports.suppliersTitle')}>
+              {suppliers.length === 0 ? (
+                <div class="report-hint">
+                  {t('reports.noSuppliers')}{' '}
+                  <a href={href('/suppliers')}>{t('reports.openSuppliers')}</a>
+                </div>
+              ) : (
+                <>
+                  <div class="report-label">{t('reports.iOweSuppliers')}</div>
+                  <div class="report-amount iowe">{money(supReport.iOweKobo)}</div>
+                  <div class="report-grid report-iowe-grid">
+                    <div>
+                      <div class="report-label">{t('reports.purchasedOnCredit')}</div>
+                      <div class="report-sub-amount">{money(supReport.purchasedKobo)}</div>
+                      <div class="report-hint">{t('reports.entries', { n: supReport.purchaseCount })}</div>
+                    </div>
+                    <div>
+                      <div class="report-label">{t('reports.paidSuppliers')}</div>
+                      <div class="report-sub-amount">{money(supReport.paidKobo)}</div>
+                      <div class="report-hint">{t('reports.entries', { n: supReport.paymentCount })}</div>
+                    </div>
+                  </div>
+                  {supReport.topCreditors.length > 0 && (
+                    <div class="settings-list report-creditors">
+                      {supReport.topCreditors.map((d) => (
+                        <a key={d.supplier.id} class="settings-row report-debtor" href={href(`/suppliers/${d.supplier.id}`)}>
+                          <span class="settings-row-body">
+                            <span class="settings-row-title">{d.supplier.name}</span>
+                            <span class="settings-row-sub">{t('supplier.youOwe')}</span>
+                          </span>
+                          <span class="settings-row-trail">
+                            {money(d.balanceKobo)}
+                            <span class="chev" aria-hidden="true">
+                              ›
+                            </span>
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
 
             {!locked && (
               <button class="btn btn-secondary" type="button" onClick={share} style={{ marginTop: 14 }}>
