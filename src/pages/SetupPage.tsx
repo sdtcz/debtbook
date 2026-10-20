@@ -42,7 +42,7 @@ export function SetupPage({ onDone }: Props) {
   };
 
   return (
-    <div class="setup-screen">
+    <main class="setup-screen">
       <div class="setup-lang" role="radiogroup" aria-label={t('settings.language')}>
         {LOCALE_OPTIONS.map((opt) => {
           const on = locale === opt.id;
@@ -98,6 +98,6 @@ export function SetupPage({ onDone }: Props) {
           {busy ? t('common.saving') : t('setup.start')}
         </button>
       </form>
-    </div>
+    </main>
   );
 }

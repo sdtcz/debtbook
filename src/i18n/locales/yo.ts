@@ -642,6 +642,11 @@ export const yo: Record<MessageKey, string> = {
   'pin.deleteTitle': "Tẹ PIN láti paarẹ́",
   'pin.deleteHint': "Èyí ń dáàbò bo ìwé rẹ bí ẹlòmíràn bá ń lo fóònù náà.",
 
+  'common.loadFailedTitle': "A kò lè ṣí ìwé rẹ",
+  'common.loadFailedBody': "Àkọsílẹ̀ rẹ ṣì wà lórí fóònù yìí. Pa àwọn áàpù mìíràn kí o gbìyànjú lẹ́ẹ̀kan sí i.",
+  'common.retry': "Gbìyànjú lẹ́ẹ̀kan sí i",
+  'settings.importBackupFile': "Fáìlì àfẹ̀yìntì láti gbé wọlé",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

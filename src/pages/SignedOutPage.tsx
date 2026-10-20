@@ -11,7 +11,7 @@ interface Props {
 export function SignedOutPage({ shopName, onSignIn, onErase }: Props) {
   const { locale, setLocale, t } = useLocale();
   return (
-    <div class="setup-screen signed-out-screen">
+    <main class="setup-screen signed-out-screen">
       <div class="setup-lang" role="radiogroup" aria-label={t('settings.language')}>
         {LOCALE_OPTIONS.map((opt) => {
           const on = locale === opt.id;
@@ -45,6 +45,6 @@ export function SignedOutPage({ shopName, onSignIn, onErase }: Props) {
       <button class="btn btn-ghost signed-out-erase" type="button" onClick={onErase}>
         {t('signedOut.erase')}
       </button>
-    </div>
+    </main>
   );
 }

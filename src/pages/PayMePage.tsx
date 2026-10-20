@@ -38,7 +38,7 @@ export function PayMePage({ route, toast }: Props) {
   };
 
   return (
-    <div class="payme-screen">
+    <main class="payme-screen">
       <div class="payme-card payme-soft">
         <section class="collect-crest-hero" aria-labelledby="collect-title">
           <div class="collect-crest" aria-hidden="true">
@@ -119,6 +119,6 @@ export function PayMePage({ route, toast }: Props) {
         </aside>
         <p class="payme-brand muted">{t('growth.footer')}</p>
       </div>
-    </div>
+    </main>
   );
 }

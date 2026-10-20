@@ -1,4 +1,5 @@
 import { BackButton } from '../components/BackButton';
+import { LoadError } from '../components/LoadError';
 import { useEffect, useState } from 'preact/hooks';
 import { StatusBadge, notifyChanged } from '../components/StatusBadge';
 import {
@@ -69,6 +70,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
   const [canUndo, setCanUndo] = useState(false);
   const [recentEntry, setRecentEntry] = useState<Entry | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -90,6 +92,9 @@ export function CustomerDetailPage({ id, toast }: Props) {
       setBalanceKobo(bal.balanceKobo);
       setCanUndo(Boolean(recent));
       setRecentEntry(recent || null);
+      setLoadFailed(false);
+    } catch {
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -224,7 +229,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
           <h1>{t('common.customer')}</h1>
         </header>
         <main class="main">
-          <div class="empty">{t('common.loading')}</div>
+          {loadFailed ? <LoadError onRetry={load} /> : <div class="empty">{t('common.loading')}</div>}
         </main>
       </div>
     );

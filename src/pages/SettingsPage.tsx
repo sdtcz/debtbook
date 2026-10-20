@@ -1075,6 +1075,8 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
             type="file"
             accept="application/json,.json"
             class="sr-only"
+            tabIndex={-1}
+            aria-label={t('settings.importBackupFile')}
             onChange={(e) => {
               const f = (e.target as HTMLInputElement).files?.[0];
               if (f) doImport(f);

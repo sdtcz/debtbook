@@ -640,6 +640,11 @@ export const en = {
   'pin.deleteTitle': "Enter PIN to delete",
   'pin.deleteHint': "This keeps your book safe if someone else is using the phone.",
 
+  'common.loadFailedTitle': "Could not open your book",
+  'common.loadFailedBody': "Your records are still on this phone. Close other apps and try again.",
+  'common.retry': "Try again",
+  'settings.importBackupFile': "Backup file to import",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

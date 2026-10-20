@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'preact/hooks';
+import { LoadError } from '../components/LoadError';
 import { BackButton } from '../components/BackButton';
 import { getShop, listAllEntries, listCustomers } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
@@ -29,12 +30,24 @@ export function ReportsPage({ locked, toast }: Props) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [shopName, setShopName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let alive = true;
     const load = async () => {
-      const [c, e, s] = await Promise.all([listCustomers(), listAllEntries(), getShop()]);
+      let c, e, s;
+      try {
+        [c, e, s] = await Promise.all([listCustomers(), listAllEntries(), getShop()]);
+      } catch {
+        if (alive) {
+          setLoadFailed(true);
+          setLoading(false);
+        }
+        return;
+      }
       if (!alive) return;
+      setLoadFailed(false);
       setCustomers(c);
       setEntries(e);
       setShopName(s?.name || '');
@@ -46,7 +59,7 @@ export function ReportsPage({ locked, toast }: Props) {
       alive = false;
       window.removeEventListener('debtbook:changed', load);
     };
-  }, []);
+  }, [reloadKey]);
 
   const report = useMemo(
     () => buildReport(customers, entries, period),
@@ -93,6 +106,13 @@ export function ReportsPage({ locked, toast }: Props) {
 
         {loading ? (
           <div class="empty">{t('common.loading')}</div>
+        ) : loadFailed ? (
+          <LoadError
+            onRetry={() => {
+              setLoading(true);
+              setReloadKey((k) => k + 1);
+            }}
+          />
         ) : customers.length === 0 ? (
           <div class="empty">
             <strong>{t('reports.title')}</strong>

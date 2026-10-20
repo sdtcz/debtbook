@@ -642,6 +642,11 @@ export const ha: Record<MessageKey, string> = {
   'pin.deleteTitle': "Shigar da PIN don gogewa",
   'pin.deleteHint': "Wannan yana kare littafinka idan wani yana amfani da wayar.",
 
+  'common.loadFailedTitle': "Ba a iya buɗe littafinka ba",
+  'common.loadFailedBody': "Bayananka suna nan a wannan wayar. Rufe sauran manhajoji ka sake gwadawa.",
+  'common.retry': "Sake gwadawa",
+  'settings.importBackupFile': "Fayil ɗin ajiya da za a shigo da shi",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

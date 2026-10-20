@@ -784,7 +784,7 @@ button:active:not(:disabled),
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
-  min-height: 40px;
+  min-height: var(--tap-min);
   min-width: 56px;
   height: auto;
   padding: 8px 12px;
@@ -1083,7 +1083,7 @@ button:active:not(:disabled),
   font-weight: 800;
   font-size: 0.85rem;
   padding: 8px 14px;
-  min-height: 36px;
+  min-height: var(--tap-min);
   cursor: pointer;
   width: auto;
 }
@@ -4702,10 +4702,10 @@ button:active:not(:disabled),
 .icon-btn.back-btn {
   background: rgba(255, 255, 255, 0.16);
   border-radius: 999px;
-  min-width: 40px;
-  min-height: 40px;
-  width: 40px;
-  height: 40px;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  width: var(--tap-min);
+  height: var(--tap-min);
 }
 .icon-btn.back-btn:active {
   background: rgba(255, 255, 255, 0.28);
@@ -4969,9 +4969,8 @@ a.settings-row.report-debtor {
   line-height: 1.2;
 }
 .receipt-sub {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  opacity: 0.8;
 }
 
 /* ── Growth cards (invite, backup nudge) & Pay-me CTA ───────────────── */
@@ -5278,4 +5277,48 @@ a.btn.payme-cta-btn {
 }
 .pin-delete-row[aria-disabled='true'] {
   opacity: 0.7;
+}
+
+/* ── Accessibility polish (2026-10-20) ───────────────────────────────── */
+/* Visible keyboard focus everywhere (zero specificity: specific rules win). */
+:where(a[href], button, input, select, textarea, summary, [tabindex], [role='switch']):focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+/* Light ring on dark/teal surfaces. */
+:where(.topbar, .toast, .fab, .btn-primary, .landing) :focus-visible,
+:where(.fab, .btn-primary, .toast-action):focus-visible {
+  outline-color: #fde68a;
+}
+.load-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+.load-error p {
+  margin: 0;
+  color: var(--muted);
+}
+.load-error-glyph {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  font-size: 1.4rem;
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -1,4 +1,5 @@
 import { downloadJson, exportBackup } from '../lib/backup';
+import { LoadError } from '../components/LoadError';
 import {
   dismissBackupNudge,
   dismissInviteCard,
@@ -93,6 +94,7 @@ export function HomePage({ locked, toast }: Props) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<FilterChip>('all');
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
   const [proHintDismissed, setProHintDismissed] = useState(() => {
     try {
       return localStorage.getItem(PRO_HINT_KEY) === '1';
@@ -122,6 +124,9 @@ export function HomePage({ locked, toast }: Props) {
       const dash = await getDashboardBalances();
       setRows(dash.customers);
       setTotal(dash.totalOutstandingKobo);
+      setLoadFailed(false);
+    } catch {
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -423,7 +428,6 @@ export function HomePage({ locked, toast }: Props) {
             <a
               class="pro-hint-soft-link"
               href={href('/settings/pro')}
-              aria-label={`${t('home.proHintTitle')}: ${t('home.proHintSub')} · ${t('home.proHintPrice')}`}
             >
               <span class="pro-hint-crest" aria-hidden="true">
                 ★
@@ -570,7 +574,9 @@ export function HomePage({ locked, toast }: Props) {
 
         <div class="section-title">{filterTitle}</div>
 
-        {!hasCustomers ? (
+        {loadFailed && !hasCustomers ? (
+          <LoadError onRetry={load} />
+        ) : !hasCustomers ? (
           <div class="empty empty-first-run">
             <div class="empty-ledger-glyph" aria-hidden="true">
               ₦
