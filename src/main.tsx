@@ -6,6 +6,7 @@ import { registerSW } from 'virtual:pwa-register';
 import { normalizeCheckoutReturnUrl } from './lib/checkoutReturn';
 import { captureAttribution } from './lib/growth';
 import { navigate } from './lib/router';
+import { localeReady } from './i18n';
 
 normalizeCheckoutReturnUrl();
 // First-touch src/ref tags (?app=1&src=…&ref=…) — stored on this device only.
@@ -26,8 +27,12 @@ document.addEventListener('click', (e) => {
 });
 
 const root = document.getElementById('app');
-if (root) {
+// Hausa/Yoruba users: wait for their strings (precached; ~instant offline) to avoid an English flash.
+if (root) void localeReady().finally(() => mount(root));
+
+function mount(root: HTMLElement) {
   render(<App />, root);
+  document.getElementById('boot')?.remove();
   const pinHost = document.createElement('div');
   pinHost.id = 'pin-prompt-root';
   document.body.appendChild(pinHost);

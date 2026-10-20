@@ -27,20 +27,20 @@ import { CustomerFormPage } from './pages/CustomerFormPage';
 import { EntryFormPage } from './pages/EntryFormPage';
 import { HomePage } from './pages/HomePage';
 import { LandingPage } from './pages/LandingPage';
-import { PayDetailsPage } from './pages/PayDetailsPage';
-import { PosterPage } from './pages/PosterPage';
 import { lazyPage } from './components/LazyPage';
 
+const PayDetailsPage = lazyPage(() => import('./pages/PayDetailsPage').then((m) => m.PayDetailsPage));
+const PosterPage = lazyPage(() => import('./pages/PosterPage').then((m) => m.PosterPage));
+const PrivacyPage = lazyPage(() => import('./pages/PrivacyPage').then((m) => m.PrivacyPage));
+const ProPage = lazyPage(() => import('./pages/ProPage').then((m) => m.ProPage));
+const ReportsPage = lazyPage(() => import('./pages/ReportsPage').then((m) => m.ReportsPage));
+const SettingsPage = lazyPage(() => import('./pages/SettingsPage').then((m) => m.SettingsPage));
 const SuppliersPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SuppliersPage));
 const SupplierFormPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SupplierFormPage));
 const SupplierDetailPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SupplierDetailPage));
 const SupplierEntryPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SupplierEntryPage));
 import { PayMePage } from './pages/PayMePage';
-import { PrivacyPage } from './pages/PrivacyPage';
-import { ProPage } from './pages/ProPage';
-import { ReportsPage } from './pages/ReportsPage';
 import { SignedOutPage } from './pages/SignedOutPage';
-import { SettingsPage } from './pages/SettingsPage';
 import { SetupPage } from './pages/SetupPage';
 
 function useDesktopAppStage(showApp: boolean): boolean {

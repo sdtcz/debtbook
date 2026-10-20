@@ -195,7 +195,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
 
   const changeLanguage = async (next: Locale) => {
     if (next === locale) return;
-    setLocale(next);
+    await setLocale(next);
     try {
       await setShopLocale(next);
     } catch {

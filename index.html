@@ -11,9 +11,20 @@
     <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <title>BashiBook</title>
+    <style>
+      /* Boot splash: paints with the HTML (before JS arrives on slow 2G/3G). Removed on mount. */
+      html,body{margin:0;background:#f1f5f9}
+      #boot{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;font:700 1.5rem/1.2 system-ui,-apple-system,Roboto,sans-serif;color:#0f766e}
+      #boot i{display:block;width:120px;height:4px;border-radius:2px;background:#ccfbf1;overflow:hidden;position:relative}
+      #boot i::after{content:"";position:absolute;inset:0;width:40%;background:#0f766e;border-radius:2px;animation:boot 1.1s ease-in-out infinite}
+      @keyframes boot{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+      @media (prefers-reduced-motion:reduce){#boot i::after{animation:none;width:100%}}
+      #app:not(:empty)~#boot{display:none}
+    </style>
   </head>
   <body>
     <div id="app"></div>
+    <div id="boot" aria-hidden="true">BashiBook<i></i></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
