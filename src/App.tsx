@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'preact/hooks';
+import { useCallback, useEffect, useRef, useState } from 'preact/hooks';
 import { PinLock } from './components/PinLock';
 import { showsTabBar, TabBar } from './components/TabBar';
 import { Toast } from './components/Toast';
@@ -139,6 +139,7 @@ export function App() {
   const [pinSalt, setPinSalt] = useState<string | undefined>();
   const [shopName, setShopName] = useState<string | undefined>();
   const [locked, setLocked] = useState(false);
+  const startLockDone = useRef(false);
   const [signedOut, setSignedOut] = useState(() => isSignedOut());
   const { message, action, toast, clearToast } = useToast();
   const { t } = useLocale();
@@ -192,7 +193,13 @@ export function App() {
       }
     };
     document.addEventListener('visibilitychange', onVis);
-    if (pinHash && pinSalt) setLocked(true);
+    // Lock once when the app opens (or a PIN is first set) — not on every
+    // route change, which used to re-ask for the PIN on each tab tap.
+    if (pinHash && pinSalt && !startLockDone.current) {
+      startLockDone.current = true;
+      setLocked(true);
+    }
+    if (!pinHash) startLockDone.current = false;
     return () => document.removeEventListener('visibilitychange', onVis);
   }, [showApp, pinHash, pinSalt, route.name, signedOut]);
 
