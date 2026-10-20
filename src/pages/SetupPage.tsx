@@ -33,7 +33,7 @@ export function SetupPage({ onDone }: Props) {
       }
       notifyChanged();
       onDone();
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('setup.couldNotSave'));
     } finally {

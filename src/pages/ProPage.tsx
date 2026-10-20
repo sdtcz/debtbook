@@ -1,3 +1,4 @@
+import { BackButton } from '../components/BackButton';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { notifyChanged } from '../components/StatusBadge';
 import { getShop, setEntitlement } from '../db/repo';
@@ -14,7 +15,6 @@ import {
   type ProBillingPlan,
 } from '../lib/checkoutReturn';
 import type { ShopProfile } from '../lib/types';
-import { navigate } from '../lib/router';
 import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
@@ -161,14 +161,7 @@ export function ProPage({ toast }: Props) {
   return (
     <div class="app-shell">
       <header class="topbar">
-        <button
-          class="icon-btn"
-          type="button"
-          aria-label={t('common.back')}
-          onClick={() => navigate('/settings')}
-        >
-          ←
-        </button>
+        <BackButton fallback="/settings" />
         <h1>{t('pro.title')}</h1>
         {pro && <span class="pro-badge">{t('common.pro')}</span>}
       </header>

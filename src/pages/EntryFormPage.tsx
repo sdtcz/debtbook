@@ -1,3 +1,4 @@
+import { BackButton } from '../components/BackButton';
 import { useEffect, useState } from 'preact/hooks';
 import { MoneyInput } from '../components/MoneyInput';
 import { notifyChanged } from '../components/StatusBadge';
@@ -15,7 +16,7 @@ import {
   formatNaira,
   parseNairaToKobo,
 } from '../lib/money';
-import { navigate } from '../lib/router';
+import { goBack, navigate } from '../lib/router';
 import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
@@ -40,7 +41,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
     getCustomer(customerId).then((c) => {
       if (!c) {
         toast(t('customer.notFound'));
-        navigate('/');
+        navigate('/', { replace: true });
         return;
       }
       setCustomerName(c.name);
@@ -101,7 +102,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
           },
         },
       });
-      navigate(`/customers/${customerId}`);
+      goBack(`/customers/${customerId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('entry.couldNotSave'));
     } finally {
@@ -121,14 +122,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
   return (
     <div class="app-shell">
       <header class="topbar">
-        <button
-          class="icon-btn"
-          type="button"
-          aria-label={t('common.back')}
-          onClick={() => navigate(`/customers/${customerId}`)}
-        >
-          ←
-        </button>
+        <BackButton fallback={`/customers/${customerId}`} />
         <div style={{ flex: 1 }}>
           <h1>
             {type === 'credit' ? t('entry.creditSale') : t('entry.payment')}

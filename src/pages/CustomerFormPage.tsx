@@ -1,3 +1,4 @@
+import { BackButton } from '../components/BackButton';
 import { useEffect, useState } from 'preact/hooks';
 import { MoneyInput } from '../components/MoneyInput';
 import { notifyChanged } from '../components/StatusBadge';
@@ -9,7 +10,7 @@ import {
   type PickedContact,
 } from '../lib/contacts';
 import { parseNairaToKobo } from '../lib/money';
-import { navigate } from '../lib/router';
+import { goBack, goHome, navigate } from '../lib/router';
 import { normalizeNgWhatsAppDigits } from '../lib/sms';
 import type { ToastAction } from '../hooks/useToast';
 
@@ -76,7 +77,7 @@ export function CustomerFormPage({ id, toast }: Props) {
     getCustomer(id).then((c) => {
       if (!c) {
         toast(t('customer.notFound'));
-        navigate('/');
+        navigate('/', { replace: true });
         return;
       }
       setName(c.name);
@@ -146,7 +147,7 @@ export function CustomerFormPage({ id, toast }: Props) {
       } else {
         toast(t('customerForm.contactsAdded', { n: added }));
       }
-      navigate('/');
+      goHome();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : t('customerForm.saveFailed'),
@@ -209,7 +210,8 @@ export function CustomerFormPage({ id, toast }: Props) {
       });
       notifyChanged();
       toast(editing ? t('customerForm.updated') : t('customerForm.added'));
-      navigate(`/customers/${c.id}`);
+      if (editing) goBack(`/customers/${c.id}`);
+      else navigate(`/customers/${c.id}`, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : t('customerForm.saveFailed'));
     } finally {
@@ -227,7 +229,7 @@ export function CustomerFormPage({ id, toast }: Props) {
       await softDeleteCustomer(id);
       notifyChanged();
       toast(t('customerForm.removed'));
-      navigate('/');
+      goHome();
     } finally {
       setBusy(false);
     }
@@ -236,14 +238,7 @@ export function CustomerFormPage({ id, toast }: Props) {
   return (
     <div class="app-shell">
       <header class="topbar">
-        <button
-          class="icon-btn"
-          type="button"
-          aria-label={t('common.back')}
-          onClick={() => (id ? navigate(`/customers/${id}`) : navigate('/'))}
-        >
-          ←
-        </button>
+        <BackButton fallback={id ? `/customers/${id}` : '/'} />
         <h1>{editing ? t('customerForm.edit') : t('customerForm.new')}</h1>
       </header>
       <main class="main">

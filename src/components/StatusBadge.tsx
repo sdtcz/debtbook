@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { countPendingOutbox } from '../db/outbox';
+import { getShop } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
 import { useOnline } from '../hooks/useOnline';
 
@@ -12,7 +13,11 @@ export function StatusBadge() {
     let alive = true;
     const refresh = async () => {
       try {
-        const n = await countPendingOutbox();
+        // Only cloud-backup users have anything to sync; for everyone else the
+        // book is simply saved on this phone, so don't show a scary counter.
+        const shop = await getShop();
+        const syncing = Boolean(shop?.cloudBackupEnabled && shop?.cloudBackupId);
+        const n = syncing ? await countPendingOutbox() : 0;
         if (alive) setPending(n);
       } catch {
         /* db not ready */

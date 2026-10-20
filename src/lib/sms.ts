@@ -11,6 +11,7 @@
  */
 
 import { t } from '../i18n';
+import { appLink, withBrandFooter } from './growth';
 import { formatNaira } from './money';
 
 export function buildRemindMessage(
@@ -21,12 +22,12 @@ export function buildRemindMessage(
   const amount = formatNaira(Math.abs(balanceKobo));
   const vars = { customer: customerName, shop: shopName, amount };
   if (balanceKobo > 0) {
-    return t('remind.owes', vars);
+    return withBrandFooter(t('remind.owes', vars), 'rem');
   }
   if (balanceKobo < 0) {
-    return t('remind.youOwe', vars);
+    return withBrandFooter(t('remind.youOwe', vars), 'rem');
   }
-  return t('remind.settled', vars);
+  return withBrandFooter(t('remind.settled', vars), 'rem');
 }
 
 /**
@@ -119,6 +120,7 @@ export function buildMorningDigestMessage(
   }
   lines.push('');
   lines.push(t('digest.messageFooter'));
+  lines.push(appLink('dig'));
   return lines.join('\n');
 }
 
@@ -172,4 +174,71 @@ export async function copyMorningDigest(opts: {
     }
   }
   return false;
+}
+
+/**
+ * Entry receipt (OkCredit-style "both sides hold the record"): sent by the
+ * shopkeeper over WhatsApp/SMS after recording a credit sale or payment.
+ */
+export function buildEntryReceiptMessage(opts: {
+  shopName: string;
+  customerName: string;
+  type: 'credit' | 'payment';
+  amountKobo: number;
+  balanceKobo: number;
+  note?: string;
+  at?: number;
+}): string {
+  const amount = formatNaira(Math.abs(opts.amountKobo));
+  const date = new Date(opts.at ?? Date.now()).toLocaleDateString('en-NG');
+  const vars = { customer: opts.customerName, shop: opts.shopName, amount, date };
+  const lines = [
+    opts.type === 'credit' ? t('receipt.credit', vars) : t('receipt.payment', vars),
+  ];
+  const note = (opts.note || '').trim();
+  if (note) lines.push(t('receipt.note', { note }));
+  const bal = opts.balanceKobo;
+  lines.push(
+    bal > 0
+      ? t('receipt.balanceOwed', { amount: formatNaira(bal) })
+      : bal < 0
+        ? t('receipt.balanceCredit', { amount: formatNaira(-bal) })
+        : t('receipt.balanceSettled'),
+  );
+  lines.push(t('receipt.footer', { shop: opts.shopName }));
+  return withBrandFooter(lines.join('\n'), 'rem');
+}
+
+/** Open WhatsApp (or SMS / share / clipboard) with a prepared message. */
+export async function sendTextToCustomer(
+  phone: string | undefined,
+  message: string,
+  title: string,
+): Promise<'whatsapp' | 'sms' | 'share' | 'clipboard' | 'none'> {
+  if (phone) {
+    const wa = buildWhatsAppUri(phone, message);
+    if (wa) {
+      window.open(wa, '_blank', 'noopener,noreferrer');
+      return 'whatsapp';
+    }
+    window.location.href = buildSmsUri(phone, message);
+    return 'sms';
+  }
+  if (typeof navigator !== 'undefined' && navigator.share) {
+    try {
+      await navigator.share({ text: message, title });
+      return 'share';
+    } catch {
+      /* cancelled */
+    }
+  }
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(message);
+      return 'clipboard';
+    } catch {
+      /* ignore */
+    }
+  }
+  return 'none';
 }

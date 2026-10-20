@@ -1,3 +1,12 @@
+import { downloadJson, exportBackup } from '../lib/backup';
+import {
+  dismissBackupNudge,
+  dismissInviteCard,
+  inviteCardDismissed,
+  openInviteWhatsApp,
+  rememberBackupExported,
+  shouldShowBackupNudge,
+} from '../lib/growth';
 import { useEffect, useMemo, useState } from 'preact/hooks';
 import { ChaseAllSheet } from '../components/ChaseAllSheet';
 import { StatusBadge } from '../components/StatusBadge';
@@ -94,6 +103,8 @@ export function HomePage({ locked, toast }: Props) {
   const [flash, setFlash] = useState<string | null>(null);
   const [chasePrompt, setChasePrompt] = useState(false);
   const [chaseSheetOpen, setChaseSheetOpen] = useState(false);
+  const [inviteHidden, setInviteHidden] = useState(() => inviteCardDismissed());
+  const [nudgeHidden, setNudgeHidden] = useState(false);
 
   const notify = (msg: string) => {
     if (toast) toast(msg);
@@ -431,6 +442,72 @@ export function HomePage({ locked, toast }: Props) {
             >
               ×
             </button>
+          </div>
+        )}
+
+        {!locked &&
+          !nudgeHidden &&
+          shouldShowBackupNudge({
+            customerCount: rows.length,
+            cloudBackupAt: shop?.lastCloudBackupAt,
+          }) && (
+            <div class="growth-card nudge" role="status">
+              <div class="growth-card-body">
+                <strong>{t('growth.backupNudgeTitle')}</strong>
+                <span>{t('growth.backupNudgeBody')}</span>
+              </div>
+              <div class="growth-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  onClick={async () => {
+                    const data = await exportBackup();
+                    const stamp = new Date().toISOString().slice(0, 10);
+                    downloadJson(`bashibook-backup-${stamp}.json`, data);
+                    rememberBackupExported();
+                    setNudgeHidden(true);
+                    notify(t('settings.backupDownloaded'));
+                  }}
+                >
+                  {t('growth.backupNudgeBtn')}
+                </button>
+                <button
+                  type="button"
+                  class="pro-hint-dismiss"
+                  aria-label={t('common.dismiss')}
+                  onClick={() => {
+                    dismissBackupNudge();
+                    setNudgeHidden(true);
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          )}
+
+        {!locked && !inviteHidden && rows.length >= 3 && (
+          <div class="growth-card invite">
+            <div class="growth-card-body">
+              <strong>{t('growth.inviteCardTitle')}</strong>
+              <span>{t('growth.inviteCardBody')}</span>
+            </div>
+            <div class="growth-card-actions">
+              <button type="button" class="btn btn-secondary" onClick={openInviteWhatsApp}>
+                {t('growth.inviteCta')}
+              </button>
+              <button
+                type="button"
+                class="pro-hint-dismiss"
+                aria-label={t('common.dismiss')}
+                onClick={() => {
+                  dismissInviteCard();
+                  setInviteHidden(true);
+                }}
+              >
+                ×
+              </button>
+            </div>
           </div>
         )}
 

@@ -1,9 +1,9 @@
+import { BackButton } from '../components/BackButton';
 import { useEffect, useState } from 'preact/hooks';
 import { notifyChanged, StatusBadge } from '../components/StatusBadge';
 import { getShop, setShopPayMe } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
 import type { ToastAction } from '../hooks/useToast';
-import { navigate } from '../lib/router';
 
 interface Props {
   toast: (msg: string, opts?: { ms?: number; action?: ToastAction }) => void;
@@ -65,14 +65,7 @@ export function PayDetailsPage({ toast }: Props) {
   return (
     <div class="app-shell">
       <header class="topbar">
-        <button
-          class="icon-btn"
-          type="button"
-          aria-label={t('common.back')}
-          onClick={() => navigate('/settings')}
-        >
-          ←
-        </button>
+        <BackButton fallback="/settings" />
         <h1>{t('payDetails.title')}</h1>
         <StatusBadge />
       </header>

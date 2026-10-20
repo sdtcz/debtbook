@@ -1,11 +1,16 @@
+import { BackButton } from '../components/BackButton';
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { LogoutSheet } from '../components/LogoutSheet';
 import { notifyChanged, StatusBadge } from '../components/StatusBadge';
+import { APP_BUILD, APP_VERSION } from '../config';
 import {
   clearPin,
   getDashboardBalances,
   getShop,
   listCustomers,
   listEntriesForCustomer,
+  listRemovedCustomers,
+  restoreCustomer,
   saveShop,
   setChaseReminderPrefs,
   setCloudBackupMeta,
@@ -54,7 +59,16 @@ import {
 } from '../lib/feedback';
 import { hashPin, isValidPin, randomSalt } from '../lib/pin';
 import { navigate } from '../lib/router';
+import { signOutAndErase, signOutKeepData } from '../lib/session';
+import {
+  attributionLabel,
+  brandFooterEnabled,
+  openInviteWhatsApp,
+  rememberBackupExported,
+  setBrandFooterEnabled,
+} from '../lib/growth';
 import type { ToastAction } from '../hooks/useToast';
+import type { Customer } from '../lib/types';
 import {
   notificationPermission,
   normalizeChaseTime,
@@ -66,9 +80,11 @@ import {
 interface Props {
   toast: (msg: string, opts?: { ms?: number; action?: ToastAction }) => void;
   onPinChanged?: () => void;
+  /** Called after Log out completes (keep = data kept on this phone). */
+  onLoggedOut?: (mode: 'keep' | 'erase') => void;
 }
 
-export function SettingsPage({ toast, onPinChanged }: Props) {
+export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
   const { locale, setLocale, t } = useLocale();
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
@@ -100,7 +116,12 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   const [notifPerm, setNotifPerm] = useState<
     NotificationPermission | 'unsupported'
   >(() => notificationPermission());
+  const [showLogout, setShowLogout] = useState(false);
+  const [footerOn, setFooterOn] = useState(() => brandFooterEnabled());
+  const [removed, setRemoved] = useState<Customer[]>([]);
+  const [showRemoved, setShowRemoved] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
   const online = useOnline();
 
   const refresh = async () => {
@@ -148,6 +169,11 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       setPaySubtitle(t('settings.payMeSubSetup'));
     }
     setNotifPerm(notificationPermission());
+    try {
+      setRemoved(await listRemovedCustomers());
+    } catch {
+      setRemoved([]);
+    }
     try {
       const st = await getSyncStatus();
       setSyncUnlocked(st.unlocked);
@@ -221,6 +247,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     const data = await exportBackup();
     const stamp = new Date().toISOString().slice(0, 10);
     downloadJson(`bashibook-backup-${stamp}.json`, data);
+    rememberBackupExported();
     toast(t('settings.backupDownloaded'));
   };
 
@@ -486,7 +513,9 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
       shopName: name.trim() || undefined,
       plan: entLabel,
       customerCount,
-      appVersion: 'BashiBook',
+      appVersion: `BashiBook ${APP_VERSION}${APP_BUILD ? ` (${APP_BUILD})` : ''}${
+        attributionLabel() ? ` · via ${attributionLabel()}` : ''
+      }`,
     });
   };
 
@@ -644,7 +673,21 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
     else if (perm === 'unsupported') toast(t('settings.chaseNotifyUnsupported'));
   };
 
-    const initial = name.trim().charAt(0).toUpperCase() || 'D';
+  const doRestoreCustomer = async (c: Customer) => {
+    await restoreCustomer(c.id);
+    notifyChanged();
+    await refresh();
+    toast(t('settings.customerRestored', { name: c.name }));
+  };
+
+  const openHelp = () => {
+    setShowFeedback(true);
+    window.setTimeout(() => {
+      feedbackRef.current?.scrollIntoView({ block: 'start' });
+    }, 50);
+  };
+
+  const initial = name.trim().charAt(0).toUpperCase() || 'B';
   const lastCloudLabel = lastCloudAt
     ? t('settings.cloudLast', {
         when: new Date(lastCloudAt).toLocaleString('en-NG'),
@@ -654,14 +697,7 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
   return (
     <div class="app-shell">
       <header class="topbar">
-        <button
-          class="icon-btn"
-          type="button"
-          aria-label={t('common.back')}
-          onClick={() => navigate('/')}
-        >
-          ←
-        </button>
+        <BackButton fallback="/" />
         <h1>{t('settings.title')}</h1>
         <StatusBadge />
       </header>
@@ -807,6 +843,47 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
               </button>
             )}
           </div>
+        </div>
+
+        <div class="settings-group-label">{t('settings.sharing')}</div>
+        <div class="settings-group card settings-list">
+          <button
+            type="button"
+            class="settings-row"
+            role="switch"
+            aria-checked={footerOn}
+            onClick={() => {
+              const next = !footerOn;
+              setBrandFooterEnabled(next);
+              setFooterOn(next);
+            }}
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              ✍
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">{t('growth.footerToggle')}</span>
+              <span class="settings-row-sub">{t('growth.footerToggleSub')}</span>
+            </span>
+            <span class="settings-row-trail">
+              <span class={footerOn ? 'status-dot on' : 'status-dot'} />
+              {footerOn ? t('common.on') : t('common.off')}
+            </span>
+          </button>
+          <button type="button" class="settings-row" onClick={openInviteWhatsApp}>
+            <span class="settings-row-icon" aria-hidden="true">
+              🤝
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">{t('growth.inviteTitle')}</span>
+              <span class="settings-row-sub">{t('growth.inviteSub')}</span>
+            </span>
+            <span class="settings-row-trail">
+              <span class="chev" aria-hidden="true">
+                ›
+              </span>
+            </span>
+          </button>
         </div>
 
         <div class="settings-group-label">{t('settings.planExport')}</div>
@@ -1106,7 +1183,50 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           )}
         </div>
 
-        <div class="settings-group-label">{t('settings.feedback')}</div>
+        <div class="settings-group-label">{t('settings.removedCustomers')}</div>
+        <div class="settings-group card settings-list">
+          <button
+            type="button"
+            class="settings-row"
+            disabled={removed.length === 0}
+            onClick={() => setShowRemoved((v) => !v)}
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              ♻
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">{t('settings.removedCustomers')}</span>
+              <span class="settings-row-sub">
+                {removed.length
+                  ? t('settings.removedCustomersSub', { n: removed.length })
+                  : t('settings.removedNone')}
+              </span>
+            </span>
+            <span class="settings-row-trail">
+              <span class="chev" aria-hidden="true">
+                {showRemoved ? '˅' : '›'}
+              </span>
+            </span>
+          </button>
+          {showRemoved &&
+            removed.map((c) => (
+              <div class="settings-row-panel removed-row" key={c.id}>
+                <span class="removed-name">
+                  {c.name}
+                  {c.phone ? <span class="muted"> · {c.phone}</span> : null}
+                </span>
+                <button
+                  type="button"
+                  class="btn btn-secondary removed-restore"
+                  onClick={() => doRestoreCustomer(c)}
+                >
+                  {t('settings.restore')}
+                </button>
+              </div>
+            ))}
+        </div>
+
+        <div class="settings-group-label" ref={feedbackRef}>{t('settings.feedback')}</div>
         <div class="settings-group card settings-list">
           <button
             type="button"
@@ -1291,6 +1411,72 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           )}
         </div>
 
+        <div class="settings-group-label">{t('settings.about')}</div>
+        <div class="settings-group card settings-list">
+          <button type="button" class="settings-row" onClick={openHelp}>
+            <span class="settings-row-icon" aria-hidden="true">
+              ?
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">{t('settings.help')}</span>
+              <span class="settings-row-sub">{t('settings.helpSub')}</span>
+            </span>
+            <span class="settings-row-trail">
+              <span class="chev" aria-hidden="true">
+                ›
+              </span>
+            </span>
+          </button>
+          <button type="button" class="settings-row" onClick={() => navigate('/privacy')}>
+            <span class="settings-row-icon" aria-hidden="true">
+              🛡
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">{t('settings.privacy')}</span>
+              <span class="settings-row-sub">{t('settings.privacySub')}</span>
+            </span>
+            <span class="settings-row-trail">
+              <span class="chev" aria-hidden="true">
+                ›
+              </span>
+            </span>
+          </button>
+          <div class="settings-row" style={{ cursor: 'default' }}>
+            <span class="settings-row-icon" aria-hidden="true">
+              ℹ
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">{t('settings.version')}</span>
+              <span class="settings-row-sub">
+                BashiBook v{APP_VERSION}
+                {APP_BUILD ? ` · ${APP_BUILD}` : ''}
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div class="settings-group-label">{t('settings.account')}</div>
+        <div class="settings-group card settings-list">
+          <button
+            type="button"
+            class="settings-row settings-row-danger"
+            onClick={() => setShowLogout(true)}
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              ⎋
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">{t('logout.title')}</span>
+              <span class="settings-row-sub">{t('logout.sub')}</span>
+            </span>
+            <span class="settings-row-trail">
+              <span class="chev" aria-hidden="true">
+                ›
+              </span>
+            </span>
+          </button>
+        </div>
+
         <p class="settings-about muted">
           {t('settings.aboutLine1', { lang: localeNativeName(locale) })}
           <br />
@@ -1303,6 +1489,24 @@ export function SettingsPage({ toast, onPinChanged }: Props) {
           ) : null}
         </p>
       </main>
+      {showLogout && (
+        <LogoutSheet
+          cloudEnabled={cloudEnabled}
+          hasPin={hasPin}
+          onClose={() => setShowLogout(false)}
+          onKeep={async () => {
+            await signOutKeepData();
+            setShowLogout(false);
+            toast(t('logout.done'));
+            onLoggedOut?.('keep');
+          }}
+          onErase={async () => {
+            await signOutAndErase();
+            setShowLogout(false);
+            onLoggedOut?.('erase');
+          }}
+        />
+      )}
     </div>
   );
 }

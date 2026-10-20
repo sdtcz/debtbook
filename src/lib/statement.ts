@@ -1,3 +1,4 @@
+import { withBrandFooter } from './growth';
 import { t } from '../i18n';
 import type { Customer, Entry, ShopProfile } from './types';
 import { formatNaira } from './money';
@@ -58,7 +59,7 @@ export function buildStatement(
   }
   lines.push('');
   lines.push(t('statement.generated'));
-  return lines.join('\n');
+  return withBrandFooter(lines.join('\n'), 'rem');
 }
 
 export async function shareOrCopyText(text: string, title: string): Promise<'share' | 'clipboard' | 'none'> {

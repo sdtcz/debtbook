@@ -5,6 +5,8 @@ Offline-first **customer credit ledger** (book debt / udhar) for African shopkee
 
 Live: https://debtbook-neon.vercel.app
 
+**Public URL:** every user-facing link (Pay-me links, reminders footer, invite links, landing QR) is built from `PUBLIC_APP_URL` in `src/config.ts` (override with `VITE_PUBLIC_APP_URL` at build time). Switching to a custom domain is a one-line change there. `api/checkout.ts` keeps its own Stripe return-origin allow-list (`DEFAULT_ORIGIN`) — add the new domain there too when it is attached.
+
 ## Quick start
 
 ```bash

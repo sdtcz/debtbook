@@ -20,6 +20,8 @@ export type Route =
   | { name: 'settings' }
   | { name: 'pro' }
   | { name: 'pay-details' }
+  | { name: 'privacy' }
+  | { name: 'reports' }
   | PayMeRoute;
 
 function parsePayMeFromQuery(queryPart: string | undefined): PayMeRoute {
@@ -55,6 +57,8 @@ export function parseHash(): Route {
   if (parts[0] === 'payme') return parsePayMeFromQuery(queryPart);
   if (parts[0] === 'setup') return { name: 'setup' };
   if (parts[0] === 'pay-details') return { name: 'pay-details' };
+  if (parts[0] === 'privacy') return { name: 'privacy' };
+  if (parts[0] === 'reports') return { name: 'reports' };
   if (parts[0] === 'settings' && parts[1] === 'pro') return { name: 'pro' };
   if (parts[0] === 'settings') return { name: 'settings' };
   if (parts[0] === 'pro') return { name: 'pro' };
@@ -73,10 +77,111 @@ export function parseHash(): Route {
   return { name: 'home' };
 }
 
-export function navigate(to: string) {
-  location.hash = to.startsWith('#') ? to : `#${to}`;
+/* ── History-aware navigation ─────────────────────────────────────────────
+ * We keep a depth counter in history.state so the in-app Back button can call
+ * history.back() (matching the Android hardware / browser back button) when
+ * there is in-app history, and fall back to a sensible parent route when the
+ * page was opened directly (deep link, PWA cold start).
+ */
+
+type NavState = { bbDepth?: number } | null;
+
+function currentDepth(): number {
+  try {
+    const st = history.state as NavState;
+    return st && typeof st.bbDepth === 'number' ? st.bbDepth : 0;
+  } catch {
+    return 0;
+  }
+}
+
+function toHash(to: string): string {
+  return to.startsWith('#') ? to : `#${to}`;
+}
+
+function fireHashChange(): void {
+  try {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  } catch {
+    window.dispatchEvent(new Event('hashchange'));
+  }
+}
+
+/**
+ * Go to an in-app route. `replace` swaps the current history entry instead of
+ * pushing (use after a form save so Back does not reopen the form).
+ */
+export function navigate(to: string, opts: { replace?: boolean } = {}) {
+  const hash = toHash(to);
+  if (location.hash === hash && !opts.replace) return;
+  try {
+    const depth = currentDepth();
+    if (opts.replace) {
+      history.replaceState({ bbDepth: depth }, '', hash);
+    } else {
+      history.pushState({ bbDepth: depth + 1 }, '', hash);
+    }
+    fireHashChange();
+  } catch {
+    location.hash = hash;
+  }
+}
+
+/** True when Back can stay inside the app (there is an in-app entry behind us). */
+export function canGoBack(): boolean {
+  return currentDepth() > 0;
+}
+
+/** In-app Back: history.back() when possible, otherwise replace with `fallback`. */
+export function goBack(fallback = '/') {
+  if (canGoBack()) {
+    history.back();
+    return;
+  }
+  navigate(fallback, { replace: true });
+}
+
+/** Jump to Home, unwinding in-app history so Android Back then exits cleanly. */
+export function goHome() {
+  const depth = currentDepth();
+  const raw = (location.hash || '#/').replace(/^#/, '') || '/';
+  const onHome = raw === '/' || raw === '';
+  if (onHome) {
+    try {
+      window.scrollTo({ top: 0 });
+    } catch {
+      /* ignore */
+    }
+    return;
+  }
+  if (depth > 0) {
+    const after = () => {
+      window.removeEventListener('popstate', after);
+      const now = (location.hash || '#/').replace(/^#/, '') || '/';
+      if (now !== '/' && now !== '') navigate('/', { replace: true });
+    };
+    window.addEventListener('popstate', after);
+    history.go(-depth);
+    return;
+  }
+  navigate('/', { replace: true });
 }
 
 export function href(to: string): string {
-  return to.startsWith('#') ? to : `#${to}`;
+  return toHash(to);
+}
+
+/** Parent route used when Back has no in-app history (deep links / cold start). */
+export function parentRoute(route: Route): string {
+  switch (route.name) {
+    case 'customer-edit':
+    case 'entry-new':
+      return `/customers/${route.id}`;
+    case 'pro':
+    case 'pay-details':
+    case 'privacy':
+      return '/settings';
+    default:
+      return '/';
+  }
 }

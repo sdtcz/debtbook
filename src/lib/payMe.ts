@@ -5,8 +5,10 @@
  * Amount in URLs uses **kobo** (`amountKobo` query int) for precision.
  */
 
+import { PUBLIC_APP_URL } from '../config';
 import { t } from '../i18n';
 import { formatNaira } from './money';
+import { withBrandFooter } from './growth';
 import { buildWhatsAppUri } from './sms';
 import type { ShopProfile } from './types';
 
@@ -66,7 +68,7 @@ export function buildPayMeMessage(opts: {
 
   lines.push('');
   lines.push(t('payme.messageAsk'));
-  return lines.join('\n');
+  return withBrandFooter(lines.join('\n'), 'rem');
 }
 
 /**
@@ -74,7 +76,8 @@ export function buildPayMeMessage(opts: {
  * Params are encoded via URLSearchParams / encodeURIComponent.
  */
 export function buildPayMePageUrl(opts: {
-  origin: string;
+  /** Defaults to PUBLIC_APP_URL */
+  origin?: string;
   shop: PayMeShopFields;
   amountKobo: number;
   customerName?: string;
@@ -92,7 +95,7 @@ export function buildPayMePageUrl(opts: {
   if (acctName) q.set('name', acctName);
   if (link) q.set('link', link);
   if (customer) q.set('customer', customer);
-  const origin = opts.origin.replace(/\/$/, '');
+  const origin = (opts.origin || PUBLIC_APP_URL).replace(/\/$/, '');
   // URLSearchParams encodes; keep explicit encode for documentation parity
   return `${origin}/#/payme?${q.toString()}`;
 }
@@ -105,13 +108,11 @@ export async function sendPayMeRequest(opts: {
   customerName: string;
   phone?: string;
   balanceKobo: number;
-  /** Defaults to window.location.origin when in browser */
+  /** Defaults to the canonical PUBLIC_APP_URL (src/config.ts) */
   origin?: string;
 }): Promise<PayMeSendResult> {
   let pageUrl: string | undefined;
-  const origin =
-    opts.origin ||
-    (typeof window !== 'undefined' ? window.location.origin : undefined);
+  const origin = opts.origin || PUBLIC_APP_URL;
   if (origin) {
     pageUrl = buildPayMePageUrl({
       origin,

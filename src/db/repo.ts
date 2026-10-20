@@ -236,6 +236,29 @@ export async function softDeleteCustomer(id: string): Promise<void> {
   await touchLocalChange();
 }
 
+/** Soft-deleted customers (newest first) — for the "Removed customers" restore list. */
+export async function listRemovedCustomers(): Promise<Customer[]> {
+  const db = await getDb();
+  const all = await db.getAll('customers');
+  return all
+    .filter((c) => Boolean(c.deletedAt))
+    .sort((a, b) => (b.deletedAt || 0) - (a.deletedAt || 0));
+}
+
+/** Undo a soft delete: the customer and their (untouched) entries reappear. */
+export async function restoreCustomer(id: string): Promise<Customer | undefined> {
+  const db = await getDb();
+  const existing = await db.get('customers', id);
+  if (!existing || !existing.deletedAt) return existing;
+  const { deletedAt: _gone, ...rest } = existing;
+  void _gone;
+  const customer: Customer = { ...rest, updatedAt: Date.now() };
+  await db.put('customers', customer);
+  await enqueueOutbox('customer', id, 'upsert', customer);
+  await touchLocalChange();
+  return customer;
+}
+
 /* ── Entries ──────────────────────────────────────────── */
 
 export async function listEntriesForCustomer(customerId: string): Promise<Entry[]> {

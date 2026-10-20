@@ -1,3 +1,4 @@
+import { BackButton } from '../components/BackButton';
 import { useEffect, useState } from 'preact/hooks';
 import { StatusBadge, notifyChanged } from '../components/StatusBadge';
 import {
@@ -17,7 +18,7 @@ import {
   formatNaira,
 } from '../lib/money';
 import { hasPayMeDetails, sendPayMeRequest } from '../lib/payMe';
-import { remindCustomer } from '../lib/sms';
+import { buildEntryReceiptMessage, remindCustomer, sendTextToCustomer } from '../lib/sms';
 import { buildStatement, shareOrCopyText } from '../lib/statement';
 import { navigate } from '../lib/router';
 import { isOverdue } from '../db/repo';
@@ -53,6 +54,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
   const [balanceKobo, setBalanceKobo] = useState(0);
   const [loading, setLoading] = useState(true);
   const [canUndo, setCanUndo] = useState(false);
+  const [recentEntry, setRecentEntry] = useState<Entry | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -65,7 +67,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
       ]);
       if (!c) {
         toast(t('customer.notFound'));
-        navigate('/');
+        navigate('/', { replace: true });
         return;
       }
       setShop(s || null);
@@ -73,6 +75,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
       setEntries(bal.entries);
       setBalanceKobo(bal.balanceKobo);
       setCanUndo(Boolean(recent));
+      setRecentEntry(recent || null);
     } finally {
       setLoading(false);
     }
@@ -146,6 +149,25 @@ export function CustomerDetailPage({ id, toast }: Props) {
     toast(t('customer.entryDeleted'));
   };
 
+  const onSendReceipt = async () => {
+    if (!customer || !shop || !recentEntry) return;
+    const message = buildEntryReceiptMessage({
+      shopName: shop.name,
+      customerName: customer.name,
+      type: recentEntry.type,
+      amountKobo: recentEntry.amountKobo,
+      balanceKobo,
+      note: recentEntry.note,
+      at: recentEntry.occurredAt,
+    });
+    const result = await sendTextToCustomer(customer.phone, message, t('receipt.shareTitle'));
+    if (result === 'whatsapp') toast(t('customer.openingWhatsApp'));
+    else if (result === 'sms') toast(t('customer.openingSms'));
+    else if (result === 'share') toast(t('customer.shared'));
+    else if (result === 'clipboard') toast(t('customer.messageCopied'));
+    else toast(t('customer.couldNotRemind'));
+  };
+
   const undoLast = async () => {
     const recent = await getRecentEntryForUndo(id);
     if (!recent) {
@@ -161,9 +183,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
     return (
       <div class="app-shell">
         <header class="topbar">
-          <button class="icon-btn" type="button" onClick={() => navigate('/')}>
-            ←
-          </button>
+          <BackButton fallback="/" />
           <h1>{t('common.customer')}</h1>
         </header>
         <main class="main">
@@ -181,14 +201,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
   return (
     <div class="app-shell">
       <header class="topbar">
-        <button
-          class="icon-btn"
-          type="button"
-          aria-label={t('common.back')}
-          onClick={() => navigate('/')}
-        >
-          ←
-        </button>
+        <BackButton fallback="/" />
         <div style={{ flex: 1, minWidth: 0 }}>
           <h1 style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {customer.name}
@@ -340,6 +353,19 @@ export function CustomerDetailPage({ id, toast }: Props) {
 
         {canUndo && (
           <div class="btn-row" style={{ marginTop: 8 }}>
+            {recentEntry && (
+              <button
+                class="btn btn-secondary receipt-btn"
+                type="button"
+                onClick={onSendReceipt}
+                title={t('receipt.sendSub', { amount: formatNaira(recentEntry.amountKobo) })}
+              >
+                {t('receipt.send')}
+                <span class="receipt-sub">
+                  {t('receipt.sendSub', { amount: formatNaira(recentEntry.amountKobo) })}
+                </span>
+              </button>
+            )}
             <button class="btn btn-ghost" type="button" onClick={undoLast}>
               {t('customer.undoLast')}
             </button>

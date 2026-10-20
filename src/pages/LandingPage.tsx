@@ -1,3 +1,4 @@
+import { PUBLIC_APP_LABEL, PUBLIC_APP_URL } from '../config';
 import { appEmbedUrl, setForceApp } from '../lib/viewportMode';
 
 const FEATURES = [
@@ -33,9 +34,8 @@ type Props = {
 };
 
 export function LandingPage({ onUseAppHere }: Props) {
-  const href =
-    typeof window !== 'undefined' ? window.location.href.split('#')[0]! : 'https://debtbook-neon.vercel.app/';
-  const displayUrl = href.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  // Canonical public URL (src/config.ts) — never the raw deployment host.
+  const href = `${PUBLIC_APP_URL}/`;
   const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=168x168&margin=8&data=${encodeURIComponent(href)}`;
   const embed = typeof window !== 'undefined' ? appEmbedUrl() : '/?app=1#/';
 
@@ -91,12 +91,12 @@ export function LandingPage({ onUseAppHere }: Props) {
             </div>
             <p class="glow-kicker">Offline credit ledger</p>
             <h1 id="landing-title" class="landing-title">
-              Track udhar.
+              Track bashi.
               <br />
               <span class="landing-title-accent">Remind. Recover.</span>
             </h1>
             <p class="glow-hint">
-              Offline credit / udhar ledger for Nigerian shopkeepers — track who owes what,
+              Offline credit (bashi) book for Nigerian shopkeepers — track who owes what,
               remind on WhatsApp, back up when you are ready.
             </p>
           </section>
@@ -139,7 +139,7 @@ export function LandingPage({ onUseAppHere }: Props) {
             <div class="landing-qr-meta">
               <p class="landing-qr-label">Scan to open on your phone</p>
               <a class="landing-url" href={href}>
-                {displayUrl}
+                Open {PUBLIC_APP_LABEL} →
               </a>
               <p class="landing-qr-hint">Best experience as an installed PWA on Android.</p>
             </div>

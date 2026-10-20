@@ -1,3 +1,4 @@
+import { appLink } from '../lib/growth';
 import { useState } from 'preact/hooks';
 import { useLocale } from '../hooks/useLocale';
 import { formatNaira } from '../lib/money';
@@ -104,6 +105,15 @@ export function PayMePage({ route, toast }: Props) {
         ) : null}
 
         <p class="payme-note muted">{t('payme.manualNote')}</p>
+
+        <aside class="payme-cta card" aria-label={t('growth.paymeCtaTitle')}>
+          <strong>{t('growth.paymeCtaTitle')}</strong>
+          <p>{t('growth.paymeCtaBody')}</p>
+          <a class="btn btn-secondary payme-cta-btn" href={appLink('payme')}>
+            {t('growth.paymeCtaBtn')}
+          </a>
+        </aside>
+        <p class="payme-brand muted">{t('growth.footer')}</p>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'preact/hooks';
 import { PinLock } from './components/PinLock';
+import { showsTabBar, TabBar } from './components/TabBar';
 import { Toast } from './components/Toast';
 import { getShop } from './db/repo';
 import { useLocale } from './hooks/useLocale';
@@ -11,7 +12,8 @@ import {
   tryAutoPush,
 } from './lib/deviceSync';
 import { getUnlockedRecoveryCode } from './lib/syncUnlock';
-import { isPayMeHash, parseHash, type Route } from './lib/router';
+import { isPayMeHash, navigate, parseHash, type Route } from './lib/router';
+import { isSignedOut, signIn, signOutAndErase } from './lib/session';
 import type { ComponentChildren } from 'preact';
 import {
   clearForceApp,
@@ -26,7 +28,10 @@ import { HomePage } from './pages/HomePage';
 import { LandingPage } from './pages/LandingPage';
 import { PayDetailsPage } from './pages/PayDetailsPage';
 import { PayMePage } from './pages/PayMePage';
+import { PrivacyPage } from './pages/PrivacyPage';
 import { ProPage } from './pages/ProPage';
+import { ReportsPage } from './pages/ReportsPage';
+import { SignedOutPage } from './pages/SignedOutPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { SetupPage } from './pages/SetupPage';
 
@@ -132,6 +137,7 @@ export function App() {
   const [pinSalt, setPinSalt] = useState<string | undefined>();
   const [shopName, setShopName] = useState<string | undefined>();
   const [locked, setLocked] = useState(false);
+  const [signedOut, setSignedOut] = useState(() => isSignedOut());
   const { message, action, toast, clearToast } = useToast();
   const { t } = useLocale();
 
@@ -153,6 +159,12 @@ export function App() {
     if (!shop?.pinHash) setLocked(false);
   }, []);
 
+  const tabbarOn =
+    showApp && ready && hasShop && !signedOut && route.name !== 'payme' && showsTabBar(route);
+  useEffect(() => {
+    document.body.classList.toggle('has-tabbar', tabbarOn);
+  }, [tabbarOn]);
+
   // Always track hash (needed for public #/payme on desktop landing)
   useEffect(() => {
     const onHash = () => setRoute(parseHash());
@@ -171,7 +183,7 @@ export function App() {
 
   // Lock when returning to the tab/app if PIN is set (never for public payme)
   useEffect(() => {
-    if (!showApp || route.name === 'payme') return;
+    if (!showApp || route.name === 'payme' || signedOut) return;
     const onVis = () => {
       if (document.visibilityState === 'visible' && pinHash && pinSalt) {
         setLocked(true);
@@ -180,11 +192,11 @@ export function App() {
     document.addEventListener('visibilitychange', onVis);
     if (pinHash && pinSalt) setLocked(true);
     return () => document.removeEventListener('visibilitychange', onVis);
-  }, [showApp, pinHash, pinSalt, route.name]);
+  }, [showApp, pinHash, pinSalt, route.name, signedOut]);
 
   // Multi-device sync: debounced auto-push + pull-offer on focus
   useEffect(() => {
-    if (!showApp || route.name === 'payme') return;
+    if (!showApp || route.name === 'payme' || signedOut) return;
 
     let debounceTimer: number | undefined;
     let cancelled = false;
@@ -249,7 +261,7 @@ export function App() {
       document.removeEventListener('visibilitychange', onVis);
       window.removeEventListener('online', onOnline);
     };
-  }, [showApp, route.name, toast]);
+  }, [showApp, route.name, toast, signedOut]);
 
   // Public Pay-me page — no PIN, works for customers (incl. desktop)
   if (route.name === 'payme') {
@@ -296,6 +308,39 @@ export function App() {
     );
   }
 
+  const eraseDevice = async () => {
+    await signOutAndErase();
+    try {
+      history.replaceState(null, '', `${location.pathname}${location.search}#/`);
+    } catch {
+      /* ignore */
+    }
+    location.reload();
+  };
+
+  if (signedOut) {
+    return (
+      <>
+        {frame(
+          <SignedOutPage
+            shopName={shopName || 'BashiBook'}
+            onSignIn={() => {
+              signIn();
+              setSignedOut(false);
+              if (pinHash && pinSalt) setLocked(true);
+              navigate('/', { replace: true });
+            }}
+            onErase={() => {
+              if (!confirm(tNow('logout.eraseConfirm'))) return;
+              void eraseDevice();
+            }}
+          />,
+        )}
+        <Toast message={message} action={action} onDismiss={clearToast} />
+      </>
+    );
+  }
+
   let page;
   switch (route.name) {
     case 'customer-new':
@@ -317,7 +362,26 @@ export function App() {
       );
       break;
     case 'settings':
-      page = <SettingsPage toast={toast} onPinChanged={onPinChanged} />;
+      page = (
+        <SettingsPage
+          toast={toast}
+          onPinChanged={onPinChanged}
+          onLoggedOut={(mode) => {
+            if (mode === 'erase') {
+              try {
+                history.replaceState(null, '', `${location.pathname}${location.search}#/`);
+              } catch {
+                /* ignore */
+              }
+              location.reload();
+              return;
+            }
+            setLocked(false);
+            setSignedOut(true);
+            navigate('/', { replace: true });
+          }}
+        />
+      );
       break;
     case 'pro':
       page = <ProPage toast={toast} />;
@@ -325,13 +389,29 @@ export function App() {
     case 'pay-details':
       page = <PayDetailsPage toast={toast} />;
       break;
+    case 'privacy':
+      page = <PrivacyPage />;
+      break;
+    case 'reports':
+      page = <ReportsPage locked={locked} toast={toast} />;
+      break;
     default:
       page = <HomePage locked={locked} toast={toast} />;
   }
 
+  const tabbed = showsTabBar(route);
   return (
     <>
-      {frame(page)}
+      {frame(
+        tabbed ? (
+          <div class="tabbed">
+            {page}
+            <TabBar route={route} />
+          </div>
+        ) : (
+          page
+        ),
+      )}
       {locked && pinHash && pinSalt && (
         <PinLock
           salt={pinSalt}
