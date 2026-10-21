@@ -26,6 +26,7 @@ import type { ToastAction } from '../../hooks/useToast';
 import { formatNaira, parseNairaToKobo } from '../../lib/money';
 import { guardDelete } from '../../lib/pinGuard';
 import { goBack, href, navigate } from '../../lib/router';
+import { buildWhatsAppUri } from '../../lib/sms';
 import type { StatementRange } from '../../lib/statementPdf';
 import type { ShopProfile, Supplier, SupplierBalance, SupplierEntry, SupplierEntryType } from '../../lib/types';
 
@@ -33,6 +34,10 @@ type Toast = (msg: string, opts?: { ms?: number; action?: ToastAction }) => void
 
 function fmtWhen(ts: number): string {
   return new Date(ts).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+}
+
+function fmtDay(ts: number): string {
+  return new Date(ts).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' });
 }
 
 function initial(name: string): string {
@@ -366,6 +371,38 @@ export function SupplierDetailPage({ id, toast }: { id: string; toast: Toast }) 
   }
 
   const { balanceKobo } = computeSupplierBalance(entries);
+  const tone = balanceKobo > 0 ? 'owing' : balanceKobo < 0 ? 'credit' : 'zero';
+  const byNewest = [...entries].sort((a, b) => b.occurredAt - a.occurredAt);
+  const lastPurchase = byNewest.find((e) => e.type === 'purchase');
+  const lastPayment = byNewest.find((e) => e.type === 'payment');
+
+  const onWhatsApp = async () => {
+    const vars = {
+      supplier: supplier.name,
+      shop: shop?.name || 'BashiBook',
+      amount: formatNaira(Math.abs(balanceKobo)),
+    };
+    const message =
+      balanceKobo > 0
+        ? t('supplier.msgOwe', vars)
+        : balanceKobo < 0
+          ? t('supplier.msgOverpaid', vars)
+          : t('supplier.msgSettled', vars);
+    const url =
+      (supplier.phone && buildWhatsAppUri(supplier.phone, message)) ||
+      `https://wa.me/?text=${encodeURIComponent(message)}`;
+    try {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      toast(t('customer.openingWhatsApp'));
+    } catch {
+      try {
+        await navigator.clipboard.writeText(message);
+        toast(t('customer.messageCopied'));
+      } catch {
+        toast(t('customer.couldNotRemind'));
+      }
+    }
+  };
 
   const removeEntry = async (entryId: string) => {
     if (!confirm(t('customer.deleteEntryConfirm'))) return;
@@ -417,12 +454,33 @@ export function SupplierDetailPage({ id, toast }: { id: string; toast: Toast }) 
         </button>
       </header>
       <main class="main">
-        <section class={`iowe-hero${balanceKobo > 0 ? ' owing' : ''}`} aria-labelledby="iowe-bal-label">
-          <div class="iowe-hero-kicker" id="iowe-bal-label">
-            {t('supplier.balanceTitle')}
+        <section class={`balance-soft-hero iowe-soft-hero ${tone}`} aria-labelledby="iowe-bal-label">
+          <div class="balance-soft-row">
+            <div class="balance-soft-avatar" aria-hidden="true">
+              ₦
+            </div>
+            <div class="balance-soft-text">
+              <div class="balance-soft-kicker" id="iowe-bal-label">
+                {t('supplier.balanceTitle')}
+              </div>
+              <div class="balance-soft-amount">{formatNaira(Math.abs(balanceKobo))}</div>
+              <p class="balance-soft-label">{label(balanceKobo, supplier.name)}</p>
+            </div>
           </div>
-          <div class="iowe-hero-amount">{formatNaira(Math.abs(balanceKobo))}</div>
-          <p class="iowe-hero-hint">{label(balanceKobo, supplier.name)}</p>
+          {(lastPurchase || lastPayment) && (
+            <div class="balance-soft-hints">
+              {lastPurchase && (
+                <p class="balance-soft-hint">
+                  {t('supplier.lastBought', { date: fmtDay(lastPurchase.occurredAt), amount: formatNaira(lastPurchase.amountKobo) })}
+                </p>
+              )}
+              {lastPayment && (
+                <p class="balance-soft-hint">
+                  {t('supplier.lastPaid', { date: fmtDay(lastPayment.occurredAt), amount: formatNaira(lastPayment.amountKobo) })}
+                </p>
+              )}
+            </div>
+          )}
         </section>
 
         <div class="actions-grid">
@@ -433,16 +491,72 @@ export function SupplierDetailPage({ id, toast }: { id: string; toast: Toast }) 
             − {t('supplier.payment')}
           </button>
         </div>
-        <button
-          class="btn btn-secondary statement-pdf-btn"
-          type="button"
-          onClick={() => {
-            void loadPdf().catch(() => undefined);
-            setPdfOpen(true);
-          }}
+
+        <section
+          class={`collect-soft iowe-payback${balanceKobo > 0 ? '' : ' collect-soft-share'}`}
+          aria-label={balanceKobo > 0 ? t('supplier.payBackKicker') : t('supplier.checkKicker')}
         >
-          {t('customer.statementPdf')}
-        </button>
+          <div class="collect-soft-head">
+            <div class="collect-soft-crest" aria-hidden="true">
+              {balanceKobo > 0 ? '₦' : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+              )}
+            </div>
+            <div class="collect-soft-copy">
+              <div class="collect-soft-kicker">
+                {balanceKobo > 0 ? t('supplier.payBackKicker') : t('supplier.checkKicker')}
+              </div>
+              <div class="collect-soft-title">
+                {balanceKobo > 0
+                  ? t('supplier.payBackTitle', { amount: formatNaira(balanceKobo) })
+                  : t('supplier.checkTitle')}
+              </div>
+              <p class="collect-soft-hint">
+                {balanceKobo > 0
+                  ? t('supplier.payBackHint', { name: supplier.name })
+                  : t('supplier.checkHint', { name: supplier.name })}
+              </p>
+            </div>
+          </div>
+          <div class={`collect-soft-tiles${supplier.phone ? '' : ' two'}`}>
+            {supplier.phone && (
+              <a class="collect-tile" href={`tel:${supplier.phone.replace(/[^\d+]/g, '')}`}>
+                <span class="collect-tile-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z" />
+                  </svg>
+                </span>
+                <span class="collect-tile-label">{t('supplier.call')}</span>
+              </a>
+            )}
+            <button class="collect-tile hero" type="button" onClick={onWhatsApp}>
+              <span class="collect-tile-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />
+                </svg>
+              </span>
+              <span class="collect-tile-label">{t('supplier.whatsapp')}</span>
+            </button>
+            <button
+              class="collect-tile"
+              type="button"
+              onClick={() => {
+                void loadPdf().catch(() => undefined);
+                setPdfOpen(true);
+              }}
+            >
+              <span class="collect-tile-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M7 3h7l5 5v13H7z" />
+                  <path d="M14 3v5h5M12 11v7M9 15l3 3 3-3" />
+                </svg>
+              </span>
+              <span class="collect-tile-label">{t('customer.statementPdf')}</span>
+            </button>
+          </div>
+        </section>
         {supplier.note && (
           <p class="muted" style={{ marginTop: 12 }}>
             {t('customer.note', { note: supplier.note })}
@@ -450,41 +564,46 @@ export function SupplierDetailPage({ id, toast }: { id: string; toast: Toast }) 
         )}
 
         <div class="section-title">{t('customer.history')}</div>
-        {entries.length === 0 ? (
-          <div class="empty supplier-empty">
-            <strong>{t('supplier.noEntriesTitle')}</strong>
-            <p>{t('supplier.noEntries')}</p>
-          </div>
-        ) : (
-          <ul class="supplier-history">
-            {entries.map((e) => (
-              <li class={`supplier-hist-row ${e.type}`} key={e.id}>
-                <span class="supplier-hist-sign" aria-hidden="true">
+        <div class="history-soft" aria-label={t('customer.history')}>
+          {entries.length === 0 ? (
+            <div class="history-soft-empty iowe-empty">
+              <div class="history-soft-glyph" aria-hidden="true">
+                ₦
+              </div>
+              <strong>{t('supplier.noEntriesTitle')}</strong>
+              <p>{t('supplier.noEntries')}</p>
+            </div>
+          ) : (
+            entries.map((e) => (
+              <div class={`history-soft-row ${e.type}`} key={e.id}>
+                <div class="history-soft-avatar" aria-hidden="true">
                   {e.type === 'purchase' ? '+' : '−'}
-                </span>
-                <span class="supplier-hist-body">
-                  <span class="supplier-hist-type">
+                </div>
+                <div class="history-soft-body">
+                  <div class="history-soft-type">
                     {e.type === 'purchase' ? t('supplier.purchaseLabel') : t('supplier.paymentLabel')}
-                  </span>
-                  <span class="supplier-hist-when">{fmtWhen(e.occurredAt)}</span>
-                  {e.note && <span class="supplier-hist-note">{e.note}</span>}
-                </span>
-                <span class="supplier-hist-amt">
-                  {e.type === 'purchase' ? '+' : '−'}
-                  {formatNaira(e.amountKobo)}
-                </span>
-                <button
-                  type="button"
-                  class="history-soft-del"
-                  aria-label={t('customer.deleteEntry')}
-                  onClick={() => removeEntry(e.id)}
-                >
-                  ×
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+                  </div>
+                  <div class="history-soft-when">{fmtWhen(e.occurredAt)}</div>
+                  {e.note && <div class="history-soft-note">{e.note}</div>}
+                </div>
+                <div class="history-soft-trail">
+                  <div class="history-soft-amt">
+                    {e.type === 'purchase' ? '+' : '−'}
+                    {formatNaira(e.amountKobo)}
+                  </div>
+                  <button
+                    type="button"
+                    class="history-soft-del"
+                    aria-label={t('customer.deleteEntry')}
+                    onClick={() => removeEntry(e.id)}
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </main>
       {pdfOpen && (
         <StatementPdfSheet customerName={supplier.name} onPick={onPdf} onClose={() => setPdfOpen(false)} />

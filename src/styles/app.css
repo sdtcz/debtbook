@@ -5548,3 +5548,36 @@ a.btn.payme-cta-btn {
 @media (prefers-reduced-motion: reduce) {
   .reports-main .report-seg .chip:active { transform: none; }
 }
+
+/* —— Soft I-owe crest: supplier detail (amber hero, Pay back card, crest history) —— */
+.balance-soft-hero.iowe-soft-hero.owing {
+  background: linear-gradient(160deg, #fffbeb 0%, #fef3c7 100%);
+  border-color: rgba(180, 83, 9, 0.22);
+}
+.iowe-soft-hero.owing .balance-soft-avatar {
+  background: linear-gradient(145deg, #b45309, #92400e);
+  box-shadow: 0 0 0 6px rgba(180, 83, 9, 0.1);
+}
+.iowe-soft-hero.owing .balance-soft-kicker,
+.iowe-soft-hero.owing .balance-soft-label,
+.iowe-soft-hero.owing .balance-soft-hint { color: #713f12; }
+.iowe-soft-hero.owing .balance-soft-amount { color: #92400e; font-variant-numeric: tabular-nums; }
+.iowe-soft-hero .balance-soft-label,
+.iowe-soft-hero .balance-soft-hint { overflow-wrap: anywhere; }
+.iowe-payback .collect-tile { text-decoration: none; }
+.iowe-payback .collect-tile-label { overflow-wrap: anywhere; }
+.history-soft-row.purchase {
+  background: linear-gradient(160deg, #fff 0%, #fffbeb 100%);
+  border-color: rgba(180, 83, 9, 0.16);
+}
+.history-soft-row.purchase .history-soft-avatar {
+  background: linear-gradient(145deg, #b45309, #92400e);
+  box-shadow: 0 0 0 5px rgba(180, 83, 9, 0.08);
+}
+.history-soft-row.purchase .history-soft-type,
+.history-soft-row.purchase .history-soft-amt { color: #92400e; }
+.iowe-empty .history-soft-glyph {
+  color: #92400e;
+  background: radial-gradient(circle at 35% 30%, #fffbeb, #fde68a 55%, #fcd34d);
+  box-shadow: 0 0 0 6px rgba(180, 83, 9, 0.08), 0 8px 20px rgba(180, 83, 9, 0.14);
+}
