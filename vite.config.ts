@@ -47,9 +47,11 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: 'index.html',
+        // The app is hash-routed on "/" only; any other path goes to the network (SEO pages, real 404s).
+        navigateFallbackAllowlist: [/^\/(index\.html)?(\?.*)?$/],
         // Static SEO page + crawler files are served by the network, never the app shell.
         navigateFallbackDenylist: [/^\/api\//, /^\/kippa-alternative/, /^\/credit-book-app/, /^\/(robots\.txt|sitemap\.xml)$/],
-        globIgnores: ['**/kippa-alternative.html', '**/credit-book-app.html'],
+        globIgnores: ['**/kippa-alternative.html', '**/credit-book-app.html', '**/404.html'],
       },
       devOptions: {
         enabled: true,

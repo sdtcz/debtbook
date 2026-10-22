@@ -17,7 +17,7 @@
       "destination": "/credit-book-app.html"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/",
       "destination": "/index.html"
     }
   ],
