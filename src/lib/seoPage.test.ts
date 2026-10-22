@@ -20,7 +20,7 @@ describe('/kippa-alternative static page', () => {
     expect(html).toMatch(/<meta name="description" content="[^"]{50,160}">/);
     expect(html).toContain(`<link rel="canonical" href="${PUBLIC_APP_URL}/kippa-alternative">`);
     for (const lang of ['en', 'pcm', 'ha', 'yo']) expect(html).toContain(`<section id="${lang}" lang="${lang}">`);
-    expect(html).toContain('Your book stays on your phone, works offline, free.');
+    expect(html).toContain('Your book stays on your phone, works offline once opened, free.');
   });
   it('makes no claims about Kippa beyond the neutral question and trademark note', () => {
     const kippaLines = html.split('\n').filter((l: string) => /kippa/i.test(l) && !/src=kippa|kippa-/.test(l));

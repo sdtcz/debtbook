@@ -6,7 +6,7 @@ const FEATURES = [
   {
     icon: '📴',
     title: 'Offline-first',
-    body: 'Works without data. Your ledger lives on the phone in IndexedDB.',
+    body: 'Works offline once opened. Your ledger lives on the phone in IndexedDB.',
   },
   {
     icon: '💬',
