@@ -48,8 +48,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: 'index.html',
         // Static SEO page + crawler files are served by the network, never the app shell.
-        navigateFallbackDenylist: [/^\/api\//, /^\/kippa-alternative/, /^\/(robots\.txt|sitemap\.xml)$/],
-        globIgnores: ['**/kippa-alternative.html'],
+        navigateFallbackDenylist: [/^\/api\//, /^\/kippa-alternative/, /^\/credit-book-app/, /^\/(robots\.txt|sitemap\.xml)$/],
+        globIgnores: ['**/kippa-alternative.html', '**/credit-book-app.html'],
       },
       devOptions: {
         enabled: true,

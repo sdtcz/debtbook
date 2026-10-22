@@ -13,6 +13,10 @@
       "destination": "/kippa-alternative.html"
     },
     {
+      "source": "/credit-book-app",
+      "destination": "/credit-book-app.html"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
@@ -69,6 +73,15 @@
     },
     {
       "source": "/kippa-alternative",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/credit-book-app",
       "headers": [
         {
           "key": "Cache-Control",

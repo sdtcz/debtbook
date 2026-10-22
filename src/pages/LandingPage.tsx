@@ -145,6 +145,11 @@ export function LandingPage({ onUseAppHere }: Props) {
                 Looking for a Kippa alternative?
               </a>
             </p>
+            <p>
+              <a class="landing-footer-link" href="/credit-book-app">
+                Free credit book app for Nigerian shops
+              </a>
+            </p>
           </footer>
         </section>
 
