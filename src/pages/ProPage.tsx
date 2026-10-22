@@ -163,6 +163,8 @@ export function ProPage({ toast }: Props) {
   const pro = isPro(shop);
   const canPay = !pro || ent.source === 'demo';
   const trial = trialStatus(shop);
+  /** Trial over and not paid: the prompt at the top carries the only pay buttons. */
+  const trialEndedPrompt = trial.state === 'ended' && !pro;
   const trialLeft =
     trial.state === 'active'
       ? trial.daysLeft === 1
@@ -216,7 +218,7 @@ export function ProPage({ toast }: Props) {
           ) : null}
         </section>
 
-        {trial.state === 'ended' && !pro && (
+        {trialEndedPrompt && (
           <section class="card pro-trial-ended" role="alert" aria-labelledby="pro-trial-ended-title">
             <h2 id="pro-trial-ended-title">{t('pro.trialEndedTitle')}</h2>
             <p>{t('pro.trialEndedBody')}</p>
@@ -326,7 +328,8 @@ export function ProPage({ toast }: Props) {
                   <div class="hint pro-pay-error">{t('pro.emailRequired')}</div>
                 )}
               </div>
-              <div class="pro-pay-buttons">
+              {!trialEndedPrompt && (
+                <div class="pro-pay-buttons">
                 <button
                   class="btn btn-secondary"
                   type="button"
@@ -343,7 +346,8 @@ export function ProPage({ toast }: Props) {
                 >
                   {t('pro.payYearly')}
                 </button>
-              </div>
+                </div>
+              )}
               <p class="pro-soft-note">{t('pro.securedBy')}</p>
               {!pro && <p class="pro-soft-note">{t('pro.demoNote')}</p>}
             </div>

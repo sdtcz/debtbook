@@ -4,6 +4,15 @@ import { getShop } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
 import { useOnline } from '../hooks/useOnline';
 
+export type BadgeKind = 'offline' | 'pending' | null;
+
+/** Which status badge to show. A pending count of 0 (or anything not a positive number) never shows a counter. */
+export function statusBadge(online: boolean, pending: number): { kind: BadgeKind; pending: number } {
+  const n = Number.isFinite(pending) && pending > 0 ? Math.floor(pending) : 0;
+  if (!online) return { kind: 'offline', pending: n };
+  return { kind: n > 0 ? 'pending' : null, pending: n };
+}
+
 export function StatusBadge() {
   const online = useOnline();
   const { t } = useLocale();
@@ -33,18 +42,19 @@ export function StatusBadge() {
     };
   }, []);
 
-  if (!online) {
+  const b = statusBadge(online, pending);
+  if (b.kind === 'offline') {
     return (
       <span class="badge offline" title={t('status.offlineTitle')}>
         {t('status.offline')}
-        {pending > 0 ? ` · ${t('status.pending', { n: pending })}` : ''}
+        {b.pending > 0 ? ` · ${t('status.pending', { n: b.pending })}` : ''}
       </span>
     );
   }
-  if (pending > 0) {
+  if (b.kind === 'pending') {
     return (
       <span class="badge pending" title={t('status.pendingTitle')}>
-        {t('status.pendingSync', { n: pending })}
+        {t('status.pendingSync', { n: b.pending })}
       </span>
     );
   }
