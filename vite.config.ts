@@ -47,7 +47,9 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: 'index.html',
-        navigateFallbackDenylist: [/^\/api\//],
+        // Static SEO page + crawler files are served by the network, never the app shell.
+        navigateFallbackDenylist: [/^\/api\//, /^\/kippa-alternative/, /^\/(robots\.txt|sitemap\.xml)$/],
+        globIgnores: ['**/kippa-alternative.html'],
       },
       devOptions: {
         enabled: true,

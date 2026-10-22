@@ -140,6 +140,11 @@ export function LandingPage({ onUseAppHere }: Props) {
 
           <footer class="landing-footer">
             <p>Bashi = debt (Hausa). Not affiliated with US DebtBook SaaS.</p>
+            <p>
+              <a class="landing-footer-link" href="/kippa-alternative">
+                Looking for a Kippa alternative?
+              </a>
+            </p>
           </footer>
         </section>
 

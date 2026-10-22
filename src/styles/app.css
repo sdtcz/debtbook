@@ -5657,3 +5657,4 @@ a.btn.payme-cta-btn {
 .pro-never-lose { padding-bottom: 10px; border-bottom: 1px solid rgba(15, 118, 110, 0.18); }
 .pro-never-lose-title { margin: 0; font-size: 1.3rem; line-height: 1.25; color: #134e4a; }
 .pro-never-lose-body { margin: 6px 0 0; color: #115e59; font-size: 0.95rem; line-height: 1.4; }
+.landing-footer-link { display: inline-flex; align-items: center; min-height: 44px; color: #0f766e; font-weight: 600; }

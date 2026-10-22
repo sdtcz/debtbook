@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Sitemap: https://debtbook-neon.vercel.app/sitemap.xml
