@@ -615,7 +615,6 @@ export const ha: Record<MessageKey, string> = {
   'pdf.totalOwed': "Jimillar bashi",
   'pdf.shopOwes': "Shago yana bin abokin ciniki",
   'pdf.settled': "An biya - babu bashi",
-  'pdf.footer': "An yi da BashiBook - littafin bashi",
   'pdf.page': "Shafi {{n}} cikin {{total}}",
 
   'poster.title': "Fosta QR",

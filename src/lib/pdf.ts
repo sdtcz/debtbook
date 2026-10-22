@@ -8,7 +8,7 @@ export const A4 = { w: 595.28, h: 841.89 };
 const HOOKED: Record<string, string> = {
   'ɗ': 'd', 'Ɗ': 'D', 'ƙ': 'k', 'Ƙ': 'K', 'ɓ': 'b', 'Ɓ': 'B', 'ƴ': 'y', 'Ƴ': 'Y',
   '₦': 'NGN ', '–': '-', '—': '-', '−': '-', '‘': "'", '’': "'", '“': '"', '”': '"',
-  '…': '...', '•': '-', '·': '-', '─': '-',
+  '…': '...', '•': '-', '─': '-',
 };
 
 /**
@@ -47,7 +47,7 @@ function pdfString(s: string): string {
 const W: Record<string, number> = {
   ' ': 278, ',': 278, '.': 278, '-': 333, '+': 584, ':': 278, '/': 278, '(': 333, ')': 333,
   N: 722, G: 778, I: 278, i: 222, l: 222, j: 222, t: 278, f: 278, r: 333, m: 833, w: 722,
-  W: 944, M: 833,
+  W: 944, M: 833, '·': 278,
 };
 export function textWidth(text: string, size: number, bold = false): number {
   let w = 0;

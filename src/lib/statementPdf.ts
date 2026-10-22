@@ -236,7 +236,8 @@ export function buildStatementPdf(opts: {
   pages.forEach((p, i) => {
     p.line(M, M + 14, R, M + 14, [0.88, 0.9, 0.93], 0.4);
     const host = brandFooterHost();
-    p.text(M, M, host ? `${t('pdf.footer')} · ${host}` : t('pdf.footer'), 8, { color: MUTED });
+    // Same 'Recorded in BashiBook · …' line as receipts and reminders, plus the site.
+    p.text(M, M, host ? `${t('growth.footer')} · ${host}` : t('growth.footer'), 8, { color: MUTED });
     p.text(R, M, t('pdf.page', { n: String(i + 1), total: String(pages.length) }), 8, { color: MUTED, align: 'right' });
   });
   return buildPdf(pages, `${sup ? t('pdf.supplierTitle') : t('statement.title')} - ${customer.name}`);

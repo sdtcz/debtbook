@@ -613,7 +613,6 @@ export const en = {
   'pdf.totalOwed': "Total owed",
   'pdf.shopOwes': "Shop owes customer",
   'pdf.settled': "Settled - nothing owed",
-  'pdf.footer': "Made with BashiBook - offline credit book",
   'pdf.page': "Page {{n}} of {{total}}",
 
   'poster.title': "QR poster",

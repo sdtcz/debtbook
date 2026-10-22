@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildStatementData, buildStatementPdf, pdfMoney, resolveRange, statementFilename } from './statementPdf';
-import { pdfSafeText, fitText, textWidth } from './pdf';
+import { pdfSafeText, fitText, textWidth, A4 } from './pdf';
+import { PUBLIC_APP_URL } from '../config';
 import type { Entry } from './types';
 
 const day = 86_400_000;
@@ -126,6 +127,14 @@ describe('buildStatementPdf', () => {
     expect(s).toContain('(Total owed)');
     expect(s).toContain('(NGN 4,500.00)');
     expect(s).not.toContain('9,999');
+  });
+
+  it('footer matches the Recorded-in line used in messages, plus the site', () => {
+    const host = PUBLIC_APP_URL.replace(/^https?:\/\//, '');
+    expect(s).toContain(`(Recorded in BashiBook \\267 free credit book for shops \\267 ${host})`);
+    // Footer (left) and page number (right) must not overlap on A4.
+    const footer = `Recorded in BashiBook · free credit book for shops · ${host}`;
+    expect(40 + textWidth(footer, 8) + 10).toBeLessThan(A4.w - 40 - textWidth('Page 10 of 10', 8));
   });
 
   it('paginates long histories', () => {

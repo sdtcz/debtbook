@@ -615,7 +615,6 @@ export const yo: Record<MessageKey, string> = {
   'pdf.totalOwed': "Àpapọ̀ gbèsè",
   'pdf.shopOwes': "Ilé ìtajà jẹ oníbàárà",
   'pdf.settled': "Ti san tán - kò sí gbèsè",
-  'pdf.footer': "A fi BashiBook ṣe é - ìwé gbèsè",
   'pdf.page': "Ojú ìwé {{n}} nínú {{total}}",
 
   'poster.title': "Pósítà QR",
