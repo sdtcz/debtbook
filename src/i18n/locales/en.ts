@@ -811,6 +811,12 @@ export const en = {
   "pin.exportHint": "Backup and export files hold your whole book, so they need your PIN.",
   "logout.eraseNoBackupConfirm": "Erase WITHOUT downloading a backup?\n\nNo backup file will be saved. Everything on this phone will be deleted. Without a cloud backup this cannot be undone.",
 
+  "settings.payBankPlaceholderAny": "e.g. bank or mobile money",
+  "settings.payAccountPlaceholderAny": "Account or mobile money number",
+  "settings.payLinkPlaceholderAny": "Payment link (https://…)",
+  "customerForm.phonePlaceholderAny": "+… (with country code)",
+  "customerForm.phoneNeedsCode": "Add the country code (start with +) so WhatsApp can find this number.",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

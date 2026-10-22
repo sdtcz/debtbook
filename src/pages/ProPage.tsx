@@ -20,6 +20,7 @@ import {
 } from '../lib/checkoutReturn';
 import type { ShopProfile } from '../lib/types';
 import type { ToastAction } from '../hooks/useToast';
+import { deviceLocale } from '../lib/dates';
 
 interface Props {
   toast: (msg: string, opts?: { ms?: number; action?: ToastAction }) => void;
@@ -78,7 +79,7 @@ export function ProPage({ toast }: Props) {
         await refresh();
         clearRefFromHash();
         const text = t('pro.paidSuccess', {
-          date: new Date(ent.exp || Date.now()).toLocaleDateString('en-NG'),
+          date: new Date(ent.exp || Date.now()).toLocaleDateString(deviceLocale()),
         });
         setVerifyMsg({ kind: 'ok', text });
         toast(text, { ms: 5000 });
@@ -266,7 +267,7 @@ export function ProPage({ toast }: Props) {
               <span aria-hidden="true">⏳</span>
               <span>
                 <strong>{trialLeft}</strong>
-                {ent.exp ? t('pro.until', { date: new Date(ent.exp).toLocaleDateString('en-NG') }) : ''}
+                {ent.exp ? t('pro.until', { date: new Date(ent.exp).toLocaleDateString(deviceLocale()) }) : ''}
               </span>
             </div>
           ) : pro ? (
@@ -276,7 +277,7 @@ export function ProPage({ toast }: Props) {
                 {t('pro.youreOnPro')}
                 {ent.exp
                   ? t('pro.until', {
-                      date: new Date(ent.exp).toLocaleDateString('en-NG'),
+                      date: new Date(ent.exp).toLocaleDateString(deviceLocale()),
                     })
                   : ''}
                 {ent.source ? ` · ${ent.source}` : ''}

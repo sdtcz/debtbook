@@ -35,6 +35,7 @@ function loadPdfModules() {
 }
 import { isOverdue } from '../db/repo';
 import type { ToastAction } from '../hooks/useToast';
+import { deviceLocale } from '../lib/dates';
 
 interface Props {
   id: string;
@@ -42,7 +43,7 @@ interface Props {
 }
 
 function fmtWhen(ts: number): string {
-  return new Date(ts).toLocaleString('en-NG', {
+  return new Date(ts).toLocaleString(deviceLocale(), {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -51,7 +52,7 @@ function fmtWhen(ts: number): string {
 }
 
 function fmtDue(ts: number): string {
-  return new Date(ts).toLocaleDateString('en-NG', {
+  return new Date(ts).toLocaleDateString(deviceLocale(), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

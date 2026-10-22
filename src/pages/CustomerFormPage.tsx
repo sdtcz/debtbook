@@ -22,7 +22,7 @@ import {
 } from '../lib/contacts';
 import { parseAmount, currencySymbol } from '../lib/money';
 import { goBack, goHome, navigate } from '../lib/router';
-import { normalizeNgWhatsAppDigits } from '../lib/sms';
+import { needsCountryCode, normalizeWhatsAppDigits, isNigeriaShop } from '../lib/phone';
 import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
@@ -64,7 +64,7 @@ function fromDateDisplay(v: string): number | null | undefined {
 /** Dedupe key only — storage keeps raw phone as today. */
 function phoneDedupeKey(raw: string | undefined): string | null {
   if (!raw?.trim()) return null;
-  return normalizeNgWhatsAppDigits(raw) || raw.replace(/\D/g, '') || null;
+  return normalizeWhatsAppDigits(raw) || raw.replace(/\D/g, '') || null;
 }
 
 export function CustomerFormPage({ id, toast }: Props) {
@@ -343,7 +343,7 @@ export function CustomerFormPage({ id, toast }: Props) {
                 type="tel"
                 inputMode="tel"
                 value={phone}
-                placeholder={t('customerForm.phonePlaceholder')}
+                placeholder={t(isNigeriaShop() ? 'customerForm.phonePlaceholder' : 'customerForm.phonePlaceholderAny')}
                 onInput={(e) => setPhone((e.target as HTMLInputElement).value)}
               />
               <button
@@ -356,7 +356,9 @@ export function CustomerFormPage({ id, toast }: Props) {
                 📇
               </button>
             </div>
-            <div class="hint">{t('customerForm.phoneHint')}</div>
+            <div class="hint">
+              {needsCountryCode(phone) ? t('customerForm.phoneNeedsCode') : t('customerForm.phoneHint')}
+            </div>
           </div>
           <button
             type="button"

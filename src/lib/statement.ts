@@ -2,9 +2,10 @@ import { withBrandFooter } from './growth';
 import { t } from '../i18n';
 import type { Customer, Entry, ShopProfile } from './types';
 import { formatMoney } from './money';
+import { deviceLocale } from './dates';
 
 function fmtDate(ts: number): string {
-  return new Date(ts).toLocaleString('en-NG', {
+  return new Date(ts).toLocaleString(deviceLocale(), {
     year: 'numeric',
     month: 'short',
     day: 'numeric',

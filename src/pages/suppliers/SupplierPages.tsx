@@ -29,15 +29,17 @@ import { goBack, href, navigate } from '../../lib/router';
 import { buildWhatsAppUri } from '../../lib/sms';
 import type { StatementRange } from '../../lib/statementPdf';
 import type { ShopProfile, Supplier, SupplierBalance, SupplierEntry, SupplierEntryType } from '../../lib/types';
+import { deviceLocale } from '../../lib/dates';
+import { isNigeriaShop } from '../../lib/phone';
 
 type Toast = (msg: string, opts?: { ms?: number; action?: ToastAction }) => void;
 
 function fmtWhen(ts: number): string {
-  return new Date(ts).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  return new Date(ts).toLocaleString(deviceLocale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 }
 
 function fmtDay(ts: number): string {
-  return new Date(ts).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' });
+  return new Date(ts).toLocaleDateString(deviceLocale(), { day: 'numeric', month: 'short' });
 }
 
 function initial(name: string): string {
@@ -276,7 +278,7 @@ export function SupplierFormPage({ id, toast }: { id?: string; toast: Toast }) {
               inputMode="tel"
               value={phone}
               maxlength={20}
-              placeholder="0803 123 4567"
+              placeholder={t(isNigeriaShop() ? 'customerForm.phonePlaceholder' : 'customerForm.phonePlaceholderAny')}
               onInput={(e) => setPhone((e.target as HTMLInputElement).value)}
             />
           </div>

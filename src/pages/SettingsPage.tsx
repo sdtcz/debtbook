@@ -82,6 +82,7 @@ import {
   resolveChasePrefs,
   writeChasePrefsToStorage,
 } from '../lib/chaseReminders';
+import { deviceLocale } from '../lib/dates';
 
 interface Props {
   toast: (msg: string, opts?: { ms?: number; action?: ToastAction }) => void;
@@ -145,7 +146,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
       setExpLabel(
         e.plan === 'pro' && e.exp
           ? t('settings.until', {
-              date: new Date(e.exp).toLocaleDateString('en-NG'),
+              date: new Date(e.exp).toLocaleDateString(deviceLocale()),
             })
           : e.plan === 'pro' && e.source
             ? String(e.source)
@@ -729,7 +730,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
   const initial = name.trim().charAt(0).toUpperCase() || 'B';
   const lastCloudLabel = lastCloudAt
     ? t('settings.cloudLast', {
-        when: new Date(lastCloudAt).toLocaleString('en-NG'),
+        when: new Date(lastCloudAt).toLocaleString(deviceLocale()),
       })
     : t('settings.cloudEncrypted');
 
@@ -1426,7 +1427,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
                           : t('settings.syncStatusLocked'),
                         lastCloudAt
                           ? t('settings.syncLast', {
-                              when: new Date(lastCloudAt).toLocaleString('en-NG'),
+                              when: new Date(lastCloudAt).toLocaleString(deviceLocale()),
                             })
                           : t('settings.syncNever'),
                         syncPendingLocal

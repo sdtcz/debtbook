@@ -13,6 +13,8 @@
 import { t } from '../i18n';
 import { appLink, withBrandFooter } from './growth';
 import { formatMoney } from './money';
+import { normalizeWhatsAppDigits } from './phone';
+import { deviceLocale } from './dates';
 
 export function buildRemindMessage(
   shopName: string,
@@ -30,24 +32,8 @@ export function buildRemindMessage(
   return withBrandFooter(t('remind.settled', vars), 'rem');
 }
 
-/**
- * Normalize Nigeria phone to digits for wa.me:
- * strip non-digits; leading 0 → 234…; leave 234… as-is.
- */
-export function normalizeNgWhatsAppDigits(phone: string): string | null {
-  let digits = phone.replace(/\D/g, '');
-  if (!digits) return null;
-  if (digits.startsWith('0') && digits.length >= 10) {
-    digits = '234' + digits.slice(1);
-  }
-  if (digits.startsWith('234') && digits.length >= 12) return digits;
-  // Already international without + or local without leading 0
-  if (digits.length >= 10) return digits;
-  return null;
-}
-
 export function buildWhatsAppUri(phone: string, body: string): string | null {
-  const digits = normalizeNgWhatsAppDigits(phone);
+  const digits = normalizeWhatsAppDigits(phone);
   if (!digits) return null;
   return `https://wa.me/${digits}?text=${encodeURIComponent(body)}`;
 }
@@ -190,7 +176,7 @@ export function buildEntryReceiptMessage(opts: {
   at?: number;
 }): string {
   const amount = formatMoney(Math.abs(opts.amountKobo));
-  const date = new Date(opts.at ?? Date.now()).toLocaleDateString('en-NG');
+  const date = new Date(opts.at ?? Date.now()).toLocaleDateString(deviceLocale());
   const vars = { customer: opts.customerName, shop: opts.shopName, amount, date };
   const lines = [
     opts.type === 'credit' ? t('receipt.credit', vars) : t('receipt.payment', vars),

@@ -7,7 +7,7 @@ import {
 } from './money';
 import { computeBalance } from '../db/repo';
 import type { Entry } from './types';
-import { normalizeNgWhatsAppDigits } from './sms';
+import { normalizeWhatsAppDigits } from './phone';
 
 describe('money', () => {
   it('formats naira with separators', () => {
@@ -40,8 +40,8 @@ describe('money', () => {
 
 describe('whatsapp phone normalize', () => {
   it('maps NG local 0… to 234…', () => {
-    expect(normalizeNgWhatsAppDigits('0803 123 4567')).toBe('2348031234567');
-    expect(normalizeNgWhatsAppDigits('+2348031234567')).toBe('2348031234567');
+    expect(normalizeWhatsAppDigits('0803 123 4567', '234')).toBe('2348031234567');
+    expect(normalizeWhatsAppDigits('+2348031234567', '234')).toBe('2348031234567');
   });
 });
 

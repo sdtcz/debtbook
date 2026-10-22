@@ -40,6 +40,7 @@ import { balanceLabel, balanceTone, formatMoney, currencySymbol } from '../lib/m
 import { href, navigate } from '../lib/router';
 import { remindCustomer, shareMorningDigest } from '../lib/sms';
 import type { ToastAction } from '../hooks/useToast';
+import { deviceLocale } from '../lib/dates';
 
 interface Props {
   locked?: boolean;
@@ -51,7 +52,7 @@ type FilterChip = 'all' | 'overdue' | 'owes';
 const PRO_HINT_KEY = 'debtbook:pro-hint-dismissed'; // KEEP: avoid re-showing dismissed Pro hint
 
 function fmtShortDate(ts: number): string {
-  return new Date(ts).toLocaleDateString('en-NG', {
+  return new Date(ts).toLocaleDateString(deviceLocale(), {
     day: 'numeric',
     month: 'short',
   });

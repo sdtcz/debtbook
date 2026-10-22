@@ -1,4 +1,5 @@
 import { currencySymbol } from '../lib/money';
+import { isNigeriaShop } from '../lib/phone';
 import { BackButton } from '../components/BackButton';
 import { useEffect, useState } from 'preact/hooks';
 import { notifyChanged, StatusBadge } from '../components/StatusBadge';
@@ -13,6 +14,7 @@ interface Props {
 
 export function PayDetailsPage({ toast }: Props) {
   const { t } = useLocale();
+  const ng = isNigeriaShop();
   const [payBankName, setPayBankName] = useState('');
   const [payAccountNumber, setPayAccountNumber] = useState('');
   const [payAccountName, setPayAccountName] = useState('');
@@ -87,7 +89,7 @@ export function PayDetailsPage({ toast }: Props) {
               class="input"
               value={payBankName}
               maxlength={80}
-              placeholder={t('settings.payBankPlaceholder')}
+              placeholder={t(ng ? 'settings.payBankPlaceholder' : 'settings.payBankPlaceholderAny')}
               autocomplete="off"
               disabled={!ready}
               onInput={(e) => setPayBankName((e.target as HTMLInputElement).value)}
@@ -101,7 +103,7 @@ export function PayDetailsPage({ toast }: Props) {
               value={payAccountNumber}
               maxlength={20}
               inputMode="numeric"
-              placeholder={t('settings.payAccountPlaceholder')}
+              placeholder={t(ng ? 'settings.payAccountPlaceholder' : 'settings.payAccountPlaceholderAny')}
               autocomplete="off"
               disabled={!ready}
               onInput={(e) =>
@@ -151,7 +153,7 @@ export function PayDetailsPage({ toast }: Props) {
                   value={payLinkUrl}
                   maxlength={200}
                   type="url"
-                  placeholder={t('settings.payLinkPlaceholder')}
+                  placeholder={t(ng ? 'settings.payLinkPlaceholder' : 'settings.payLinkPlaceholderAny')}
                   autocomplete="off"
                   disabled={!ready}
                   onInput={(e) =>

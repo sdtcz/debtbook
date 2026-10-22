@@ -813,6 +813,12 @@ export const yo: Record<MessageKey, string> = {
   "pin.exportHint": "Fáìlì àfẹ̀yìntì àti ìkójáde ní gbogbo ìwé rẹ nínú, nítorí náà wọ́n nílò PIN rẹ.",
   "logout.eraseNoBackupConfirm": "Pa á rẹ́ LÁÌṢE ìgbàsílẹ̀ àfẹ̀yìntì?\n\nA kò ní fi fáìlì àfẹ̀yìntì pamọ́. Gbogbo ohun tó wà lórí fóònù yìí ni a ó pa rẹ́. Láìsí àfẹ̀yìntì àwọsánmà, kò ṣeé dápadà.",
 
+  "settings.payBankPlaceholderAny": "àpẹẹrẹ báǹkì tàbí owó orí fóònù",
+  "settings.payAccountPlaceholderAny": "Nọ́ńbà àkáǹtì tàbí ti owó orí fóònù",
+  "settings.payLinkPlaceholderAny": "Ìjápọ̀ ìsanwó (https://…)",
+  "customerForm.phonePlaceholderAny": "+… (pẹ̀lú kóòdù orílẹ̀-èdè)",
+  "customerForm.phoneNeedsCode": "Fi kóòdù orílẹ̀-èdè kún un (bẹ̀rẹ̀ pẹ̀lú +) kí WhatsApp lè rí nọ́ńbà yìí.",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',
