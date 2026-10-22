@@ -5652,3 +5652,8 @@ a.btn.payme-cta-btn {
 }
 .chase-today-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .chase-today-actions .btn { flex: 1 1 auto; }
+
+/* Pro: "Never lose your book" lead */
+.pro-never-lose { padding-bottom: 10px; border-bottom: 1px solid rgba(15, 118, 110, 0.18); }
+.pro-never-lose-title { margin: 0; font-size: 1.3rem; line-height: 1.25; color: #134e4a; }
+.pro-never-lose-body { margin: 6px 0 0; color: #115e59; font-size: 0.95rem; line-height: 1.4; }

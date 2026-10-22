@@ -184,6 +184,13 @@ export function ProPage({ toast }: Props) {
           class={`pro-soft-hero${pro ? ' active' : ''}`}
           aria-label={t('pro.nigeriaPricing')}
         >
+          <div class="pro-never-lose">
+            <h2 class="pro-never-lose-title">
+              <span aria-hidden="true">🛡️ </span>
+              {t('pro.neverLoseTitle')}
+            </h2>
+            <p class="pro-never-lose-body">{t('pro.neverLoseBody')}</p>
+          </div>
           <div class="pro-soft-row">
             <div class="pro-soft-avatar" aria-hidden="true">
               {pro ? '✓' : '★'}

@@ -503,7 +503,7 @@ export function HomePage({ locked, toast }: Props) {
           </a>
         )}
 
-        {!pro && !locked && !proHintDismissed && trial.state !== 'ended' && (
+        {!pro && !locked && hasCustomers && !proHintDismissed && trial.state !== 'ended' && (
           <div class="pro-hint-soft">
             <a
               class="pro-hint-soft-link"
