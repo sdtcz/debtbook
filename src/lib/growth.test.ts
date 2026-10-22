@@ -1,6 +1,7 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { PUBLIC_APP_URL } from '../config';
 import { initLocale, setLocale } from '../i18n';
+import { en } from '../i18n/locales/en';
 import {
   appLink,
   buildInviteMessage,
@@ -83,6 +84,11 @@ describe('invite + nudge', () => {
     expect(code).toMatch(/^bb-[a-z0-9]{6}$/);
     expect(myRefCode()).toBe(code);
     expect(buildInviteMessage()).toContain(`src=inv&ref=${code}`);
+  });
+  it('the default (English) invite and UI strings are plain English, not Pidgin', () => {
+    expect(buildInviteMessage()).toMatch(/^I use BashiBook to keep my credit book on my phone\./);
+    const pidgin = /\b(wey|dey|don|am|abeg|wetin|sabi)\b/i;
+    for (const [k, v] of Object.entries(en)) expect(`${k}: ${v}`).not.toMatch(pidgin);
   });
   it('backup nudge only after 10 customers and no recent backup', () => {
     const now = Date.now();
