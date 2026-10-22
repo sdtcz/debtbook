@@ -10,7 +10,7 @@ import {
   shouldShowBackupNudge,
 } from '../lib/growth';
 import { useEffect, useMemo, useState } from 'preact/hooks';
-import { ChaseAllSheet } from '../components/ChaseAllSheet';
+import type { ChaseAllSheet as ChaseAllSheetType } from '../components/ChaseAllSheet';
 import { StatusBadge } from '../components/StatusBadge';
 import {
   creditLimitStatus,
@@ -20,8 +20,10 @@ import {
   getOverdueDigest,
   getShop,
   isOverdue,
+  listAllEntries,
   searchCustomers,
 } from '../db/repo';
+import { rankTodaysChase, weeklyCollected, type WeeklyCollected } from '../lib/chase';
 import { useLocale } from '../hooks/useLocale';
 import type { MessageKey } from '../i18n';
 import {
@@ -35,7 +37,7 @@ import { trialStatus } from '../lib/trial';
 import type { CustomerBalance, ShopProfile } from '../lib/types';
 import { balanceLabel, balanceTone, formatNaira } from '../lib/money';
 import { href, navigate } from '../lib/router';
-import { copyMorningDigest, shareMorningDigest } from '../lib/sms';
+import { remindCustomer, shareMorningDigest } from '../lib/sms';
 import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
@@ -107,7 +109,11 @@ export function HomePage({ locked, toast }: Props) {
   });
   const [flash, setFlash] = useState<string | null>(null);
   const [chasePrompt, setChasePrompt] = useState(false);
+  const [chasedIds, setChasedIds] = useState<Set<string>>(() => new Set());
+  const [week, setWeek] = useState<WeeklyCollected | null>(null);
   const [chaseSheetOpen, setChaseSheetOpen] = useState(false);
+  // Code-split: the chase-all sheet loads on first open (keeps Home's first load small on 2G).
+  const [ChaseAllSheet, setChaseAllSheet] = useState<typeof ChaseAllSheetType | null>(null);
   const [inviteHidden, setInviteHidden] = useState(() => inviteCardDismissed());
   const [nudgeHidden, setNudgeHidden] = useState(false);
 
@@ -127,6 +133,9 @@ export function HomePage({ locked, toast }: Props) {
       const dash = await getDashboardBalances();
       setRows(dash.customers);
       setTotal(dash.totalOutstandingKobo);
+      listAllEntries()
+        .then((all) => setWeek(weeklyCollected(all, new Set(dash.customers.map((r) => r.customer.id)))))
+        .catch(() => setWeek(null));
       setLoadFailed(false);
       // Supplier side ("I owe") — never mixed into the customer total above.
       getSupplierBalances()
@@ -156,7 +165,7 @@ export function HomePage({ locked, toast }: Props) {
   );
 
   const digest = useMemo(() => getOverdueDigest(rows), [rows]);
-  const chasePrefs = useMemo(() => resolveChasePrefs(shop), [shop]);
+  const todays = useMemo(() => rankTodaysChase(rows), [rows]);
 
   const filteredByChip = useMemo(() => {
     if (filter === 'overdue') {
@@ -231,6 +240,30 @@ export function HomePage({ locked, toast }: Props) {
   const openChaseSheet = () => {
     setChasePrompt(false);
     setChaseSheetOpen(true);
+    if (!ChaseAllSheet) {
+      import('../components/ChaseAllSheet')
+        .then((m) => setChaseAllSheet(() => m.ChaseAllSheet))
+        .catch(() => {
+          setChaseSheetOpen(false);
+          notify(t('common.loadFailedTitle'));
+        });
+    }
+  };
+
+  const chaseOne = async (row: CustomerBalance) => {
+    if (!shop) return;
+    const result = await remindCustomer({
+      shopName: shop.name,
+      customerName: row.customer.name,
+      phone: row.customer.phone,
+      balanceKobo: row.balanceKobo,
+    });
+    if (result === 'whatsapp') notify(t('customer.openingWhatsApp'));
+    else if (result === 'sms') notify(t('customer.openingSms'));
+    else if (result === 'share') notify(t('customer.shared'));
+    else if (result === 'clipboard') notify(t('customer.messageCopied'));
+    else notify(t('customer.couldNotRemind'));
+    if (result !== 'none') setChasedIds((prev) => new Set(prev).add(row.customer.id));
   };
 
   const dismissChasePrompt = () => {
@@ -253,17 +286,6 @@ export function HomePage({ locked, toast }: Props) {
     else notify(t('home.digestShareFailed'));
   };
 
-  const copyDigest = async () => {
-    if (!shop || digest.count === 0) return;
-    const ok = await copyMorningDigest({
-      shopName: shop.name,
-      overdue: digest.all.map((r) => ({
-        name: r.customer.name,
-        balanceKobo: r.balanceKobo,
-      })),
-    });
-    notify(ok ? t('home.digestCopied') : t('home.digestShareFailed'));
-  };
 
   const filterTitle = (() => {
     const n = filtered.length ? ` (${filtered.length})` : '';
@@ -366,83 +388,88 @@ export function HomePage({ locked, toast }: Props) {
           </a>
         )}
 
-        {!locked && chasePrompt && digest.count > 0 && (
-          <div class="card chase-prompt" role="status">
-            <div class="chase-prompt-text">
-              <div class="chase-prompt-title">{t('home.chasePromptTitle')}</div>
-              <div class="chase-prompt-body">
-                {t('home.chasePromptBody', {
-                  n: digest.count,
-                  time: chasePrefs.time,
-                })}
-              </div>
+        {!locked && todays.length > 0 && (
+          <section
+            class={`card chase-today${chasePrompt ? ' digest-card-emphasize' : ''}`}
+            aria-labelledby="chase-today-title"
+          >
+            <div class="chase-today-head">
+              <h2 id="chase-today-title" class="chase-today-title">
+                {t('home.chaseTodayTitle', { n: todays.length })}
+              </h2>
+              <p class="chase-today-sub">{t('home.chaseTodaySub')}</p>
             </div>
-            <div class="chase-prompt-actions">
-              <button
-                type="button"
-                class="btn btn-primary"
-                onClick={openChaseSheet}
-              >
-                {t('home.chasePromptGo')}
-              </button>
-              <button
-                type="button"
-                class="btn btn-ghost"
-                onClick={dismissChasePrompt}
-              >
-                {t('home.chasePromptDismiss')}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {!locked && digest.count > 0 && (
-          <div class={`card digest-card${chasePrompt ? ' digest-card-emphasize' : ''}`}>
-            <button
-              type="button"
-              class="digest-main"
-              onClick={openOverdue}
-            >
-              <div class="digest-title">{t('home.digestTitle')}</div>
-              <div class="digest-meta">
-                {t('home.digestMeta', {
-                  n: digest.count,
-                  amount: locked
-                    ? '••••'
-                    : formatNaira(digest.totalOverdueKobo),
-                })}
-              </div>
-              <div class="digest-top">
-                {t('home.digestTop', {
-                  names: digest.top.map((r) => r.customer.name).join(', '),
-                })}
-              </div>
-              <div class="digest-open">{t('home.digestOpen')} →</div>
+            <button type="button" class="chase-today-overdue" onClick={openOverdue}>
+              {t('home.digestMeta', { n: digest.count, amount: formatNaira(digest.totalOverdueKobo) })}
+              <span aria-hidden="true"> · {t('home.digestOpen')} →</span>
             </button>
-            <div class="digest-actions">
-              <button
-                type="button"
-                class="btn btn-primary digest-btn"
-                onClick={openChaseSheet}
-              >
+            <ol class="chase-today-list">
+              {todays.map((it, i) => {
+                const done = chasedIds.has(it.row.customer.id);
+                return (
+                  <li key={it.row.customer.id} class={`chase-today-row${done ? ' done' : ''}`}>
+                    <span class="chase-today-rank" aria-hidden="true">
+                      {i + 1}
+                    </span>
+                    <a class="chase-today-body" href={href(`/customers/${it.row.customer.id}`)}>
+                      <span class="chase-today-name">{it.row.customer.name}</span>
+                      <span class="chase-today-meta">
+                        {formatNaira(it.row.balanceKobo)} ·{' '}
+                        {it.daysOverdue === 1
+                          ? t('home.chaseTodayLateOne')
+                          : t('home.chaseTodayLate', { n: it.daysOverdue })}
+                      </span>
+                    </a>
+                    <button
+                      type="button"
+                      class={`btn chase-today-wa${done ? ' done' : ''}`}
+                      aria-label={t('home.chaseTodayWaAria', { name: it.row.customer.name })}
+                      onClick={() => chaseOne(it.row)}
+                    >
+                      {done ? `✓ ${t('home.chaseTodaySent')}` : it.row.customer.phone ? 'WhatsApp' : t('home.chaseTodayShare')}
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+            <div class="chase-today-actions">
+              <button type="button" class="btn btn-secondary" onClick={openChaseSheet}>
                 {t('home.chaseAll')}
               </button>
-              <button
-                type="button"
-                class="btn btn-secondary digest-btn"
-                onClick={shareDigest}
-              >
+              <button type="button" class="btn btn-ghost" onClick={shareDigest}>
                 {t('home.digestWhatsApp')}
               </button>
-              <button
-                type="button"
-                class="btn btn-ghost digest-btn"
-                onClick={copyDigest}
-              >
-                {t('home.digestCopy')}
-              </button>
+              {chasePrompt && (
+                <button type="button" class="btn btn-ghost" onClick={dismissChasePrompt}>
+                  {t('home.chasePromptDismiss')}
+                </button>
+              )}
             </div>
-          </div>
+          </section>
+        )}
+
+        {!locked && hasCustomers && week && (
+          <a class="week-collected" href={href('/reports')}>
+            <span class="week-collected-icon" aria-hidden="true">
+              ₦
+            </span>
+            <span class="week-collected-body">
+              <span class="week-collected-title">
+                {t('home.weekCollected', { amount: formatNaira(week.collectedKobo) })}
+              </span>
+              <span class="week-collected-sub">
+                {week.paymentCount === 0
+                  ? t('home.weekCollectedNone')
+                  : week.paymentCount === 1
+                  ? t('home.weekCollectedOne')
+                  : t('home.weekCollectedSub', { n: week.paymentCount, c: week.customerCount })}
+                {week.lastWeekKobo > 0 ? ` · ${t('home.weekCollectedLast', { amount: formatNaira(week.lastWeekKobo) })}` : ''}
+              </span>
+            </span>
+            <span class="chev" aria-hidden="true">
+              ›
+            </span>
+          </a>
         )}
 
         {flash && (
@@ -771,7 +798,7 @@ export function HomePage({ locked, toast }: Props) {
         </button>
       )}
 
-      {chaseSheetOpen && shop && (
+      {chaseSheetOpen && shop && ChaseAllSheet && (
         <ChaseAllSheet
           shopName={shop.name}
           overdue={digest.all}

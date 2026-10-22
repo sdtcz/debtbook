@@ -24,7 +24,6 @@ import {
   shouldShowApp,
 } from './lib/viewportMode';
 import { CustomerDetailPage } from './pages/CustomerDetailPage';
-import { CustomerFormPage } from './pages/CustomerFormPage';
 import { EntryFormPage } from './pages/EntryFormPage';
 import { HomePage } from './pages/HomePage';
 import { LandingPage } from './pages/LandingPage';
@@ -36,6 +35,7 @@ const PrivacyPage = lazyPage(() => import('./pages/PrivacyPage').then((m) => m.P
 const ProPage = lazyPage(() => import('./pages/ProPage').then((m) => m.ProPage));
 const ReportsPage = lazyPage(() => import('./pages/ReportsPage').then((m) => m.ReportsPage));
 const SettingsPage = lazyPage(() => import('./pages/SettingsPage').then((m) => m.SettingsPage));
+const CustomerFormPage = lazyPage(() => import('./pages/CustomerFormPage').then((m) => m.CustomerFormPage));
 const SuppliersPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SuppliersPage));
 const SupplierFormPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SupplierFormPage));
 const SupplierDetailPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SupplierDetailPage));
