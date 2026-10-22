@@ -172,6 +172,63 @@ export function ProPage({ toast }: Props) {
         : t('pro.trialDaysLeft', { n: trial.daysLeft })
       : '';
 
+  const [plan, setPlan] = useState<ProBillingPlan>('yearly');
+  /** One place to pick a plan, type the receipt email and pay (email sits right above the button). */
+  const payBlock = (
+    <div class={`pro-pay${trialEndedPrompt ? ' in-alert' : ''}`}>
+      {!trialEndedPrompt && <h2 class="pro-plan-title">{t('pro.planTitle')}</h2>}
+      <div class="pro-plans" role="radiogroup" aria-label={t('pro.planTitle')}>
+        {(['yearly', 'monthly'] as ProBillingPlan[]).map((p) => (
+          <button
+            key={p}
+            type="button"
+            role="radio"
+            aria-checked={plan === p}
+            class={`pro-plan${plan === p ? ' on' : ''}`}
+            onClick={() => setPlan(p)}
+          >
+            {p === 'yearly' && <span class="pro-plan-tag">{t('pro.planBest')}</span>}
+            <span class="pro-plan-dot" aria-hidden="true" />
+            <span class="pro-plan-text">
+              <span class="pro-plan-name">{t(p === 'yearly' ? 'pro.planYearly' : 'pro.planMonthly')}</span>
+              <span class="pro-plan-meta">{t(p === 'yearly' ? 'pro.planYearlyMeta' : 'pro.planMonthlyMeta')}</span>
+            </span>
+            <span class="pro-plan-price">{t(p === 'yearly' ? 'pro.perYear' : 'pro.perMonth')}</span>
+          </button>
+        ))}
+      </div>
+      <div class="field">
+        <label for="pro-pay-email">{t('pro.emailLabel')}</label>
+        <input
+          id="pro-pay-email"
+          ref={emailRef}
+          class={`input${emailError ? ' input-error' : ''}`}
+          type="email"
+          inputMode="email"
+          autocomplete="email"
+          placeholder={t('pro.emailPlaceholder')}
+          value={email}
+          aria-invalid={emailError}
+          onInput={(e) => {
+            setEmail((e.target as HTMLInputElement).value);
+            if (emailError) setEmailError(false);
+          }}
+        />
+        {emailError && <div class="hint pro-pay-error">{t('pro.emailRequired')}</div>}
+      </div>
+      <button
+        class={`btn ${!pro && trial.state === 'available' ? 'btn-secondary' : 'btn-primary'} pro-pay-cta`}
+        type="button"
+        disabled={busy || verifying}
+        onClick={() => tryCheckout(plan)}
+      >
+        {t('pro.continuePay', { price: plan === 'yearly' ? '$15' : '$1.99' })}
+      </button>
+      <p class="pro-soft-note">🔒 {t('pro.securedBy')}</p>
+      {!pro && !trialEndedPrompt && <p class="pro-soft-note">{t('pro.demoNote')}</p>}
+    </div>
+  );
+
   return (
     <div class="app-shell">
       <header class="topbar">
@@ -229,14 +286,7 @@ export function ProPage({ toast }: Props) {
           <section class="card pro-trial-ended" role="alert" aria-labelledby="pro-trial-ended-title">
             <h2 id="pro-trial-ended-title">{t('pro.trialEndedTitle')}</h2>
             <p>{t('pro.trialEndedBody')}</p>
-            <div class="pro-pay-buttons">
-              <button class="btn btn-primary" type="button" disabled={busy || verifying} onClick={() => tryCheckout('monthly')}>
-                {t('pro.payMonthly')}
-              </button>
-              <button class="btn btn-primary" type="button" disabled={busy || verifying} onClick={() => tryCheckout('yearly')}>
-                {t('pro.payYearly')}
-              </button>
-            </div>
+            {payBlock}
           </section>
         )}
 
@@ -310,55 +360,10 @@ export function ProPage({ toast }: Props) {
               {t('pro.tryFree')}
             </button>
           )}
+          {!pro && trial.state === 'available' && <p class="pro-soft-note pro-trial-nocard">{t('pro.trialNoCard')}</p>}
           {!pro && trial.state === 'ended' && <p class="pro-soft-note">{t('pro.trialUsedNote')}</p>}
 
-          {canPay && (
-            <div class="pro-pay">
-              <div class="field">
-                <label for="pro-pay-email">{t('pro.emailLabel')}</label>
-                <input
-                  id="pro-pay-email"
-                  ref={emailRef}
-                  class={`input${emailError ? ' input-error' : ''}`}
-                  type="email"
-                  inputMode="email"
-                  autocomplete="email"
-                  placeholder={t('pro.emailPlaceholder')}
-                  value={email}
-                  aria-invalid={emailError}
-                  onInput={(e) => {
-                    setEmail((e.target as HTMLInputElement).value);
-                    if (emailError) setEmailError(false);
-                  }}
-                />
-                {emailError && (
-                  <div class="hint pro-pay-error">{t('pro.emailRequired')}</div>
-                )}
-              </div>
-              {!trialEndedPrompt && (
-                <div class="pro-pay-buttons">
-                <button
-                  class="btn btn-secondary"
-                  type="button"
-                  disabled={busy || verifying}
-                  onClick={() => tryCheckout('monthly')}
-                >
-                  {t('pro.payMonthly')}
-                </button>
-                <button
-                  class="btn btn-secondary"
-                  type="button"
-                  disabled={busy || verifying}
-                  onClick={() => tryCheckout('yearly')}
-                >
-                  {t('pro.payYearly')}
-                </button>
-                </div>
-              )}
-              <p class="pro-soft-note">{t('pro.securedBy')}</p>
-              {!pro && <p class="pro-soft-note">{t('pro.demoNote')}</p>}
-            </div>
-          )}
+          {canPay && !trialEndedPrompt && payBlock}
         </section>
       </main>
     </div>
