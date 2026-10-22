@@ -23,9 +23,31 @@ describe('/kippa-alternative static page', () => {
     expect(html).toContain('Your book stays on your phone, works offline, free.');
   });
   it('makes no claims about Kippa beyond the neutral question and trademark note', () => {
-    const kippaLines = html.split('\n').filter((l: string) => /kippa/i.test(l) && !/src=kippa|kippa-alternative/.test(l));
+    const kippaLines = html.split('\n').filter((l: string) => /kippa/i.test(l) && !/src=kippa|kippa-/.test(l));
     for (const l of kippaLines) expect(l).toMatch(/Kippa alternative|trademark of its owner|not affiliated/i);
     expect(html).not.toMatch(/shut ?down|went dark|lost (their|your) data/i);
+  });
+  it('only claims offline use once opened, never "without data or network"', () => {
+    expect(html).not.toMatch(/without (data|network)|data no dey|ba tare da data|láìsí dátà/i);
+    expect(html).toContain('Works offline once opened');
+  });
+  it('passes ?src= through to the app link, sanitised, with the static href as fallback', () => {
+    const ctas = html.match(/<a class="cta" href="[^"]+">/g) || [];
+    expect(ctas.length).toBe(4);
+    for (const a of ctas) expect(a).toContain('href="/?app=1&amp;src=kippa"');
+    const code = html.match(/<script>\n([\s\S]*?)<\/script>/)![1];
+    const run = (search: string) => {
+      const links = [0, 1].map(() => ({ href: '/?app=1&src=kippa', setAttribute(_: string, v: string) { this.href = v; } }));
+      new Function('location', 'document', code)({ search }, { querySelectorAll: () => links });
+      return links.map((l) => l.href);
+    };
+    expect(run('')).toEqual(['/?app=1&src=kippa', '/?app=1&src=kippa']);
+    expect(run('?src=tw')[1]).toBe('/?app=1&src=kippa-tw');
+    expect(run('?utm=x&src=Google_Ads%20NG!')[0]).toBe('/?app=1&src=kippa-googleadsng');
+    expect(run('?src=' + 'a'.repeat(40))[0]).toBe('/?app=1&src=kippa-' + 'a'.repeat(20));
+    expect(run('?src=%3Cscript%3E"')[0]).toBe('/?app=1&src=kippa-script');
+    expect(run('?src=%E0%A4%A')[0]).toBe('/?app=1&src=kippa');
+    expect(run('?src=!!!')[0]).toBe('/?app=1&src=kippa');
   });
   it('is in the sitemap and robots.txt points to it', () => {
     expect(read('public/sitemap.xml')).toContain(`<loc>${PUBLIC_APP_URL}/kippa-alternative</loc>`);

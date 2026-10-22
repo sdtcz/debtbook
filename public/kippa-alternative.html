@@ -53,7 +53,7 @@ footer a{color:#0f766e}
     <p class="lead">Your book stays on your phone, works offline, free.</p>
     <ul>
       <li>Records credit sales and payments for each customer, saved on your phone.</li>
-      <li>Works without data or network. Open it in the market, even with no signal.</li>
+      <li>Works offline once opened, so you can keep recording in the market even with no signal.</li>
       <li>Free to use: customers, balances, WhatsApp reminders, receipts and statement PDFs.</li>
       <li>Free backup file you download and keep yourself, so you can restore your book.</li>
       <li>Also tracks what you owe your suppliers, separate from what customers owe you.</li>
@@ -65,10 +65,10 @@ footer a{color:#0f766e}
 
   <section id="pcm" lang="pcm">
     <h2>Your bashi book wey no go loss</h2>
-    <p class="lead">Your book dey your phone, e dey work without network, e free.</p>
+    <p class="lead">Your book dey your phone, e dey work offline once you don open am, e free.</p>
     <ul>
       <li>Write who carry goods on credit and who don pay, e dey save for your phone.</li>
-      <li>E dey work even when data no dey or network no dey for market.</li>
+      <li>Once you don open am, you fit still dey write for market even when network no dey.</li>
       <li>E free: customers, balance, WhatsApp reminder, receipt and statement PDF.</li>
       <li>Free backup file wey you go download keep, so you fit bring your book back.</li>
       <li>E fit also write the money wey you owe your suppliers, separate from customers own.</li>
@@ -79,10 +79,10 @@ footer a{color:#0f766e}
 
   <section id="ha" lang="ha">
     <h2>Littafin bashi da yake tare da kai</h2>
-    <p class="lead">Littafinka yana kan wayarka, yana aiki ba tare da intanet ba, kyauta ne.</p>
+    <p class="lead">Littafinka yana kan wayarka, yana aiki ba tare da intanet ba bayan an buɗe shi, kyauta ne.</p>
     <ul>
       <li>Yana rubuta bashi da biya na kowane abokin ciniki, an ajiye a wayarka.</li>
-      <li>Yana aiki ba tare da data ko sabis ba, ko a kasuwa babu siginar waya.</li>
+      <li>Bayan an buɗe shi, za ka iya ci gaba da rubutu a kasuwa ko babu siginar waya.</li>
       <li>Kyauta: abokan ciniki, bashi, tunatarwar WhatsApp, rasit da PDF na bayani.</li>
       <li>Fayil ɗin ajiya kyauta da kake saukewa ka ajiye, don ka maido littafinka.</li>
       <li>Yana kuma rubuta abin da kake bin masu kawo kaya, daban da na abokan ciniki.</li>
@@ -94,10 +94,10 @@ footer a{color:#0f766e}
 
   <section id="yo" lang="yo">
     <h2>Ìwé gbèsè tí ó máa ń wà pẹ̀lú rẹ</h2>
-    <p class="lead">Ìwé rẹ wà lórí fóònù rẹ, ó ń ṣiṣẹ́ láìsí íńtánẹ́ẹ̀tì, ọ̀fẹ́ ni.</p>
+    <p class="lead">Ìwé rẹ wà lórí fóònù rẹ, ó ń ṣiṣẹ́ láìsí íńtánẹ́ẹ̀tì lẹ́yìn tí o bá ti ṣí i, ọ̀fẹ́ ni.</p>
     <ul>
       <li>Ó ń kọ ọjà àwìn àti ìsanwó oníbàárà kọ̀ọ̀kan sílẹ̀, ó sì wà lórí fóònù rẹ.</li>
-      <li>Ó ń ṣiṣẹ́ láìsí dátà tàbí nẹ́tíwọ́ọ̀kì, kódà ní ọjà tí kò sí àmì fóònù.</li>
+      <li>Lẹ́yìn tí o bá ti ṣí i, o lè máa kọ sílẹ̀ ní ọjà, kódà tí kò bá sí àmì fóònù.</li>
       <li>Ọ̀fẹ́ ni: oníbàárà, gbèsè, ìrántí WhatsApp, rìsíìtì àti PDF àkọọ́lẹ̀.</li>
       <li>Fáìlì àfípadà ọ̀fẹ́ tí o máa ń gbà sílẹ̀ tí o sì ń pa mọ́, kí o lè dá ìwé rẹ padà.</li>
       <li>Ó tún ń kọ ohun tí o jẹ àwọn olùpèsè, lọ́tọ̀ sí ti àwọn oníbàárà.</li>
@@ -111,5 +111,18 @@ footer a{color:#0f766e}
   <p>Kippa is a trademark of its owner. BashiBook is an independent app and is not affiliated with Kippa.</p>
   <p><a href="/">BashiBook home</a></p>
 </footer>
+<script>
+/* Pass the visitor's ?src= through to the app link as kippa-<src>; the static href is the fallback. */
+(function () {
+  try {
+    var m = /[?&]src=([^&#]*)/.exec(location.search);
+    if (!m) return;
+    var x = decodeURIComponent(m[1].replace(/\+/g, ' ')).toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 20);
+    if (!x) return;
+    var links = document.querySelectorAll('a.cta');
+    for (var i = 0; i < links.length; i++) links[i].setAttribute('href', '/?app=1&src=kippa-' + x);
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>
