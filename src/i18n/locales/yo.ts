@@ -768,6 +768,9 @@ export const yo: Record<MessageKey, string> = {
   'pro.neverLoseTitle': "Má ṣe pàdánù ìwé rẹ láéláé",
   'pro.neverLoseBody': "Fóònù sọnù, wọ́n jí i, tàbí o ra tuntun? Pro ń pa àfípadà oníbàárà àti gbèsè wọn mọ́ ní ìkọ̀kọ̀, ó sì ń dá a padà sórí fóònù míì pẹ̀lú kóòdù ìmúpadà rẹ.",
 
+  "pro.manageBilling": "Ṣàkóso tàbí fagilé àsansílẹ̀ Pro",
+  "pro.manageBillingSub": "Ojú-ìwé ìsanwó Stripe · wọlé pẹ̀lú ímeèlì tó wà lórí rìsíìtì rẹ",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

@@ -2,7 +2,7 @@ import { BackButton } from '../components/BackButton';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { LogoutSheet } from '../components/LogoutSheet';
 import { notifyChanged, StatusBadge } from '../components/StatusBadge';
-import { APP_BUILD, APP_VERSION } from '../config';
+import { APP_BUILD, APP_VERSION, STRIPE_BILLING_PORTAL_URL } from '../config';
 import {
   clearPin,
   getDashboardBalances,
@@ -940,6 +940,25 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
               </span>
             </span>
           </button>
+          <a
+            class="settings-row"
+            href={STRIPE_BILLING_PORTAL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              ⚙
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">{t('pro.manageBilling')}</span>
+              <span class="settings-row-sub">{t('pro.manageBillingSub')}</span>
+            </span>
+            <span class="settings-row-trail">
+              <span class="chev" aria-hidden="true">
+                ↗
+              </span>
+            </span>
+          </a>
           <button type="button" class="settings-row" onClick={doCsv}>
             <span class="settings-row-icon" aria-hidden="true">
               ⬇

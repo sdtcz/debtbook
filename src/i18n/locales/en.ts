@@ -766,6 +766,9 @@ export const en = {
   'pro.neverLoseTitle': "Never lose your book",
   'pro.neverLoseBody': "Lost, stolen or new phone? Pro keeps an encrypted backup of your customers and balances and restores it on another phone with your recovery code.",
 
+  "pro.manageBilling": "Manage or cancel subscription",
+  "pro.manageBillingSub": "Stripe billing page · sign in with the email on your receipt",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

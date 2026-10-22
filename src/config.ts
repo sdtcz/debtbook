@@ -27,6 +27,8 @@ export const APP_BUILD: string =
 
 /** Support contact — leave empty until the owner provides a public WhatsApp/email. */
 export const SUPPORT_WHATSAPP = '';
+/** Stripe customer portal: subscribers manage or cancel Pro there (sign in by email). */
+export const STRIPE_BILLING_PORTAL_URL = 'https://billing.stripe.com/p/login/7sY3cwbWocB79sH9x13Ru00';
 export const SUPPORT_EMAIL = '';
 
 /** Build an absolute public URL for a hash route, e.g. publicUrl('/payme?x=1'). */

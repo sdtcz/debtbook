@@ -768,6 +768,9 @@ export const ha: Record<MessageKey, string> = {
   'pro.neverLoseTitle': "Kada littafinka ya ɓace",
   'pro.neverLoseBody': "Waya ta ɓace, an sace ta, ko sabuwa? Pro na ajiye kwafin abokan cinikinka da bashinsu a ɓoye, kuma ya maido su a wata waya da lambar farfadowarka.",
 
+  "pro.manageBilling": "Sarrafa ko soke biyan Pro",
+  "pro.manageBillingSub": "Shafin biyan kuɗi na Stripe · shiga da imel ɗin da ke kan rasit ɗinka",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

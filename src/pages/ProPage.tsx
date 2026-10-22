@@ -1,4 +1,5 @@
 import { BackButton } from '../components/BackButton';
+import { STRIPE_BILLING_PORTAL_URL } from '../config';
 import { hit } from '../lib/hit';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { notifyChanged } from '../components/StatusBadge';
@@ -367,6 +368,14 @@ export function ProPage({ toast }: Props) {
 
           {canPay && !trialEndedPrompt && payBlock}
         </section>
+
+        <p class="pro-soft-note pro-manage-billing">
+          <a href={STRIPE_BILLING_PORTAL_URL} target="_blank" rel="noopener noreferrer">
+            {t('pro.manageBilling')}
+          </a>
+          <br />
+          {t('pro.manageBillingSub')}
+        </p>
       </main>
     </div>
   );
