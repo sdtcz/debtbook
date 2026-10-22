@@ -740,6 +740,13 @@ export const yo: Record<MessageKey, string> = {
   'home.trialUpgrade': "Ṣe àfikún",
   'home.trialEndedSub': "Ṣe àfikún pẹ̀lú $1.99/oṣù tàbí $15/ọdún",
 
+  'entry.receiptStepTitle': "A ti fi gbèsè {{amount}} pamọ́ fún {{name}}",
+  'entry.receiptStepWhy': "Fi rìsíìtì ránṣẹ́ kí wọ́n lè ní àkọsílẹ̀ kan náà àti iye tí wọ́n jẹ báyìí.",
+  'entry.receiptSend': "Fi rìsíìtì ránṣẹ́ sí {{name}}",
+  'entry.receiptVia': "WhatsApp · {{phone}}",
+  'entry.receiptNoPhone': "Kò sí nọ́ńbà fóònù, o lè pín in tàbí dà á kọ",
+  'entry.receiptSkip': "Fò ó",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

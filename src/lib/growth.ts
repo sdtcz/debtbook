@@ -58,10 +58,15 @@ export function setBrandFooterEnabled(on: boolean): void {
   }
 }
 
-/** Small, factual footer: "— Recorded in BashiBook · free credit book for shops <link>". */
+/** One short, factual line after a blank line: "Recorded in BashiBook · free credit book for shops <link>". */
 export function brandFooterLines(src: LinkSource = 'rem'): string[] {
   if (!brandFooterEnabled()) return [];
-  return ['', '—', t('growth.footer'), appLink(src)];
+  return ['', `${t('growth.footer')} ${appLink(src)}`];
+}
+
+/** Host-only footer for PDFs (no tracking query), e.g. "debtbook-neon.vercel.app". */
+export function brandFooterHost(): string {
+  return brandFooterEnabled() ? PUBLIC_APP_URL.replace(/^https?:\/\//, '') : '';
 }
 
 export function withBrandFooter(message: string, src: LinkSource = 'rem'): string {

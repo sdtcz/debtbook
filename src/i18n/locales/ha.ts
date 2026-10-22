@@ -740,6 +740,13 @@ export const ha: Record<MessageKey, string> = {
   'home.trialUpgrade': "Haɓaka",
   'home.trialEndedSub': "Haɓaka da $1.99/wata ko $15/shekara",
 
+  'entry.receiptStepTitle': "An ajiye bashin {{amount}} na {{name}}",
+  'entry.receiptStepWhy': "Aika rasit don su ma su sami bayanin da sabon bashinsu.",
+  'entry.receiptSend': "Aika rasit ga {{name}}",
+  'entry.receiptVia': "WhatsApp · {{phone}}",
+  'entry.receiptNoPhone': "Babu lambar waya, za ka iya rabawa ko kwafa",
+  'entry.receiptSkip': "Tsallake",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

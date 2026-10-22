@@ -5600,3 +5600,20 @@ a.btn.payme-cta-btn {
 }
 .pro-trial-ended h2 { margin: 0 0 6px; font-size: 1.1rem; color: #78350f; }
 .pro-trial-ended p { margin: 0 0 12px; color: #713f12; }
+
+/* ---------- Receipt step after a credit sale ---------- */
+.receipt-step { padding: 20px 18px calc(16px + var(--safe-bottom)); align-items: stretch; text-align: center; gap: 8px; }
+.receipt-step-check {
+  width: 48px; height: 48px; margin: 0 auto 4px; border-radius: 50%;
+  background: var(--ok-soft); color: var(--ok); display: grid; place-items: center; font-size: 1.5rem; font-weight: 800;
+}
+.receipt-step-title { margin: 0; font-size: 1.15rem; line-height: 1.3; }
+.receipt-step-why { margin: 0 0 8px; color: var(--muted); font-size: 0.92rem; }
+.btn-whatsapp {
+  background: #0b7a3e; border-color: #0b7a3e; color: #fff; min-height: 52px; font-size: 1.05rem;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-whatsapp:active:not(:disabled) { background: #086332; }
+.receipt-step-send span { overflow: hidden; text-overflow: ellipsis; }
+.receipt-step-via { margin: 0; color: var(--muted); font-size: 0.85rem; }
+.receipt-step-skip { min-height: var(--tap); }

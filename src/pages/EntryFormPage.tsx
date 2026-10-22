@@ -1,15 +1,17 @@
 import { BackButton } from '../components/BackButton';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { MoneyInput } from '../components/MoneyInput';
 import { notifyChanged } from '../components/StatusBadge';
 import {
   addEntry,
   getCustomer,
   getCustomerBalance,
+  getShop,
   softDeleteEntry,
 } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
-import type { Customer, EntryType } from '../lib/types';
+import type { Customer, Entry, EntryType } from '../lib/types';
+import { buildEntryReceiptMessage, sendTextToCustomer } from '../lib/sms';
 import {
   balanceLabel,
   balanceTone,
@@ -36,6 +38,9 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
   const [balanceKobo, setBalanceKobo] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** After a credit sale: "Send receipt to {customer}" is the default next step. */
+  const [receiptStep, setReceiptStep] = useState<{ entry: Entry; balanceKobo: number; shopName: string } | null>(null);
+  const sendRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     getCustomer(customerId).then((c) => {
@@ -89,25 +94,70 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
         note: note || undefined,
       });
       notifyChanged();
-      const label =
-        type === 'credit' ? t('entry.creditRecorded') : t('entry.paymentRecorded');
-      toast(label, {
-        ms: 10000,
-        action: {
-          label: t('common.undo'),
-          onClick: async () => {
-            await softDeleteEntry(entry.id);
-            notifyChanged();
-            toast(t('entry.undone'));
-          },
-        },
-      });
-      goBack(`/customers/${customerId}`);
+      if (type === 'credit') {
+        const [bal, shop] = await Promise.all([getCustomerBalance(customerId), getShop()]);
+        setReceiptStep({ entry, balanceKobo: bal.balanceKobo, shopName: shop?.name || '' });
+        return;
+      }
+      finish(entry);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('entry.couldNotSave'));
     } finally {
       setBusy(false);
     }
+  };
+
+  /** Leave the form with the usual "recorded · Undo" toast. */
+  const finish = (entry: Entry, opener?: string) => {
+    const label =
+      entry.type === 'credit' ? t('entry.creditRecorded') : t('entry.paymentRecorded');
+    toast(opener ? `${label} · ${opener}` : label, {
+      ms: 10000,
+      action: {
+        label: t('common.undo'),
+        onClick: async () => {
+          await softDeleteEntry(entry.id);
+          notifyChanged();
+          toast(t('entry.undone'));
+        },
+      },
+    });
+    goBack(`/customers/${customerId}`);
+  };
+
+  useEffect(() => {
+    if (!receiptStep) return;
+    sendRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') finish(receiptStep.entry);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [receiptStep]);
+
+  const sendReceipt = async () => {
+    if (!receiptStep || !customer) return;
+    const { entry, balanceKobo: bal, shopName } = receiptStep;
+    const message = buildEntryReceiptMessage({
+      shopName,
+      customerName: customer.name,
+      type: entry.type,
+      amountKobo: entry.amountKobo,
+      balanceKobo: bal,
+      note: entry.note,
+      at: entry.occurredAt,
+    });
+    const result = await sendTextToCustomer(customer.phone, message, t('receipt.shareTitle'));
+    finish(
+      entry,
+      result === 'whatsapp'
+        ? t('customer.openingWhatsApp')
+        : result === 'sms'
+          ? t('customer.openingSms')
+          : result === 'clipboard'
+            ? t('customer.messageCopied')
+            : undefined,
+    );
   };
 
   const typedKobo = parseNairaToKobo(amount);
@@ -228,6 +278,31 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
           </button>
         </form>
       </main>
+      {receiptStep && customer && (
+        <div class="chase-sheet-overlay receipt-step-overlay" role="dialog" aria-modal="true" aria-labelledby="receipt-step-title">
+          <div class="chase-sheet receipt-step">
+            <div class="receipt-step-check" aria-hidden="true">
+              ✓
+            </div>
+            <h2 id="receipt-step-title" class="receipt-step-title">
+              {t('entry.receiptStepTitle', { amount: formatNaira(receiptStep.entry.amountKobo), name: customer.name })}
+            </h2>
+            <p class="receipt-step-why">{t('entry.receiptStepWhy')}</p>
+            <button ref={sendRef} class="btn btn-whatsapp receipt-step-send" type="button" onClick={sendReceipt}>
+              <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
+                <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3a.5.5 0 0 0 0-.5l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.7 11.7 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .1-1.2c0-.1-.2-.2-.5-.3z" />
+              </svg>
+              <span>{t('entry.receiptSend', { name: customer.name })}</span>
+            </button>
+            <p class="receipt-step-via">
+              {customer.phone ? t('entry.receiptVia', { phone: customer.phone }) : t('entry.receiptNoPhone')}
+            </p>
+            <button class="btn btn-ghost receipt-step-skip" type="button" onClick={() => finish(receiptStep.entry)}>
+              {t('entry.receiptSkip')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

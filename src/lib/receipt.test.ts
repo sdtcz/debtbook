@@ -69,3 +69,32 @@ describe('public URL config', () => {
     expect(url.startsWith(`${PUBLIC_APP_URL}/#/payme?`)).toBe(true);
   });
 });
+
+describe('brand footer (one line, ends the message)', () => {
+  it('credit receipt ends with a single BashiBook line + app link', async () => {
+    const { buildRemindMessage } = await import('./sms');
+    const { buildStatement } = await import('./statement');
+    const link = `${PUBLIC_APP_URL}/?app=1&src=rem`;
+    const receipt = buildEntryReceiptMessage({
+      shopName: 'S', customerName: 'Ada', type: 'credit', amountKobo: 500000, balanceKobo: 500000,
+    });
+    const remind = buildRemindMessage('S', 'Ada', 500000);
+    const stmt = buildStatement(
+      { id: 'shop', name: 'S', currency: 'NGN', createdAt: 0, updatedAt: 0 },
+      { id: 'c', name: 'Ada', createdAt: 0, updatedAt: 0 },
+      [],
+      0,
+    );
+    for (const msg of [receipt, remind, stmt]) {
+      const lines = msg.split('\n');
+      expect(lines[lines.length - 1]).toBe(`Recorded in BashiBook · free credit book for shops ${link}`);
+      expect(lines[lines.length - 2]).toBe('');
+      expect(msg.match(/BashiBook ·/g)).toHaveLength(1);
+    }
+  });
+
+  it('PDF footer shows the plain app host (no tracking query)', async () => {
+    const { brandFooterHost } = await import('./growth');
+    expect(brandFooterHost()).toBe(PUBLIC_APP_URL.replace(/^https?:\/\//, ''));
+  });
+});
