@@ -40,3 +40,43 @@ describe('index.html share tags', () => {
     expect(indexHtml).toContain('href="/favicon.ico"');
   });
 });
+
+const pages = import.meta.glob('../../public/**/*.html', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+
+async function sha256b64(text: string): Promise<string> {
+  const d = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)));
+  return btoa(String.fromCharCode(...d));
+}
+
+describe('security headers', () => {
+  const all = vercel.headers.find((h) => h.source === '/(.*)');
+  const get = (k: string) => all?.headers.find((h) => h.key === k)?.value || '';
+
+  it('sends nosniff, referrer, permissions and frame headers on every path', () => {
+    expect(get('X-Content-Type-Options')).toBe('nosniff');
+    expect(get('Referrer-Policy')).toBe('strict-origin-when-cross-origin');
+    expect(get('Permissions-Policy')).toContain('camera=()');
+    expect(get('X-Frame-Options')).toBe('SAMEORIGIN');
+  });
+
+  it('CSP is strict but allows what the app uses (same-origin iframe preview, Stripe, Vercel Blob)', () => {
+    const csp = get('Content-Security-Policy');
+    expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("object-src 'none'");
+    expect(csp).toContain("frame-ancestors 'self'"); // landing page previews the app in a same-origin iframe
+    expect(csp).toMatch(/form-action [^;]*https:\/\/checkout\.stripe\.com/);
+    expect(csp).toMatch(/connect-src [^;]*blob\.vercel-storage\.com/);
+    expect(csp).not.toMatch(/script-src[^;]*'unsafe-(inline|eval)'/);
+  });
+
+  it('allows every inline script on the static pages by hash (run node scripts/csp.mjs after edits)', async () => {
+    const csp = get('Content-Security-Policy');
+    const files = Object.keys(pages);
+    expect(files.length).toBeGreaterThanOrEqual(3);
+    for (const f of files) {
+      for (const m of pages[f].matchAll(/<script>([\s\S]*?)<\/script>/g)) {
+        expect(csp, f).toContain(`'sha256-${await sha256b64(m[1])}'`);
+      }
+    }
+  });
+});

@@ -23,6 +23,31 @@
   ],
   "headers": [
     {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'sha256-cIMxXiJwBmAIlohaCffWQw1YUbq0pAWsEN/BVZw309A=' 'sha256-g+V5Z5rm9GmnhVfpXK9ux0y8IAoerAFpl3/rnUlAPVI=' 'sha256-jDpCxcNpC4V2G915EG9m35ecFd41ppcCWjhUdHnrYhM=' 'sha256-pYDJ+Hlb8XXSgEIPCgXngdHG1xD+pT7AlC5Vbe6yVVY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.stripe.com; font-src 'self' data:; connect-src 'self' https://api.stripe.com https://*.public.blob.vercel-storage.com https://*.blob.vercel-storage.com; frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://billing.stripe.com; worker-src 'self' blob:; manifest-src 'self'; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self' https://checkout.stripe.com https://billing.stripe.com; frame-ancestors 'self'; upgrade-insecure-requests"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), clipboard-write=(self)"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
+      ]
+    },
+    {
       "source": "/sw.js",
       "headers": [
         {
