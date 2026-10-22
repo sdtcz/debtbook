@@ -19,7 +19,7 @@ export type LinkSource =
 const FOOTER_KEY = 'bashibook-brand-footer';
 const ATTR_KEY = 'bashibook-attribution';
 const REF_KEY = 'bashibook-ref-code';
-const TAG_RE = /^[a-z0-9-]{1,24}$/;
+const TAG_RE = /^[a-z0-9-]{1,32}$/; // fits "kippa-" + a 20-char source from the SEO page
 
 function ls(): Storage | null {
   try {

@@ -44,6 +44,8 @@ describe('tagged links', () => {
   it('drops unsafe ref values', () => {
     expect(sanitizeTag('cs_test_123')).toBeNull();
     expect(sanitizeTag('<script>')).toBeNull();
+    expect(sanitizeTag('kippa-' + 'a'.repeat(20))).toBe('kippa-' + 'a'.repeat(20));
+    expect(sanitizeTag('a'.repeat(33))).toBeNull();
     expect(new URL(appLink('rem', 'Bad Ref!')).searchParams.has('ref')).toBe(false);
   });
 });
