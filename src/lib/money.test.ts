@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   balanceLabel,
   balanceTone,
-  formatNaira,
-  parseNairaToKobo,
+  formatMoney,
+  parseAmount,
 } from './money';
 import { computeBalance } from '../db/repo';
 import type { Entry } from './types';
@@ -11,23 +11,23 @@ import { normalizeNgWhatsAppDigits } from './sms';
 
 describe('money', () => {
   it('formats naira with separators', () => {
-    expect(formatNaira(123456)).toMatch(/1,234\.56/);
+    expect(formatMoney(123456)).toMatch(/1,234\.56/);
   });
 
   it('parses amounts to kobo', () => {
-    expect(parseNairaToKobo('1,500.50')).toBe(150050);
-    expect(parseNairaToKobo('100')).toBe(10000);
-    expect(parseNairaToKobo('')).toBeNull();
-    expect(parseNairaToKobo('-5')).toBeNull();
+    expect(parseAmount('1,500.50')).toBe(150050);
+    expect(parseAmount('100')).toBe(10000);
+    expect(parseAmount('')).toBeNull();
+    expect(parseAmount('-5')).toBeNull();
   });
 
   it('parses market shorthand k / K', () => {
-    expect(parseNairaToKobo('3k')).toBe(300000);
-    expect(parseNairaToKobo('3K')).toBe(300000);
-    expect(parseNairaToKobo('1.5k')).toBe(150000);
-    expect(parseNairaToKobo('10k')).toBe(1000000);
-    expect(parseNairaToKobo('₦2k')).toBe(200000);
-    expect(parseNairaToKobo('k')).toBeNull();
+    expect(parseAmount('3k')).toBe(300000);
+    expect(parseAmount('3K')).toBe(300000);
+    expect(parseAmount('1.5k')).toBe(150000);
+    expect(parseAmount('10k')).toBe(1000000);
+    expect(parseAmount('₦2k')).toBe(200000);
+    expect(parseAmount('k')).toBeNull();
   });
 
   it('labels balances', () => {

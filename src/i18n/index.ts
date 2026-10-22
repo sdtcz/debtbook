@@ -104,6 +104,16 @@ export function isRegionNigeria(): boolean {
   return regionNigeria;
 }
 
+/* Values filled into every string unless passed explicitly, e.g. {{sym}} / {{code}} / {{zero}} for the shop currency. */
+let autoVars: Record<string, string> = {};
+
+export function setAutoVars(v: Record<string, string>): void {
+  const next = { ...autoVars, ...v };
+  if (Object.keys(next).every((k) => next[k] === autoVars[k])) return;
+  autoVars = next;
+  notify();
+}
+
 function applyDocumentLang(locale: Locale): void {
   try {
     // en-NG etc. only in Nigeria (native date inputs lean toward dd/mm there); plain tags elsewhere.
@@ -155,6 +165,7 @@ export function t(key: MessageKey, vars?: Vars, locale?: Locale): string {
       s = s.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), String(v));
     }
   }
+  if (s.includes('{{')) s = s.replace(/\{\{(\w+)\}\}/g, (m, k: string) => autoVars[k] ?? m);
   return s;
 }
 

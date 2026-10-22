@@ -23,7 +23,7 @@ import {
 } from '../../db/suppliers';
 import { useLocale } from '../../hooks/useLocale';
 import type { ToastAction } from '../../hooks/useToast';
-import { formatNaira, parseNairaToKobo } from '../../lib/money';
+import { formatMoney, parseAmount, currencySymbol } from '../../lib/money';
 import { guardDelete } from '../../lib/pinGuard';
 import { goBack, href, navigate } from '../../lib/router';
 import { buildWhatsAppUri } from '../../lib/sms';
@@ -102,7 +102,7 @@ export function SuppliersPage() {
           <div class="iowe-hero-kicker" id="iowe-total-label">
             {t('supplier.totalIOwe')}
           </div>
-          <div class="iowe-hero-amount">{formatNaira(total)}</div>
+          <div class="iowe-hero-amount">{formatMoney(total)}</div>
           <p class="iowe-hero-hint">{t('supplier.heroHint')}</p>
         </section>
 
@@ -156,7 +156,7 @@ export function SuppliersPage() {
                         </span>
                       </span>
                       <span class={`supplier-pill${r.balanceKobo > 0 ? ' owing' : ''}`}>
-                        {formatNaira(Math.abs(r.balanceKobo))}
+                        {formatMoney(Math.abs(r.balanceKobo))}
                       </span>
                     </a>
                   </li>
@@ -380,7 +380,7 @@ export function SupplierDetailPage({ id, toast }: { id: string; toast: Toast }) 
     const vars = {
       supplier: supplier.name,
       shop: shop?.name || 'BashiBook',
-      amount: formatNaira(Math.abs(balanceKobo)),
+      amount: formatMoney(Math.abs(balanceKobo)),
     };
     const message =
       balanceKobo > 0
@@ -457,13 +457,13 @@ export function SupplierDetailPage({ id, toast }: { id: string; toast: Toast }) 
         <section class={`balance-soft-hero iowe-soft-hero ${tone}`} aria-labelledby="iowe-bal-label">
           <div class="balance-soft-row">
             <div class="balance-soft-avatar" aria-hidden="true">
-              ₦
+              {currencySymbol()}
             </div>
             <div class="balance-soft-text">
               <div class="balance-soft-kicker" id="iowe-bal-label">
                 {t('supplier.balanceTitle')}
               </div>
-              <div class="balance-soft-amount">{formatNaira(Math.abs(balanceKobo))}</div>
+              <div class="balance-soft-amount">{formatMoney(Math.abs(balanceKobo))}</div>
               <p class="balance-soft-label">{label(balanceKobo, supplier.name)}</p>
             </div>
           </div>
@@ -471,12 +471,12 @@ export function SupplierDetailPage({ id, toast }: { id: string; toast: Toast }) 
             <div class="balance-soft-hints">
               {lastPurchase && (
                 <p class="balance-soft-hint">
-                  {t('supplier.lastBought', { date: fmtDay(lastPurchase.occurredAt), amount: formatNaira(lastPurchase.amountKobo) })}
+                  {t('supplier.lastBought', { date: fmtDay(lastPurchase.occurredAt), amount: formatMoney(lastPurchase.amountKobo) })}
                 </p>
               )}
               {lastPayment && (
                 <p class="balance-soft-hint">
-                  {t('supplier.lastPaid', { date: fmtDay(lastPayment.occurredAt), amount: formatNaira(lastPayment.amountKobo) })}
+                  {t('supplier.lastPaid', { date: fmtDay(lastPayment.occurredAt), amount: formatMoney(lastPayment.amountKobo) })}
                 </p>
               )}
             </div>
@@ -498,7 +498,7 @@ export function SupplierDetailPage({ id, toast }: { id: string; toast: Toast }) 
         >
           <div class="collect-soft-head">
             <div class="collect-soft-crest" aria-hidden="true">
-              {balanceKobo > 0 ? '₦' : (
+              {balanceKobo > 0 ? currencySymbol() : (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M20 6 9 17l-5-5" />
                 </svg>
@@ -510,7 +510,7 @@ export function SupplierDetailPage({ id, toast }: { id: string; toast: Toast }) 
               </div>
               <div class="collect-soft-title">
                 {balanceKobo > 0
-                  ? t('supplier.payBackTitle', { amount: formatNaira(balanceKobo) })
+                  ? t('supplier.payBackTitle', { amount: formatMoney(balanceKobo) })
                   : t('supplier.checkTitle')}
               </div>
               <p class="collect-soft-hint">
@@ -568,7 +568,7 @@ export function SupplierDetailPage({ id, toast }: { id: string; toast: Toast }) 
           {entries.length === 0 ? (
             <div class="history-soft-empty iowe-empty">
               <div class="history-soft-glyph" aria-hidden="true">
-                ₦
+                {currencySymbol()}
               </div>
               <strong>{t('supplier.noEntriesTitle')}</strong>
               <p>{t('supplier.noEntries')}</p>
@@ -589,7 +589,7 @@ export function SupplierDetailPage({ id, toast }: { id: string; toast: Toast }) 
                 <div class="history-soft-trail">
                   <div class="history-soft-amt">
                     {e.type === 'purchase' ? '+' : '−'}
-                    {formatNaira(e.amountKobo)}
+                    {formatMoney(e.amountKobo)}
                   </div>
                   <button
                     type="button"
@@ -650,7 +650,7 @@ export function SupplierEntryPage({
     if (initialType) setType(initialType);
   }, [initialType]);
 
-  const kobo = parseNairaToKobo(amount);
+  const kobo = parseAmount(amount);
   const after = balanceKobo === null || !kobo || kobo <= 0 ? null : balanceKobo + (type === 'purchase' ? kobo : -kobo);
 
   const submit = async (e: Event) => {
@@ -687,11 +687,11 @@ export function SupplierEntryPage({
         {balanceKobo !== null && (
           <section class={`iowe-hero compact${balanceKobo > 0 ? ' owing' : ''}`} aria-live="polite">
             <div class="iowe-hero-kicker">{t('entry.tallyNow')}</div>
-            <div class="iowe-hero-amount">{formatNaira(Math.abs(balanceKobo))}</div>
+            <div class="iowe-hero-amount">{formatMoney(Math.abs(balanceKobo))}</div>
             <p class="iowe-hero-hint">{label(balanceKobo)}</p>
             {after !== null && (
               <p class="iowe-hero-after">
-                {t('entry.tallyAfter')}: <strong>{formatNaira(Math.abs(after))}</strong> · {label(after)}
+                {t('entry.tallyAfter')}: <strong>{formatMoney(Math.abs(after))}</strong> · {label(after)}
               </p>
             )}
           </section>

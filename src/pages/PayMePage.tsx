@@ -1,7 +1,7 @@
 import { appLink } from '../lib/growth';
 import { useState } from 'preact/hooks';
 import { useLocale } from '../hooks/useLocale';
-import { formatNaira } from '../lib/money';
+import { formatMoney, currencySymbol } from '../lib/money';
 import type { PayMeRoute } from '../lib/router';
 
 interface Props {
@@ -42,7 +42,7 @@ export function PayMePage({ route, toast }: Props) {
       <div class="payme-card payme-soft">
         <section class="collect-crest-hero" aria-labelledby="collect-title">
           <div class="collect-crest" aria-hidden="true">
-            ₦
+            {currencySymbol(route.currency)}
           </div>
           <div class="collect-kicker">{t('payme.kicker')}</div>
           <h1 id="collect-title" class="payme-title">
@@ -55,7 +55,7 @@ export function PayMePage({ route, toast }: Props) {
         {amount > 0 ? (
           <div class="payme-amount-block">
             <div class="payme-amount-label">{t('payme.amountDue')}</div>
-            <div class="payme-amount">{formatNaira(amount)}</div>
+            <div class="payme-amount">{formatMoney(amount, route.currency)}</div>
             {route.customer.trim() ? (
               <div class="payme-customer">
                 {t('payme.forCustomer', { name: route.customer.trim() })}

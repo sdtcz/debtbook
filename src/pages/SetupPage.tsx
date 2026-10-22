@@ -1,4 +1,7 @@
-import { useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
+import { isRegionNigeria } from '../i18n';
+import { CURRENCIES, currencySymbol, setCurrency } from '../lib/money';
+import { currencyLabel, defaultCurrency } from '../lib/currency';
 import { saveShop, setShopLocale } from '../db/repo';
 import { notifyChanged } from '../components/StatusBadge';
 import { useLocale } from '../hooks/useLocale';
@@ -14,6 +17,10 @@ export function SetupPage({ onDone }: Props) {
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // NGN in Nigeria, else from the device locale; follows the region answer until the user picks.
+  const [picked, setPicked] = useState<string | null>(null);
+  const currency = picked || defaultCurrency(isRegionNigeria());
+  useEffect(() => setCurrency(currency), [currency]);
 
   const submit = async (e: Event) => {
     e.preventDefault();
@@ -25,7 +32,7 @@ export function SetupPage({ onDone }: Props) {
     setBusy(true);
     setError(null);
     try {
-      await saveShop(trimmed);
+      await saveShop(trimmed, currency);
       try {
         await setShopLocale(locale);
       } catch {
@@ -64,14 +71,14 @@ export function SetupPage({ onDone }: Props) {
 
       <div class="setup-soft-hero">
         <div class="setup-crest" aria-hidden="true">
-          ₦
+          {currencySymbol()}
         </div>
         <div class="setup-kicker">{t('setup.welcome')}</div>
         <h1>BashiBook</h1>
         <p>{t('setup.tagline')}</p>
         <ul class="setup-chips">
           <li>✓ {t('setup.chipOffline')}</li>
-          <li>{t('setup.chipNaira')}</li>
+          <li>{t('setup.chipCurrency')}</li>
           <li>{LOCALE_OPTIONS.map((o) => o.nativeName).join(' · ')}</li>
         </ul>
       </div>
@@ -93,6 +100,21 @@ export function SetupPage({ onDone }: Props) {
               {error}
             </div>
           )}
+        </div>
+        <div class="field">
+          <label for="shop-currency">{t('setup.currency')}</label>
+          <select
+            id="shop-currency"
+            class="input"
+            value={currency}
+            onChange={(e) => setPicked((e.target as HTMLSelectElement).value)}
+          >
+            {CURRENCIES.map(([code]) => (
+              <option key={code} value={code}>
+                {currencyLabel(code, locale)}
+              </option>
+            ))}
+          </select>
         </div>
         <button class="btn btn-primary" type="submit" disabled={busy}>
           {busy ? t('common.saving') : t('setup.start')}

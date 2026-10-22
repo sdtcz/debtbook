@@ -101,7 +101,7 @@ export const yo: Record<MessageKey, string> = {
   'setup.couldNotSave': 'Kò le fi pamọ́',
   'setup.welcome': 'Ẹ kú àbọ̀',
   'setup.chipOffline': 'Kò nílò íńtánẹ́ẹ̀tì lẹ́yìn tí o bá ti ṣí i',
-  'setup.chipNaira': 'Náírà (₦)',
+  'setup.chipCurrency': '{{code}} ({{sym}})',
 
   'settings.title': 'Àwọn ètò',
   'settings.yourShop': 'Ilé ìtajà rẹ',
@@ -181,7 +181,7 @@ export const yo: Record<MessageKey, string> = {
   'settings.syncUnlockPrompt':
     'Tẹ kóòdù ìmúláradá láti ṣí ìṣọ̀kan lórí ẹ̀rọ yìí (a fi pamọ́ sórí fóònù yìí nìkan):',
   'settings.syncPro': 'Ìṣọ̀kan ọ̀pọ̀ ẹ̀rọ jẹ́ ẹ̀bun Pro',
-  'settings.aboutLine1': 'BashiBook · {{lang}} · ₦',
+  'settings.aboutLine1': 'BashiBook · {{lang}} · {{sym}}',
   'settings.aboutLine2': 'Ìwé gbèsè offline fún {{shops}}',
   'settings.aboutTip': '',
   'settings.language': 'Èdè',
@@ -356,7 +356,7 @@ export const yo: Record<MessageKey, string> = {
   'customerForm.orType': 'tàbí tẹ',
   'customerForm.dueHintShort': 'Àmì Ti pẹ́ nígbà tí wọn ṣì jẹ gbèsè',
 
-  'customerForm.creditLimit': 'Òpin gbèsè (₦, àyànfẹ́)',
+  'customerForm.creditLimit': 'Òpin gbèsè ({{sym}}, àyànfẹ́)',
   'customerForm.creditLimitHint': 'Yóò kìlọ̀ nígbà tí tita bá ju èyí lọ — o ṣì le kọ ọ́',
   'customerForm.creditLimitInvalid': 'Tẹ òpin gbèsè tó tọ́ (tàbí fi sílẹ̀)',
 
@@ -383,7 +383,7 @@ export const yo: Record<MessageKey, string> = {
   'entry.tallyAria': 'Iyokù ṣáájú àti lẹ́yìn àkọsílẹ̀ yìí',
 
   'money.placeholder': '0.00 tàbí 3k',
-  'money.hint': 'Náírà (₦) — ìmọ̀ràn: tẹ 3k fún ₦3,000',
+  'money.hint': '{{code}} ({{sym}}) — ìmọ̀ràn: tẹ 3k fún {{sym}}3,000',
   'money.quickAmounts': 'Iye kíákíá',
 
   'pin.unlock': 'Ṣí BashiBook',
@@ -495,7 +495,7 @@ export const yo: Record<MessageKey, string> = {
   'statement.note': '  Àkọsílẹ̀: {{note}}',
   'statement.balanceOwed': 'GBÈSÈ TÓ KÙ: {{amount}}',
   'statement.shopOwes': 'ILÉ ÌTAJÀ JẸ́ ONÍBÀÁRÀ: {{amount}}',
-  'statement.balanceSettled': 'ÌWỌ̀NTÚNWỌ̀NSÌ: Ti san (₦0.00)',
+  'statement.balanceSettled': 'ÌWỌ̀NTÚNWỌ̀NSÌ: Ti san ({{zero}})',
   'statement.generated': 'BashiBook ṣẹ̀dá (offline)',
   'statement.shareTitle': 'Àkọọ́lẹ̀ {{name}}',
 
@@ -613,9 +613,9 @@ export const yo: Record<MessageKey, string> = {
   'pdf.generatedOn': "A ṣe é ní {{date}}",
   'pdf.colDate': "Ọjọ́",
   'pdf.colDetails': "Àlàyé",
-  'pdf.colCredit': "Gbèsè (NGN)",
-  'pdf.colPayment': "Ìsanwó (NGN)",
-  'pdf.colBalance': "Ìyókù (NGN)",
+  'pdf.colCredit': "Gbèsè ({{code}})",
+  'pdf.colPayment': "Ìsanwó ({{code}})",
+  'pdf.colBalance': "Ìyókù ({{code}})",
   'pdf.opening': "Gbèsè àtẹ̀yìnwá",
   'pdf.totals': "Àpapọ̀ àkókò",
   'pdf.totalOwed': "Àpapọ̀ gbèsè",
@@ -655,8 +655,8 @@ export const yo: Record<MessageKey, string> = {
   'home.iOweSuppliers': "Gbèsè tí mo jẹ àwọn olùpèsè",
   'home.iOweSuppliersCount': "Olùpèsè {{n}} · lọ́tọ̀ sí àwọn oníbàárà",
   'home.iOweSuppliersEmpty': "Kọ ọjà tí o rà láwìn sílẹ̀",
-  'pdf.colIOwe': "Mo jẹ (NGN)",
-  'pdf.colPurchase': "Rà (NGN)",
+  'pdf.colIOwe': "Mo jẹ ({{code}})",
+  'pdf.colPurchase': "Rà ({{code}})",
   'pdf.iOweSupplier': "Mo jẹ olùpèsè yìí",
   'pdf.supplier': "OLÙPÈSÈ",
   'pdf.supplierOwesMe': "Olùpèsè jẹ mí (mo san jù)",
@@ -671,7 +671,7 @@ export const yo: Record<MessageKey, string> = {
   'supplier.add': "Fi olùpèsè kún un",
   'supplier.addFirst': "Fi olùpèsè àkọ́kọ́ kún un",
   'supplier.added': "A ti fi {{name}} kún un",
-  'supplier.amountInvalid': "Tẹ iye tó ju ₦0 lọ",
+  'supplier.amountInvalid': "Tẹ iye tó ju {{sym}}0 lọ",
   'supplier.balanceTitle': "Mo jẹ",
   'supplier.editTitle': "Ṣàtúnṣe olùpèsè",
   'supplier.emptyBody': "Kọ ọjà tí o rà láwìn lọ́wọ́ àwọn oníṣòwò àgbà àti ohun tí o ti san. Èyí yàtọ̀ sí àwọn oníbàárà.",
@@ -773,6 +773,11 @@ export const yo: Record<MessageKey, string> = {
 
   "region.shops": "àwọn ṣọ́ọ̀bù kékeré",
   "region.shopsNG": "àwọn ṣọ́ọ̀bù ní Nàìjíríà",
+
+  "setup.currency": "Owó tí o ń ná",
+  "settings.currency": "Owó",
+  "settings.currencyChanged": "A ti ṣètò owó sí {{code}}",
+  "settings.currencyHint": "Ó ń yí bí a ṣe ń fi iye owó hàn padà. Iye tí o ti kọ sílẹ̀ kò ní yí padà.",
 
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',

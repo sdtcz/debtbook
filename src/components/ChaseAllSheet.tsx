@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'preact/hooks';
 import { useLocale } from '../hooks/useLocale';
 import type { CustomerBalance } from '../lib/types';
-import { formatNaira } from '../lib/money';
+import { formatMoney, currencySymbol } from '../lib/money';
 import { remindCustomer } from '../lib/sms';
 
 interface Props {
@@ -89,13 +89,13 @@ export function ChaseAllSheet({ shopName, overdue, onClose, onToast }: Props) {
       <div class="chase-sheet">
         <div class="chase-sheet-head chase-soft-hero">
           <div class="chase-soft-crest" aria-hidden="true">
-            ₦
+            {currencySymbol()}
           </div>
           <div class="chase-soft-meta">
             <div class="chase-soft-kicker">{t('common.overdue')}</div>
             <div class="chase-sheet-title">
               {t('home.chaseSheetTitle', { n: overdue.length })}
-              {totalKobo > 0 ? ` · ${formatNaira(totalKobo)}` : ''}
+              {totalKobo > 0 ? ` · ${formatMoney(totalKobo)}` : ''}
             </div>
             {withPhone.length > 0 && (
               <div class="chase-sheet-sub">
@@ -160,7 +160,7 @@ export function ChaseAllSheet({ shopName, overdue, onClose, onToast }: Props) {
                     {hasPhone
                       ? row.customer.phone
                       : t('home.chaseNoPhone')}{' '}
-                    · {formatNaira(row.balanceKobo)}
+                    · {formatMoney(row.balanceKobo)}
                   </div>
                 </div>
                 {done ? (

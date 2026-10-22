@@ -13,11 +13,9 @@ import {
 } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
 import type { Customer, Entry, ShopProfile } from '../lib/types';
-import {
-  balanceLabel,
+import { balanceLabel,
   balanceTone,
-  formatNaira,
-} from '../lib/money';
+  formatMoney, currencySymbol } from '../lib/money';
 import { hasPayMeDetails, sendPayMeRequest } from '../lib/payMe';
 import { buildEntryReceiptMessage, remindCustomer, sendTextToCustomer } from '../lib/sms';
 import { buildStatement, shareOrCopyText } from '../lib/statement';
@@ -275,12 +273,12 @@ export function CustomerDetailPage({ id, toast }: Props) {
         >
           <div class="balance-soft-row">
             <div class="balance-soft-avatar" aria-hidden="true">
-              ₦
+              {currencySymbol()}
             </div>
             <div class="balance-soft-text">
               <div class="balance-soft-kicker">{t('customer.balanceTitle')}</div>
               <div class="balance-soft-amount">
-                {formatNaira(Math.abs(balanceKobo))}
+                {formatMoney(Math.abs(balanceKobo))}
               </div>
               <p class="balance-soft-label">{balanceLabel(balanceKobo)}</p>
             </div>
@@ -298,12 +296,12 @@ export function CustomerDetailPage({ id, toast }: Props) {
               {customer.creditLimitKobo != null && customer.creditLimitKobo > 0 && (
                 <p class="balance-soft-hint">
                   {t('customer.creditLimit', {
-                    amount: formatNaira(customer.creditLimitKobo),
+                    amount: formatMoney(customer.creditLimitKobo),
                   })}
                   {headroom != null && headroom >= 0
-                    ? ` · ${t('customer.creditHeadroom', { amount: formatNaira(headroom) })}`
+                    ? ` · ${t('customer.creditHeadroom', { amount: formatMoney(headroom) })}`
                     : headroom != null
-                      ? ` · ${t('customer.creditOverBy', { amount: formatNaira(-headroom) })}`
+                      ? ` · ${t('customer.creditOverBy', { amount: formatMoney(-headroom) })}`
                       : ''}
                 </p>
               )}
@@ -341,7 +339,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
         >
           <div class="collect-soft-head">
             <div class="collect-soft-crest" aria-hidden="true">
-              {balanceKobo > 0 ? '₦' : (
+              {balanceKobo > 0 ? currencySymbol() : (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M7 3h7l5 5v13H7z" />
                   <path d="M14 3v5h5M10 13h6M10 17h6" />
@@ -356,7 +354,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
               </div>
               <div class="collect-soft-title">
                 {balanceKobo > 0
-                  ? t('customer.collectTitle', { amount: formatNaira(balanceKobo) })
+                  ? t('customer.collectTitle', { amount: formatMoney(balanceKobo) })
                   : t('customer.collectShareTitle')}
               </div>
               <p class="collect-soft-hint">
@@ -377,7 +375,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
             </button>
             {balanceKobo > 0 && (
               <button class="collect-tile hero" type="button" onClick={onPayMe}>
-                <span class="collect-tile-icon naira" aria-hidden="true">₦</span>
+                <span class="collect-tile-icon naira" aria-hidden="true">{currencySymbol()}</span>
                 <span class="collect-tile-label">{t('customer.payMe')}</span>
               </button>
             )}
@@ -414,11 +412,11 @@ export function CustomerDetailPage({ id, toast }: Props) {
                 class="btn btn-secondary receipt-btn"
                 type="button"
                 onClick={onSendReceipt}
-                title={t('receipt.sendSub', { amount: formatNaira(recentEntry.amountKobo) })}
+                title={t('receipt.sendSub', { amount: formatMoney(recentEntry.amountKobo) })}
               >
                 {t('receipt.send')}
                 <span class="receipt-sub">
-                  {t('receipt.sendSub', { amount: formatNaira(recentEntry.amountKobo) })}
+                  {t('receipt.sendSub', { amount: formatMoney(recentEntry.amountKobo) })}
                 </span>
               </button>
             )}
@@ -439,7 +437,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
           {entries.length === 0 ? (
             <div class="history-soft-empty">
               <div class="history-soft-glyph" aria-hidden="true">
-                ₦
+                {currencySymbol()}
               </div>
               <strong>{t('customer.noEntriesTitle')}</strong>
               <p>{t('customer.noEntries')}</p>
@@ -462,7 +460,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
                 <div class="history-soft-trail">
                   <div class="history-soft-amt">
                     {e.type === 'credit' ? '+' : '−'}
-                    {formatNaira(e.amountKobo)}
+                    {formatMoney(e.amountKobo)}
                   </div>
                   <button
                     type="button"

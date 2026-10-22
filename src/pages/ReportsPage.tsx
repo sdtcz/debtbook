@@ -5,7 +5,7 @@ import { getShop, listAllEntries, listCustomers } from '../db/repo';
 import { listAllSupplierEntries, listSuppliers } from '../db/suppliers';
 import { useLocale } from '../hooks/useLocale';
 import type { MessageKey } from '../i18n';
-import { formatNaira } from '../lib/money';
+import { formatMoney, currencySymbol } from '../lib/money';
 import { buildReport, buildSupplierReport, type ReportPeriod } from '../lib/reports';
 import { href, navigate } from '../lib/router';
 import { shareOrCopyText } from '../lib/statement';
@@ -80,7 +80,7 @@ export function ReportsPage({ locked, toast }: Props) {
     () => buildSupplierReport(suppliers, supplierEntries, period),
     [suppliers, supplierEntries, period],
   );
-  const money = (k: number) => (locked ? '••••' : formatNaira(k));
+  const money = (k: number) => (locked ? '••••' : formatMoney(k));
   const periodLabel = t(PERIODS.find((p) => p.id === period)!.key);
 
   const share = async () => {
@@ -88,13 +88,13 @@ export function ReportsPage({ locked, toast }: Props) {
       t('reports.messageTitle', { shop: shopName || 'BashiBook', period: periodLabel }),
       ...(customers.length
         ? [
-            t('reports.messageCredit', { amount: formatNaira(report.creditGivenKobo) }),
-            t('reports.messageCollected', { amount: formatNaira(report.collectedKobo) }),
-            t('reports.messageOutstanding', { amount: formatNaira(report.outstandingKobo) }),
+            t('reports.messageCredit', { amount: formatMoney(report.creditGivenKobo) }),
+            t('reports.messageCollected', { amount: formatMoney(report.collectedKobo) }),
+            t('reports.messageOutstanding', { amount: formatMoney(report.outstandingKobo) }),
           ]
         : []),
       ...(suppliers.length
-        ? [t('reports.messageIOwe', { amount: formatNaira(supReport.iOweKobo) })]
+        ? [t('reports.messageIOwe', { amount: formatMoney(supReport.iOweKobo) })]
         : []),
       '— BashiBook',
     ];
@@ -270,7 +270,7 @@ export function ReportsPage({ locked, toast }: Props) {
             {hasCustomers ? customerSection : supplierSection}
             {hasCustomers ? supplierSection : (
               <div class="card report-nudge">
-                <span class="report-nudge-crest" aria-hidden="true">₦</span>
+                <span class="report-nudge-crest" aria-hidden="true">{currencySymbol()}</span>
                 <span class="report-nudge-body">
                   <strong>{t('reports.noCustomersTitle')}</strong>
                   <span>{t('reports.noCustomersHint')}</span>

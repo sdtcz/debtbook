@@ -12,12 +12,10 @@ import {
 import { useLocale } from '../hooks/useLocale';
 import type { Customer, Entry, EntryType } from '../lib/types';
 import { buildEntryReceiptMessage, sendTextToCustomer } from '../lib/sms';
-import {
-  balanceLabel,
+import { balanceLabel,
   balanceTone,
-  formatNaira,
-  parseNairaToKobo,
-} from '../lib/money';
+  formatMoney,
+  parseAmount, currencySymbol } from '../lib/money';
 import { goBack, navigate } from '../lib/router';
 import type { ToastAction } from '../hooks/useToast';
 
@@ -63,7 +61,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
 
   const submit = async (e: Event) => {
     e.preventDefault();
-    const kobo = parseNairaToKobo(amount);
+    const kobo = parseAmount(amount);
     if (kobo === null || kobo <= 0) {
       setError(t('entry.validAmount'));
       return;
@@ -77,8 +75,8 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
         if (wouldBe > customer.creditLimitKobo) {
           const ok = confirm(
             t('entry.creditLimitWarn', {
-              limit: formatNaira(customer.creditLimitKobo),
-              wouldBe: formatNaira(wouldBe),
+              limit: formatMoney(customer.creditLimitKobo),
+              wouldBe: formatMoney(wouldBe),
             }),
           );
           if (!ok) {
@@ -160,7 +158,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
     );
   };
 
-  const typedKobo = parseNairaToKobo(amount);
+  const typedKobo = parseAmount(amount);
   const deltaKobo =
     typedKobo !== null && typedKobo > 0
       ? type === 'credit'
@@ -189,7 +187,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
         >
           <div class="entry-soft-hero-row">
             <div class="entry-soft-avatar" aria-hidden="true">
-              ₦
+              {currencySymbol()}
             </div>
             <div class="entry-soft-hero-text">
               <div class="entry-soft-kicker">{t('entry.kicker')}</div>
@@ -206,7 +204,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
               <div class="entry-tally-cell">
                 <div class="entry-tally-label">{t('entry.tallyNow')}</div>
                 <div class={`entry-tally-amount ${balanceTone(balanceKobo)}`}>
-                  {formatNaira(Math.abs(balanceKobo))}
+                  {formatMoney(Math.abs(balanceKobo))}
                 </div>
                 <div class="entry-tally-sub">{balanceLabel(balanceKobo)}</div>
               </div>
@@ -216,7 +214,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
               <div class="entry-tally-cell after" aria-live="polite">
                 <div class="entry-tally-label">{t('entry.tallyAfter')}</div>
                 <div class={`entry-tally-amount ${balanceTone(afterKobo)}`}>
-                  {formatNaira(Math.abs(afterKobo))}
+                  {formatMoney(Math.abs(afterKobo))}
                 </div>
                 <div class="entry-tally-sub">{balanceLabel(afterKobo)}</div>
               </div>
@@ -285,7 +283,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
               ✓
             </div>
             <h2 id="receipt-step-title" class="receipt-step-title">
-              {t('entry.receiptStepTitle', { amount: formatNaira(receiptStep.entry.amountKobo), name: customer.name })}
+              {t('entry.receiptStepTitle', { amount: formatMoney(receiptStep.entry.amountKobo), name: customer.name })}
             </h2>
             <p class="receipt-step-why">{t('entry.receiptStepWhy')}</p>
             <button ref={sendRef} class="btn btn-whatsapp receipt-step-send" type="button" onClick={sendReceipt}>

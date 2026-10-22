@@ -35,7 +35,7 @@ import {
 import { isPro } from '../lib/entitlement';
 import { trialStatus } from '../lib/trial';
 import type { CustomerBalance, ShopProfile } from '../lib/types';
-import { balanceLabel, balanceTone, formatNaira } from '../lib/money';
+import { balanceLabel, balanceTone, formatMoney, currencySymbol } from '../lib/money';
 import { href, navigate } from '../lib/router';
 import { remindCustomer, shareMorningDigest } from '../lib/sms';
 import type { ToastAction } from '../hooks/useToast';
@@ -354,12 +354,12 @@ export function HomePage({ locked, toast }: Props) {
         >
           <div class="total-soft-row">
             <div class="total-soft-avatar" aria-hidden="true">
-              ₦
+              {currencySymbol()}
             </div>
             <div class="total-soft-text">
               <div class="total-soft-kicker">{t('home.totalOutstanding')}</div>
               <div class="total-soft-amount">
-                {locked ? '••••••' : formatNaira(total)}
+                {locked ? '••••••' : formatMoney(total)}
               </div>
               {!locked && hasCustomers && (
                 <p class="total-soft-meta">{heroMeta}</p>
@@ -381,7 +381,7 @@ export function HomePage({ locked, toast }: Props) {
                   : t('home.iOweSuppliersCount', { n: iOwe.count })}
               </span>
             </span>
-            <span class="iowe-home-amount">{locked ? '••••' : formatNaira(iOwe.total)}</span>
+            <span class="iowe-home-amount">{locked ? '••••' : formatMoney(iOwe.total)}</span>
             <span class="chev" aria-hidden="true">
               ›
             </span>
@@ -400,7 +400,7 @@ export function HomePage({ locked, toast }: Props) {
               <p class="chase-today-sub">{t('home.chaseTodaySub')}</p>
             </div>
             <button type="button" class="chase-today-overdue" onClick={openOverdue}>
-              {t('home.digestMeta', { n: digest.count, amount: formatNaira(digest.totalOverdueKobo) })}
+              {t('home.digestMeta', { n: digest.count, amount: formatMoney(digest.totalOverdueKobo) })}
               <span aria-hidden="true"> · {t('home.digestOpen')} →</span>
             </button>
             <ol class="chase-today-list">
@@ -414,7 +414,7 @@ export function HomePage({ locked, toast }: Props) {
                     <a class="chase-today-body" href={href(`/customers/${it.row.customer.id}`)}>
                       <span class="chase-today-name">{it.row.customer.name}</span>
                       <span class="chase-today-meta">
-                        {formatNaira(it.row.balanceKobo)} ·{' '}
+                        {formatMoney(it.row.balanceKobo)} ·{' '}
                         {it.daysOverdue === 1
                           ? t('home.chaseTodayLateOne')
                           : t('home.chaseTodayLate', { n: it.daysOverdue })}
@@ -451,11 +451,11 @@ export function HomePage({ locked, toast }: Props) {
         {!locked && hasCustomers && week && (
           <a class="week-collected" href={href('/reports')}>
             <span class="week-collected-icon" aria-hidden="true">
-              ₦
+              {currencySymbol()}
             </span>
             <span class="week-collected-body">
               <span class="week-collected-title">
-                {t('home.weekCollected', { amount: formatNaira(week.collectedKobo) })}
+                {t('home.weekCollected', { amount: formatMoney(week.collectedKobo) })}
               </span>
               <span class="week-collected-sub">
                 {week.paymentCount === 0
@@ -463,7 +463,7 @@ export function HomePage({ locked, toast }: Props) {
                   : week.paymentCount === 1
                   ? t('home.weekCollectedOne')
                   : t('home.weekCollectedSub', { n: week.paymentCount, c: week.customerCount })}
-                {week.lastWeekKobo > 0 ? ` · ${t('home.weekCollectedLast', { amount: formatNaira(week.lastWeekKobo) })}` : ''}
+                {week.lastWeekKobo > 0 ? ` · ${t('home.weekCollectedLast', { amount: formatMoney(week.lastWeekKobo) })}` : ''}
               </span>
             </span>
             <span class="chev" aria-hidden="true">
@@ -659,7 +659,7 @@ export function HomePage({ locked, toast }: Props) {
         ) : !hasCustomers ? (
           <div class="empty empty-first-run">
             <div class="empty-ledger-glyph" aria-hidden="true">
-              ₦
+              {currencySymbol()}
             </div>
             <strong>{t('home.emptyFirstTitle')}</strong>
             <p class="empty-tip">{t('home.emptyFirstTip')}</p>
@@ -677,7 +677,7 @@ export function HomePage({ locked, toast }: Props) {
         ) : filtered.length === 0 ? (
           <div class="match-soft-empty">
             <div class="match-soft-glyph" aria-hidden="true">
-              ₦
+              {currencySymbol()}
             </div>
             <strong>{t('home.noMatches')}</strong>
             <p>
@@ -747,7 +747,7 @@ export function HomePage({ locked, toast }: Props) {
                     <div class={`amount-pill soft-list-pill ${tone}`}>
                       {locked
                         ? '••••'
-                        : formatNaira(Math.abs(row.balanceKobo))}
+                        : formatMoney(Math.abs(row.balanceKobo))}
                     </div>
                   </a>
                   {!locked && (

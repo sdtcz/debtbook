@@ -20,7 +20,7 @@ import {
   pickContacts,
   type PickedContact,
 } from '../lib/contacts';
-import { parseNairaToKobo } from '../lib/money';
+import { parseAmount, currencySymbol } from '../lib/money';
 import { goBack, goHome, navigate } from '../lib/router';
 import { normalizeNgWhatsAppDigits } from '../lib/sms';
 import type { ToastAction } from '../hooks/useToast';
@@ -202,7 +202,7 @@ export function CustomerFormPage({ id, toast }: Props) {
     }
     let creditLimitKobo: number | null = null;
     if (creditLimit.trim()) {
-      const parsed = parseNairaToKobo(creditLimit);
+      const parsed = parseAmount(creditLimit);
       if (parsed === null || parsed <= 0) {
         setError(t('customerForm.creditLimitInvalid'));
         return;
@@ -311,7 +311,7 @@ export function CustomerFormPage({ id, toast }: Props) {
               aria-labelledby="invite-crest-title"
             >
               <div class="invite-crest" aria-hidden="true">
-                {(loadedName.trim()[0] || '₦').toUpperCase()}
+                {(loadedName.trim()[0] || currencySymbol()).toUpperCase()}
               </div>
               <div class="invite-crest-kicker">
                 {t('customerForm.editKicker')}

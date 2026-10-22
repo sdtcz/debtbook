@@ -1,3 +1,5 @@
+import { CURRENCIES, currencySymbol, getCurrency, setCurrency } from '../lib/money';
+import { currencyLabel } from '../lib/currency';
 import { BackButton } from '../components/BackButton';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { LogoutSheet } from '../components/LogoutSheet';
@@ -17,6 +19,7 @@ import {
   setPin,
   setPinBeforeDelete,
   setShopLocale,
+  updateShopFields,
 } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
 import { useOnline } from '../hooks/useOnline';
@@ -222,6 +225,17 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
       await refresh();
     } finally {
       setBusy(false);
+    }
+  };
+
+  const changeCurrency = async (code: string) => {
+    try {
+      await updateShopFields({ currency: code });
+      setCurrency(code);
+      notifyChanged();
+      toast(t('settings.currencyChanged', { code }));
+    } catch {
+      toast(t('setup.couldNotSave'));
     }
   };
 
@@ -764,6 +778,25 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
           </button>
         </form>
 
+        <div class="settings-group card">
+          <div class="field" style={{ marginBottom: 0 }}>
+            <label for="shop-currency">{t('settings.currency')}</label>
+            <select
+              id="shop-currency"
+              class="input"
+              value={getCurrency()}
+              onChange={(e) => void changeCurrency((e.target as HTMLSelectElement).value)}
+            >
+              {CURRENCIES.map(([code]) => (
+                <option key={code} value={code}>
+                  {currencyLabel(code, locale)}
+                </option>
+              ))}
+            </select>
+            <div class="hint">{t('settings.currencyHint')}</div>
+          </div>
+        </div>
+
         <div class="settings-group-label">{t('settings.language')}</div>
         <div class="settings-group card settings-list" role="radiogroup" aria-label={t('settings.language')}>
           {LOCALE_OPTIONS.map((opt) => {
@@ -801,7 +834,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
             onClick={() => navigate('/pay-details')}
           >
             <span class="settings-row-icon" aria-hidden="true">
-              ₦
+              {currencySymbol()}
             </span>
             <span class="settings-row-body">
               <span class="settings-row-title">{t('settings.payMe')}</span>

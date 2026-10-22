@@ -1,4 +1,5 @@
 import { useLocale } from '../hooks/useLocale';
+import { currencySymbol, quickAmounts } from '../lib/money';
 
 interface Props {
   id: string;
@@ -8,17 +9,11 @@ interface Props {
   autoFocus?: boolean;
 }
 
-const CHIPS: { label: string; value: string }[] = [
-  { label: '₦500', value: '500' },
-  { label: '1k', value: '1k' },
-  { label: '2k', value: '2k' },
-  { label: '5k', value: '5k' },
-  { label: '10k', value: '10k' },
-];
-
 /** Amount input — digits, decimal, or market shorthand like 3k */
 export function MoneyInput({ id, label, value, onInput, autoFocus }: Props) {
   const { t } = useLocale();
+  // Quick amounts sized to the shop currency; the first one shows the symbol (e.g. ₦500).
+  const chips = quickAmounts().map((v, i) => ({ value: v, label: i ? v : `${currencySymbol()}${v}` }));
   return (
     <div class="field">
       <label for={id}>{label}</label>
@@ -39,7 +34,7 @@ export function MoneyInput({ id, label, value, onInput, autoFocus }: Props) {
         }}
       />
       <div class="chip-row" role="group" aria-label={t('money.quickAmounts')}>
-        {CHIPS.map((c) => (
+        {chips.map((c) => (
           <button
             key={c.value}
             type="button"

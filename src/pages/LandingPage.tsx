@@ -1,3 +1,5 @@
+import { currencySymbol } from '../lib/money';
+import { defaultCurrency } from '../lib/currency';
 import { useEffect } from 'preact/hooks';
 import { PUBLIC_APP_LABEL, PUBLIC_APP_URL } from '../config';
 import { appEmbedUrl, setForceApp } from '../lib/viewportMode';
@@ -46,6 +48,7 @@ export function LandingPage({ onUseAppHere }: Props) {
   const ng = isRegionNigeria();
   const enShops = tr(ng ? 'region.shopsNG' : 'region.shops', undefined, 'en');
   const seo = ng ? '/ng' : '';
+  const sym = currencySymbol(defaultCurrency(ng));
 
   useEffect(() => {
     // Anonymous channel count (event + src tag only), once per device per day.
@@ -81,13 +84,13 @@ export function LandingPage({ onUseAppHere }: Props) {
         <div class="landing-orb landing-orb-c" />
         <div class="landing-grid" />
         <div class="landing-noise" />
-        <div class="landing-naira-wm">₦</div>
+        <div class="landing-naira-wm">{sym}</div>
       </div>
 
       <nav class="landing-nav">
         <div class="landing-nav-brand">
           <span class="landing-logo-mark" aria-hidden="true">
-            ₦
+            {sym}
           </span>
           <span class="landing-logo-text">BashiBook</span>
           <span class="landing-tag-chip">{ng ? 'Nigeria · ₦ · PWA' : 'Works offline · PWA'}</span>
@@ -106,7 +109,7 @@ export function LandingPage({ onUseAppHere }: Props) {
         <section class="landing-narrative landing-soft-glow">
           <section class="glow-crest-hero" aria-labelledby="landing-title">
             <div class="glow-crest" aria-hidden="true">
-              ₦
+              {sym}
             </div>
             <p class="glow-kicker">Offline credit ledger</p>
             <h1 id="landing-title" class="landing-title">

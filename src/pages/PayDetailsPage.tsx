@@ -1,3 +1,4 @@
+import { currencySymbol } from '../lib/money';
 import { BackButton } from '../components/BackButton';
 import { useEffect, useState } from 'preact/hooks';
 import { notifyChanged, StatusBadge } from '../components/StatusBadge';
@@ -72,7 +73,7 @@ export function PayDetailsPage({ toast }: Props) {
       </header>
       <main class="main settings-main pay-details-soft">
         <section class="pay-crest-hero" aria-labelledby="pay-crest-title">
-          <div class="pay-crest" aria-hidden="true">₦</div>
+          <div class="pay-crest" aria-hidden="true">{currencySymbol()}</div>
           <div class="pay-crest-kicker">{t('payDetails.kicker')}</div>
           <h2 id="pay-crest-title">{t('payDetails.heroTitle')}</h2>
           <p class="pay-crest-hint">{t('payDetails.heroHint')}</p>

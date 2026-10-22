@@ -1,5 +1,6 @@
 import { brandFooterHost } from './growth';
 import { t } from '../i18n';
+import { formatMoney, getCurrency } from './money';
 import type { Customer } from './types';
 
 /** Customer entries (credit/payment) or supplier entries (purchase/payment). */
@@ -85,12 +86,11 @@ export function buildStatementData(
   return { rows, openingKobo: opening, closingKobo: bal, from: start, to, creditTotalKobo: cr, paymentTotalKobo: pay };
 }
 
-const NUM = new Intl.NumberFormat('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-/** Amount text that renders in base PDF fonts (no ₦ glyph): "NGN 1,234.50". */
-export function pdfMoney(kobo: number, withCode = true): string {
-  const s = NUM.format(Math.abs(kobo) / 100);
+/** Amount text that renders in base PDF fonts (ISO code, not a symbol glyph): "NGN 1,234.50". */
+export function pdfMoney(kobo: number, withCode = true, code = getCurrency()): string {
+  const s = formatMoney(Math.abs(kobo), code).replace(/[^\d.,]/g, '');
   const sign = kobo < 0 ? '-' : '';
-  return withCode ? `${sign}NGN ${s}` : `${sign}${s}`;
+  return withCode ? `${sign}${code} ${s}` : `${sign}${s}`;
 }
 
 export function pdfDate(ts: number): string {

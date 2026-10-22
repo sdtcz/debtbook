@@ -1,7 +1,7 @@
 import { withBrandFooter } from './growth';
 import { t } from '../i18n';
 import type { Customer, Entry, ShopProfile } from './types';
-import { formatNaira } from './money';
+import { formatMoney } from './money';
 
 function fmtDate(ts: number): string {
   return new Date(ts).toLocaleString('en-NG', {
@@ -43,13 +43,13 @@ export function buildStatement(
       const label =
         e.type === 'credit' ? t('statement.credit') : t('statement.payment');
       lines.push(`${fmtDate(e.occurredAt)}`);
-      lines.push(`  ${label}  ${sign}${formatNaira(e.amountKobo)}`);
+      lines.push(`  ${label}  ${sign}${formatMoney(e.amountKobo)}`);
       if (e.note) lines.push(t('statement.note', { note: e.note }));
     }
   }
 
   lines.push('─'.repeat(28));
-  const abs = formatNaira(Math.abs(balanceKobo));
+  const abs = formatMoney(Math.abs(balanceKobo));
   if (balanceKobo > 0) {
     lines.push(t('statement.balanceOwed', { amount: abs }));
   } else if (balanceKobo < 0) {

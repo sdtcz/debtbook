@@ -20,7 +20,8 @@ export interface TrialMarker {
 export interface ShopProfile {
   id: 'shop';
   name: string;
-  currency: 'NGN';
+  /** ISO 4217 code (see lib/money CURRENCIES). Shops created before Oct 2026 are 'NGN'. */
+  currency: string;
   createdAt: number;
   updatedAt: number;
   /** SHA-256 hex of salt+pin; unset = no lock */
@@ -76,7 +77,7 @@ export interface Entry {
   id: string;
   customerId: string;
   type: EntryType;
-  /** Amount in kobo (1 Naira = 100 kobo) for precise arithmetic */
+  /** Amount in hundredths of the shop currency (kobo for NGN) for precise arithmetic */
   amountKobo: number;
   note?: string;
   /** When the sale/payment happened (user-facing) */

@@ -8,6 +8,8 @@ export type PayMeRoute = {
   accountName: string;
   link: string;
   customer: string;
+  /** ISO currency from cur= (links made before Oct 2026 have none → NGN) */
+  currency: string;
 };
 
 export type Route =
@@ -43,6 +45,7 @@ function parsePayMeFromQuery(queryPart: string | undefined): PayMeRoute {
     accountName: q.get('name') || '',
     link: q.get('link') || '',
     customer: q.get('customer') || '',
+    currency: /^[A-Z]{3}$/.test(q.get('cur') || '') ? (q.get('cur') as string) : 'NGN',
   };
 }
 

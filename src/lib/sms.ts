@@ -12,14 +12,14 @@
 
 import { t } from '../i18n';
 import { appLink, withBrandFooter } from './growth';
-import { formatNaira } from './money';
+import { formatMoney } from './money';
 
 export function buildRemindMessage(
   shopName: string,
   customerName: string,
   balanceKobo: number,
 ): string {
-  const amount = formatNaira(Math.abs(balanceKobo));
+  const amount = formatMoney(Math.abs(balanceKobo));
   const vars = { customer: customerName, shop: shopName, amount };
   if (balanceKobo > 0) {
     return withBrandFooter(t('remind.owes', vars), 'rem');
@@ -116,7 +116,7 @@ export function buildMorningDigestMessage(
   lines.push(t('digest.messageCount', { n: overdue.length }));
   lines.push('');
   for (const row of overdue) {
-    lines.push(`• ${row.name}: ${formatNaira(row.balanceKobo)}`);
+    lines.push(`• ${row.name}: ${formatMoney(row.balanceKobo)}`);
   }
   lines.push('');
   lines.push(t('digest.messageFooter'));
@@ -189,7 +189,7 @@ export function buildEntryReceiptMessage(opts: {
   note?: string;
   at?: number;
 }): string {
-  const amount = formatNaira(Math.abs(opts.amountKobo));
+  const amount = formatMoney(Math.abs(opts.amountKobo));
   const date = new Date(opts.at ?? Date.now()).toLocaleDateString('en-NG');
   const vars = { customer: opts.customerName, shop: opts.shopName, amount, date };
   const lines = [
@@ -200,9 +200,9 @@ export function buildEntryReceiptMessage(opts: {
   const bal = opts.balanceKobo;
   lines.push(
     bal > 0
-      ? t('receipt.balanceOwed', { amount: formatNaira(bal) })
+      ? t('receipt.balanceOwed', { amount: formatMoney(bal) })
       : bal < 0
-        ? t('receipt.balanceCredit', { amount: formatNaira(-bal) })
+        ? t('receipt.balanceCredit', { amount: formatMoney(-bal) })
         : t('receipt.balanceSettled'),
   );
   lines.push(t('receipt.footer', { shop: opts.shopName }));

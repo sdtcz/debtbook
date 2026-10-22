@@ -17,7 +17,8 @@ export async function getShop(): Promise<ShopProfile | undefined> {
   return db.get('shop', 'shop');
 }
 
-export async function saveShop(name: string): Promise<ShopProfile> {
+/** Create the shop (currency chosen at setup; default NGN) or rename it (currency kept). */
+export async function saveShop(name: string, currency = 'NGN'): Promise<ShopProfile> {
   const db = await getDb();
   const existing = await db.get('shop', 'shop');
   const now = Date.now();
@@ -26,7 +27,7 @@ export async function saveShop(name: string): Promise<ShopProfile> {
     : {
         id: 'shop',
         name: name.trim(),
-        currency: 'NGN',
+        currency,
         createdAt: now,
         updatedAt: now,
       };
@@ -57,6 +58,7 @@ export async function updateShopFields(
       | 'payAccountNumber'
       | 'payAccountName'
       | 'payLinkUrl'
+      | 'currency'
     >
   > & { clearPin?: boolean },
 ): Promise<ShopProfile> {

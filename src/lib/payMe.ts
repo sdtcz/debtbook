@@ -7,7 +7,7 @@
 
 import { PUBLIC_APP_URL } from '../config';
 import { t } from '../i18n';
-import { formatNaira } from './money';
+import { formatMoney, getCurrency } from './money';
 import { withBrandFooter } from './growth';
 import { buildWhatsAppUri } from './sms';
 import type { ShopProfile } from './types';
@@ -34,7 +34,7 @@ export function buildPayMeMessage(opts: {
   /** Public hash-route URL for the Pay-me page (preferred when available). */
   pageUrl?: string;
 }): string {
-  const amount = formatNaira(Math.abs(opts.balanceKobo));
+  const amount = formatMoney(Math.abs(opts.balanceKobo));
   const lines: string[] = [];
   lines.push(
     t('payme.messageIntro', {
@@ -95,6 +95,8 @@ export function buildPayMePageUrl(opts: {
   if (acctName) q.set('name', acctName);
   if (link) q.set('link', link);
   if (customer) q.set('customer', customer);
+  // Old links have no cur= and mean NGN.
+  if (getCurrency() !== 'NGN') q.set('cur', getCurrency());
   const origin = (opts.origin || PUBLIC_APP_URL).replace(/\/$/, '');
   // URLSearchParams encodes; keep explicit encode for documentation parity
   return `${origin}/#/payme?${q.toString()}`;

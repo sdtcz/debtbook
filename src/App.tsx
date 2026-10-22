@@ -3,6 +3,7 @@ import { PinLock } from './components/PinLock';
 import { showsTabBar, TabBar } from './components/TabBar';
 import { Toast } from './components/Toast';
 import { getShop } from './db/repo';
+import { setCurrency, currencySymbol } from './lib/money';
 import { reconcileTrialOnStart } from './lib/trialStore';
 import { useLocale } from './hooks/useLocale';
 import { useToast } from './hooks/useToast';
@@ -42,7 +43,8 @@ const SupplierDetailPage = lazyPage(() => import('./pages/suppliers/SupplierPage
 const SupplierEntryPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SupplierEntryPage));
 import { PayMePage } from './pages/PayMePage';
 import { SignedOutPage } from './pages/SignedOutPage';
-import { SetupPage } from './pages/SetupPage';
+// First-run only: kept out of the main bundle (precached by the service worker).
+const SetupPage = lazyPage(() => import('./pages/SetupPage').then((m) => m.SetupPage));
 
 function useDesktopAppStage(showApp: boolean): boolean {
   const [on, setOn] = useState(
@@ -85,7 +87,7 @@ function DesktopAppStage({
         <div class="landing-orb landing-orb-c" />
         <div class="landing-grid" />
         <div class="landing-noise" />
-        <div class="landing-naira-wm">₦</div>
+        <div class="landing-naira-wm">{currencySymbol()}</div>
       </div>
       <button type="button" class="showcase-back-btn" onClick={onBack}>
         ← Showcase home
@@ -168,6 +170,7 @@ export function App() {
     await reconcileTrialOnStart().catch(() => null);
     const shop = await getShop();
     if (shop?.locale) initLocale(shop.locale);
+    setCurrency(shop?.currency);
     setHasShop(Boolean(shop?.name));
     setShopName(shop?.name);
     setPinHash(shop?.pinHash);
@@ -181,6 +184,13 @@ export function App() {
     setPinHash(shop?.pinHash);
     setPinSalt(shop?.pinSalt);
     if (!shop?.pinHash) setLocked(false);
+  }, []);
+
+  // Backups / sync restores can bring a different shop currency.
+  useEffect(() => {
+    const onChanged = () => void getShop().then((s) => s && setCurrency(s.currency)).catch(() => {});
+    window.addEventListener('debtbook:changed', onChanged);
+    return () => window.removeEventListener('debtbook:changed', onChanged);
   }, []);
 
   const tabbarOn =

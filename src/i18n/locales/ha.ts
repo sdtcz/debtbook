@@ -101,7 +101,7 @@ export const ha: Record<MessageKey, string> = {
   'setup.couldNotSave': 'An kasa ajiyawa',
   'setup.welcome': 'Barka da zuwa',
   'setup.chipOffline': 'Yana aiki ba intanet bayan an buɗe shi',
-  'setup.chipNaira': 'Naira (₦)',
+  'setup.chipCurrency': '{{code}} ({{sym}})',
 
   'settings.title': 'Saiti',
   'settings.yourShop': 'Shagonka',
@@ -181,7 +181,7 @@ export const ha: Record<MessageKey, string> = {
   'settings.syncUnlockPrompt':
     "Shigar da lambar farfaɗowa don buɗe daidaitawa a wannan na'ura (ana adana a wannan waya kawai):",
   'settings.syncPro': "Daidaitawar na'urori da yawa fasalin Pro ne",
-  'settings.aboutLine1': 'BashiBook · {{lang}} · ₦',
+  'settings.aboutLine1': 'BashiBook · {{lang}} · {{sym}}',
   'settings.aboutLine2': 'Littafin bashi na offline ga {{shops}}',
   'settings.aboutTip': '',
   'settings.language': 'Harshe',
@@ -356,7 +356,7 @@ export const ha: Record<MessageKey, string> = {
   'customerForm.orType': 'ko rubuta',
   'customerForm.dueHintShort': 'Alamar Ya wuce lokaci idan har yanzu suna bin bashi',
 
-  'customerForm.creditLimit': 'Iyakar bashi (₦, na zaɓi)',
+  'customerForm.creditLimit': 'Iyakar bashi ({{sym}}, na zaɓi)',
   'customerForm.creditLimitHint': 'Zai yi gargaɗi idan sayarwa ta wuce wannan — har yanzu za ka iya rubutawa',
   'customerForm.creditLimitInvalid': 'Shigar da iyakar bashi mai kyau (ko barshi babu)',
 
@@ -383,7 +383,7 @@ export const ha: Record<MessageKey, string> = {
   'entry.tallyAria': 'Saura kafin da bayan wannan shigarwa',
 
   'money.placeholder': '0.00 ko 3k',
-  'money.hint': 'Naira (₦) — shawara: rubuta 3k don ₦3,000',
+  'money.hint': '{{code}} ({{sym}}) — shawara: rubuta 3k don {{sym}}3,000',
   'money.quickAmounts': 'Adadi na sauri',
 
   'pin.unlock': 'Buɗe BashiBook',
@@ -495,7 +495,7 @@ export const ha: Record<MessageKey, string> = {
   'statement.note': '  Bayani: {{note}}',
   'statement.balanceOwed': 'BASHI DA YA RAGE: {{amount}}',
   'statement.shopOwes': 'SHAGO YANA BIN ABOKIN CINIKI: {{amount}}',
-  'statement.balanceSettled': 'MA\'AUNI: An biya (₦0.00)',
+  'statement.balanceSettled': 'MA\'AUNI: An biya ({{zero}})',
   'statement.generated': 'An ƙirƙira ta BashiBook (offline)',
   'statement.shareTitle': 'Bayanin {{name}}',
 
@@ -613,9 +613,9 @@ export const ha: Record<MessageKey, string> = {
   'pdf.generatedOn': "An yi ranar {{date}}",
   'pdf.colDate': "Kwanan wata",
   'pdf.colDetails': "Bayani",
-  'pdf.colCredit': "Bashi (NGN)",
-  'pdf.colPayment': "Biya (NGN)",
-  'pdf.colBalance': "Saura (NGN)",
+  'pdf.colCredit': "Bashi ({{code}})",
+  'pdf.colPayment': "Biya ({{code}})",
+  'pdf.colBalance': "Saura ({{code}})",
   'pdf.opening': "Bashin da aka kawo",
   'pdf.totals': "Jimilla na lokacin",
   'pdf.totalOwed': "Jimillar bashi",
@@ -655,8 +655,8 @@ export const ha: Record<MessageKey, string> = {
   'home.iOweSuppliers': "Bashin da nake bin masu kawo kaya",
   'home.iOweSuppliersCount': "Masu kawo kaya {{n}} · daban da abokan ciniki",
   'home.iOweSuppliersEmpty': "Rubuta kayan da ka saya bashi",
-  'pdf.colIOwe': "Ina bi (NGN)",
-  'pdf.colPurchase': "Saya (NGN)",
+  'pdf.colIOwe': "Ina bi ({{code}})",
+  'pdf.colPurchase': "Saya ({{code}})",
   'pdf.iOweSupplier': "Ina bin wannan mai kawo kaya",
   'pdf.supplier': "MAI KAWO KAYA",
   'pdf.supplierOwesMe': "Mai kawo kaya yana bina (na biya fiye)",
@@ -671,7 +671,7 @@ export const ha: Record<MessageKey, string> = {
   'supplier.add': "Ƙara mai kawo kaya",
   'supplier.addFirst': "Ƙara mai kawo kaya na farko",
   'supplier.added': "An ƙara {{name}}",
-  'supplier.amountInvalid': "Shigar da adadi sama da ₦0",
+  'supplier.amountInvalid': "Shigar da adadi sama da {{sym}}0",
   'supplier.balanceTitle': "Ina bi",
   'supplier.editTitle': "Gyara mai kawo kaya",
   'supplier.emptyBody': "Rubuta kayan da kake saya bashi daga dillalai da abin da ka biya. Wannan daban yake da abokan ciniki.",
@@ -773,6 +773,11 @@ export const ha: Record<MessageKey, string> = {
 
   "region.shops": "ƙananan shaguna",
   "region.shopsNG": "shagunan Najeriya",
+
+  "setup.currency": "Kuɗin da kake amfani da su",
+  "settings.currency": "Kuɗi",
+  "settings.currencyChanged": "An saita kuɗi zuwa {{code}}",
+  "settings.currencyHint": "Yana canza yadda ake nuna adadi. Adadin da ka riga ka rubuta ba sa canzawa.",
 
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
