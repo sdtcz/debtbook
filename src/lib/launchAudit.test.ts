@@ -80,3 +80,13 @@ describe('security headers', () => {
     }
   });
 });
+
+describe('web app manifest', () => {
+  it('has a stable id, categories and shortcuts into hash routes', () => {
+    expect(viteConfig).toContain("id: '/?app=1',");
+    expect(viteConfig).toContain("start_url: '/?app=1',");
+    expect(viteConfig).toMatch(/categories: \['finance', 'business', 'productivity'\]/);
+    const urls = [...viteConfig.matchAll(/\burl: '([^']+)'/g)].map((m) => m[1]);
+    expect(urls).toEqual(['/?app=1#/customers/new', '/?app=1#/reports', '/?app=1#/pay-details']);
+  });
+});

@@ -18,7 +18,30 @@ export default defineConfig({
       manifest: {
         name: 'BashiBook',
         short_name: 'BashiBook',
-        description: 'Offline customer credit ledger for African shopkeepers',
+        // id = the start_url browsers already derived for existing installs, so they stay the same app.
+        id: '/?app=1',
+        description: 'Free credit book for small shops. Works offline once opened.',
+        categories: ['finance', 'business', 'productivity'],
+        shortcuts: [
+          {
+            name: 'Add customer',
+            short_name: 'Add customer',
+            url: '/?app=1#/customers/new',
+            icons: [{ src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' }],
+          },
+          {
+            name: 'Reports',
+            short_name: 'Reports',
+            url: '/?app=1#/reports',
+            icons: [{ src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' }],
+          },
+          {
+            name: 'Pay me (bank details)',
+            short_name: 'Pay me',
+            url: '/?app=1#/pay-details',
+            icons: [{ src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' }],
+          },
+        ],
         theme_color: '#0f766e',
         background_color: '#f8fafc',
         display: 'standalone',
