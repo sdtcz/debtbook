@@ -32,8 +32,8 @@ function call(method: string, opts: { body?: unknown; query?: Record<string, str
         status = c;
         return res;
       },
-      json(b: Record<string, unknown>) {
-        resolve({ status, body: b });
+      json(b: unknown) {
+        resolve({ status, body: b as Record<string, unknown> });
       },
     };
     void handler({ method, body: opts.body as never, query: opts.query }, res);
