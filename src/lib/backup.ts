@@ -32,7 +32,7 @@ export function downloadJson(filename: string, data: unknown): void {
   URL.revokeObjectURL(url);
 }
 
-function isBackupPayload(data: unknown): data is BackupPayload {
+export function isBackupPayload(data: unknown): data is BackupPayload {
   if (!data || typeof data !== 'object') return false;
   const d = data as BackupPayload;
   return (

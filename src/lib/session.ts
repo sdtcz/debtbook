@@ -22,7 +22,7 @@ const DB_NAME = 'debtbook'; // KEEP: IndexedDB name (see db/schema.ts)
 /** Session-ish keys cleared on sign-out (device prefs like language are kept). */
 const SESSION_KEYS = ['bashibook-pay-email'];
 /** Keys kept when erasing the device (language preference only). */
-const KEEP_ON_ERASE = ['debtbook-locale'];
+const KEEP_ON_ERASE = ['debtbook-locale', 'bashibook-region'];
 
 export function isSignedOut(): boolean {
   try {
@@ -91,13 +91,22 @@ export async function signOutAndErase(): Promise<{ backupDownloaded: boolean }> 
   } catch {
     /* ignore */
   }
+  // Give the browser a moment to start the backup download before wiping.
+  await new Promise((r) => setTimeout(r, 600));
+  await eraseThisDevice();
+  return { backupDownloaded };
+}
+
+/**
+ * Delete the local book and app keys (language and region kept). No export and no cloud push:
+ * also used by "Forgot PIN?", where the locked book must not be opened.
+ */
+export async function eraseThisDevice(): Promise<void> {
   try {
     await lockSyncOnDevice();
   } catch {
     /* ignore */
   }
-  // Give the browser a moment to start the backup download before wiping.
-  await new Promise((r) => setTimeout(r, 600));
   try {
     const db = await getDb();
     db.close();
@@ -127,5 +136,4 @@ export async function signOutAndErase(): Promise<{ backupDownloaded: boolean }> 
   } catch {
     /* ignore */
   }
-  return { backupDownloaded };
 }

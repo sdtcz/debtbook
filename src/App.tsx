@@ -45,6 +45,7 @@ import { PayMePage } from './pages/PayMePage';
 import { SignedOutPage } from './pages/SignedOutPage';
 // First-run only: kept out of the main bundle (precached by the service worker).
 const SetupPage = lazyPage(() => import('./pages/SetupPage').then((m) => m.SetupPage));
+const ForgotPinSheet = lazyPage(() => import('./components/ForgotPinSheet').then((m) => m.ForgotPinSheet));
 
 function useDesktopAppStage(showApp: boolean): boolean {
   const [on, setOn] = useState(
@@ -148,6 +149,7 @@ export function App() {
   const [pinSalt, setPinSalt] = useState<string | undefined>();
   const [shopName, setShopName] = useState<string | undefined>();
   const [locked, setLocked] = useState(false);
+  const [forgotPin, setForgotPin] = useState(false);
   const startLockDone = useRef(false);
   const [signedOut, setSignedOut] = useState(() => isSignedOut());
 
@@ -473,13 +475,33 @@ export function App() {
           page
         ),
       )}
-      {locked && pinHash && pinSalt && (
+      {locked && pinHash && pinSalt && !forgotPin && (
         <PinLock
           salt={pinSalt}
           hash={pinHash}
           shopName={shopName}
           onUnlock={() => setLocked(false)}
+          onForgot={() => setForgotPin(true)}
         />
+      )}
+      {locked && forgotPin && (
+        <div class="pin-overlay">
+          <div class="pin-card forgot-card">
+            <ForgotPinSheet
+              onClose={() => setForgotPin(false)}
+              onReset={async () => {
+                await onPinChanged();
+                setForgotPin(false);
+                setLocked(false);
+                toast(tNow('forgot.pinReset'));
+              }}
+              onErased={() => {
+                history.replaceState(null, '', `${location.pathname}${location.search}#/`);
+                location.reload();
+              }}
+            />
+          </div>
+        </div>
       )}
       <Toast message={message} action={action} onDismiss={clearToast} />
     </>

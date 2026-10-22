@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { useLocale } from '../hooks/useLocale';
 import { verifyPin } from '../lib/pin';
+import { pinWaitRemaining, recordPinFailure, recordPinSuccess } from '../lib/pinAttempts';
 
 interface Props {
   salt: string;
@@ -12,24 +13,42 @@ interface Props {
   hint?: string;
   /** When set, shows a Cancel button (and Escape closes). */
   onCancel?: () => void;
+  /** App lock screen only: shows "Forgot PIN?". */
+  onForgot?: () => void;
 }
 
-export function PinLock({ salt, hash, shopName, onUnlock, title, hint, onCancel }: Props) {
+export function PinLock({ salt, hash, shopName, onUnlock, title, hint, onCancel, onForgot }: Props) {
   const { t } = useLocale();
   const [digits, setDigits] = useState('');
   const [error, setError] = useState(false);
   const [shake, setShake] = useState(0);
+  const [waitS, setWaitS] = useState(() => Math.ceil(pinWaitRemaining() / 1000));
+
+  // Count down the wrong-PIN wait; the keypad is disabled until it ends.
+  useEffect(() => {
+    if (waitS <= 0) return;
+    const id = setInterval(() => setWaitS(Math.ceil(pinWaitRemaining() / 1000)), 1000);
+    return () => clearInterval(id);
+  }, [waitS > 0]);
 
   useEffect(() => {
     if (digits.length !== 4) return;
     let cancelled = false;
     (async () => {
+      if (pinWaitRemaining() > 0) {
+        setDigits('');
+        setWaitS(Math.ceil(pinWaitRemaining() / 1000));
+        return;
+      }
       const ok = await verifyPin(salt, digits, hash);
       if (cancelled) return;
       if (ok) {
+        recordPinSuccess();
         setError(false);
         onUnlock();
       } else {
+        const wait = recordPinFailure();
+        setWaitS(Math.ceil(wait / 1000));
         setError(true);
         setShake((n) => n + 1);
         setDigits('');
@@ -51,6 +70,7 @@ export function PinLock({ salt, hash, shopName, onUnlock, title, hint, onCancel 
   }, [onCancel]);
 
   const press = (d: string) => {
+    if (pinWaitRemaining() > 0) return;
     setError(false);
     setDigits((prev) => (prev.length < 4 ? prev + d : prev));
   };
@@ -71,7 +91,11 @@ export function PinLock({ salt, hash, shopName, onUnlock, title, hint, onCancel 
           </div>
           {name && <div class="pin-soft-kicker">{name}</div>}
           <h2>{title || t('pin.unlock')}</h2>
-          {error ? (
+          {waitS > 0 ? (
+            <p class="pin-soft-wrong" role="alert">
+              {t('pin.wait', { s: waitS })}
+            </p>
+          ) : error ? (
             <p class="pin-soft-wrong" role="alert">
               {t('pin.wrong')}
             </p>
@@ -92,6 +116,7 @@ export function PinLock({ salt, hash, shopName, onUnlock, title, hint, onCancel 
               <button
                 key={k}
                 type="button"
+                disabled={waitS > 0}
                 class={k === '⌫' ? 'pin-back' : undefined}
                 onClick={() => (k === '⌫' ? back() : press(k))}
                 aria-label={k === '⌫' ? t('pin.backspace') : k}
@@ -101,6 +126,11 @@ export function PinLock({ salt, hash, shopName, onUnlock, title, hint, onCancel 
             ),
           )}
         </div>
+        {onForgot && (
+          <button type="button" class="btn btn-ghost pin-forgot" onClick={onForgot}>
+            {t('pin.forgot')}
+          </button>
+        )}
         {onCancel && (
           <button type="button" class="btn btn-ghost pin-cancel" onClick={onCancel}>
             {t('common.cancel')}

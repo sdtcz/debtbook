@@ -5691,3 +5691,15 @@ a.settings-row {
 .pro-manage-billing {
   text-align: center;
 }
+
+/* Forgot PIN */
+.pin-forgot { display: block; margin: 0 auto 12px; }
+.pin-pad button:disabled { opacity: 0.4; }
+.pin-card.forgot-card { max-height: calc(100dvh - 32px); overflow-y: auto; }
+.forgot-pin h2 { margin-top: 0; }
+.forgot-pin h3 { font-size: 1rem; margin: 0 0 6px; }
+.forgot-pin .input { width: 100%; margin: 4px 0 10px; box-sizing: border-box; }
+.forgot-pin .btn { width: 100%; margin-top: 6px; }
+.forgot-step { border-top: 1px solid var(--border, #e2e8f0); padding: 14px 0; }
+.forgot-danger h3 { color: var(--danger, #b91c1c); }
+.forgot-msg { color: var(--danger, #b91c1c); font-weight: 600; }
