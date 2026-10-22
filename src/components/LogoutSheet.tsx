@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { useLocale } from '../hooks/useLocale';
 import { getShop } from '../db/repo';
-import { guardDelete } from '../lib/pinGuard';
+import { guardEraseDownload } from '../lib/pinGuard';
 
 interface Props {
   cloudEnabled: boolean;
   hasPin: boolean;
   onKeep: () => Promise<void>;
-  onErase: () => Promise<void>;
+  /** download: whether a backup file may be downloaded first (PIN checked). */
+  onErase: (download: boolean) => Promise<void>;
   onClose: () => void;
 }
 
@@ -75,8 +76,9 @@ export function LogoutSheet({ cloudEnabled, hasPin, onKeep, onErase, onClose }: 
           onClick={() => {
             if (!confirm(t('logout.eraseConfirm'))) return;
             void (async () => {
-              if (!(await guardDelete(getShop))) return;
-              await run(onErase);
+              const how = await guardEraseDownload(getShop, () => confirm(t('logout.eraseNoBackupConfirm')));
+              if (how === 'cancel') return;
+              await run(() => onErase(how === 'download'));
             })();
           }}
         >

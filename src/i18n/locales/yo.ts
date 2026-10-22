@@ -809,6 +809,10 @@ export const yo: Record<MessageKey, string> = {
   "forgot.badFile": "Fáìlì yìí kì í ṣe àfipamọ́ BashiBook. A kò pa nǹkan kan rẹ́.",
   "forgot.erasing": "À ń pa á rẹ́…",
 
+  "pin.exportTitle": "Tẹ PIN láti ṣe ìgbàsílẹ̀ dátà rẹ",
+  "pin.exportHint": "Fáìlì àfẹ̀yìntì àti ìkójáde ní gbogbo ìwé rẹ nínú, nítorí náà wọ́n nílò PIN rẹ.",
+  "logout.eraseNoBackupConfirm": "Pa á rẹ́ LÁÌṢE ìgbàsílẹ̀ àfẹ̀yìntì?\n\nA kò ní fi fáìlì àfẹ̀yìntì pamọ́. Gbogbo ohun tó wà lórí fóònù yìí ni a ó pa rẹ́. Láìsí àfẹ̀yìntì àwọsánmà, kò ṣeé dápadà.",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

@@ -14,9 +14,13 @@ export function shouldAskPinBeforeDelete(shop: PinGuardShop): boolean {
   return Boolean(shop?.pinBeforeDelete && shop.pinHash && shop.pinSalt);
 }
 
+/** What the PIN is for: shown as the prompt's title. */
+export type PinRequestKind = 'delete' | 'export';
+
 export interface PinRequest {
   salt: string;
   hash: string;
+  kind: PinRequestKind;
   resolve: (ok: boolean) => void;
 }
 
@@ -34,12 +38,13 @@ export function subscribePinRequests(fn: Listener): () => void {
 }
 
 /** Ask for the PIN (resolves false if no host is mounted or the user cancels). */
-export function requestPin(salt: string, hash: string): Promise<boolean> {
+export function requestPin(salt: string, hash: string, kind: PinRequestKind = 'delete'): Promise<boolean> {
   if (pending) pending.resolve(false);
   return new Promise<boolean>((resolve) => {
     const req: PinRequest = {
       salt,
       hash,
+      kind,
       resolve: (ok) => {
         if (pending === req) pending = null;
         listener?.(null);
@@ -62,4 +67,37 @@ export async function guardDelete(
   const s = typeof shop === 'function' ? await shop() : shop;
   if (!shouldAskPinBeforeDelete(s)) return true;
   return requestPin(s!.pinSalt as string, s!.pinHash as string);
+}
+
+type ShopArg = PinGuardShop | (() => Promise<PinGuardShop>);
+const load = async (shop: ShopArg): Promise<PinGuardShop> => (typeof shop === 'function' ? shop() : shop);
+const hasPin = (s: PinGuardShop): boolean => Boolean(s?.pinHash && s.pinSalt);
+
+/**
+ * Gate any download of book data (backup file, CSV). When a PIN is set it is ALWAYS asked,
+ * whatever "Ask PIN before deleting" says, so a phone left logged out or unlocked cannot
+ * leak the book through a download.
+ */
+export async function guardExport(shop: ShopArg): Promise<boolean> {
+  const s = await load(shop);
+  if (!hasPin(s)) return true;
+  return requestPin(s!.pinSalt as string, s!.pinHash as string, 'export');
+}
+
+/**
+ * "Erase this phone" (after its first confirm). Returns:
+ *  - 'download': no PIN, or the right PIN: download a backup file, then erase;
+ *  - 'skip': PIN not given, but erasing is allowed: erase WITHOUT a download
+ *    (only after `confirmNoBackup()`; nothing leaks);
+ *  - 'cancel': stop. Also when "Ask PIN before deleting" is on, since the erase itself needs the PIN.
+ */
+export async function guardEraseDownload(
+  shop: ShopArg,
+  confirmNoBackup: () => boolean,
+): Promise<'download' | 'skip' | 'cancel'> {
+  const s = await load(shop);
+  if (!hasPin(s)) return 'download';
+  if (await requestPin(s!.pinSalt as string, s!.pinHash as string, 'export')) return 'download';
+  if (s!.pinBeforeDelete) return 'cancel';
+  return confirmNoBackup() ? 'skip' : 'cancel';
 }

@@ -807,6 +807,10 @@ export const en = {
   "forgot.badFile": "That file is not a BashiBook backup. Nothing was erased.",
   "forgot.erasing": "Erasing…",
 
+  "pin.exportTitle": "Enter PIN to download your data",
+  "pin.exportHint": "Backup and export files hold your whole book, so they need your PIN.",
+  "logout.eraseNoBackupConfirm": "Erase WITHOUT downloading a backup?\n\nNo backup file will be saved. Everything on this phone will be deleted. Without a cloud backup this cannot be undone.",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

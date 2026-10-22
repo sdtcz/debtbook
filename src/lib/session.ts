@@ -73,18 +73,21 @@ export function signIn(): void {
 }
 
 /**
- * Sign out AND erase this device. Downloads a JSON backup first so nothing is
- * lost silently, tries a final cloud push, then deletes the local database.
+ * Sign out AND erase this device. Downloads a JSON backup first (only when the caller
+ * passed the PIN check, see guardEraseDownload), tries a final cloud push, then deletes
+ * the local database.
  */
-export async function signOutAndErase(): Promise<{ backupDownloaded: boolean }> {
+export async function signOutAndErase({ download }: { download: boolean }): Promise<{ backupDownloaded: boolean }> {
   let backupDownloaded = false;
-  try {
-    const data = await exportBackup();
-    const stamp = new Date().toISOString().slice(0, 10);
-    downloadJson(`bashibook-backup-before-signout-${stamp}.json`, data);
-    backupDownloaded = true;
-  } catch {
-    backupDownloaded = false;
+  if (download) {
+    try {
+      const data = await exportBackup();
+      const stamp = new Date().toISOString().slice(0, 10);
+      downloadJson(`bashibook-backup-before-signout-${stamp}.json`, data);
+      backupDownloaded = true;
+    } catch {
+      backupDownloaded = false;
+    }
   }
   try {
     await tryAutoPush();

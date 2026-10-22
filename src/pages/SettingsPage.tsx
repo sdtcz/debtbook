@@ -63,7 +63,7 @@ import {
   type FeedbackTopicId,
 } from '../lib/feedback';
 import { hashPin, isValidPin, randomSalt } from '../lib/pin';
-import { guardDelete } from '../lib/pinGuard';
+import { guardDelete, guardExport } from '../lib/pinGuard';
 import { navigate } from '../lib/router';
 import { signOutAndErase, signOutKeepData } from '../lib/session';
 import {
@@ -281,6 +281,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
   };
 
   const doExport = async () => {
+    if (!(await guardExport(getShop))) return;
     const data = await exportBackup();
     const stamp = new Date().toISOString().slice(0, 10);
     downloadJson(`bashibook-backup-${stamp}.json`, data);
@@ -319,6 +320,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
       });
       return;
     }
+    if (!(await guardExport(getShop))) return;
     const dash = await getDashboardBalances();
     const map = new Map<string, Awaited<ReturnType<typeof listEntriesForCustomer>>>();
     for (const row of dash.customers) {
@@ -1607,8 +1609,8 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
             toast(t('logout.done'));
             onLoggedOut?.('keep');
           }}
-          onErase={async () => {
-            await signOutAndErase();
+          onErase={async (download) => {
+            await signOutAndErase({ download });
             setShowLogout(false);
             onLoggedOut?.('erase');
           }}

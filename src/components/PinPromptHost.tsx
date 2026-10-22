@@ -14,8 +14,8 @@ export function PinPromptHost() {
       <PinLock
         salt={req.salt}
         hash={req.hash}
-        title={t('pin.deleteTitle')}
-        hint={t('pin.deleteHint')}
+        title={req.kind === 'export' ? t('pin.exportTitle') : t('pin.deleteTitle')}
+        hint={req.kind === 'export' ? t('pin.exportHint') : t('pin.deleteHint')}
         onUnlock={() => req.resolve(true)}
         onCancel={() => req.resolve(false)}
       />

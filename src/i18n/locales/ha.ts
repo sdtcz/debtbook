@@ -809,6 +809,10 @@ export const ha: Record<MessageKey, string> = {
   "forgot.badFile": "Wannan fayil ba ajiyar BashiBook ba ne. Ba a goge komai ba.",
   "forgot.erasing": "Ana gogewa…",
 
+  "pin.exportTitle": "Shigar da PIN don sauke bayananka",
+  "pin.exportHint": "Fayilolin ajiya da fitarwa suna ɗauke da dukan littafinka, don haka suna buƙatar PIN ɗinka.",
+  "logout.eraseNoBackupConfirm": "A goge BA TARE da sauke fayil ɗin ajiya ba?\n\nBa za a ajiye fayil ɗin ajiya ba. Za a goge duk abin da ke wannan waya. Ba tare da ajiyar gajimare ba, ba za a iya dawowa ba.",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

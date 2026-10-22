@@ -1,4 +1,5 @@
 import { downloadJson, exportBackup } from '../lib/backup';
+import { guardExport } from '../lib/pinGuard';
 import { LoadError } from '../components/LoadError';
 import { getSupplierBalances } from '../db/suppliers';
 import {
@@ -545,6 +546,7 @@ export function HomePage({ locked, toast }: Props) {
                   type="button"
                   class="btn btn-primary"
                   onClick={async () => {
+                    if (!(await guardExport(getShop))) return;
                     const data = await exportBackup();
                     const stamp = new Date().toISOString().slice(0, 10);
                     downloadJson(`bashibook-backup-${stamp}.json`, data);
