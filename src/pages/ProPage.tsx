@@ -1,4 +1,5 @@
 import { BackButton } from '../components/BackButton';
+import { hit } from '../lib/hit';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { notifyChanged } from '../components/StatusBadge';
 import { getShop, setEntitlement } from '../db/repo';
@@ -119,6 +120,7 @@ export function ProPage({ toast }: Props) {
     setEmailError(false);
     rememberEmail(addr);
     setBusy(true);
+    hit('pro_checkout', { once: true }); // anonymous, fire-and-forget
     let redirecting = false;
     try {
       const res = await fetch('/api/checkout', {

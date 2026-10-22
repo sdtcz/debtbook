@@ -26,9 +26,9 @@ import {
 import { CustomerDetailPage } from './pages/CustomerDetailPage';
 import { EntryFormPage } from './pages/EntryFormPage';
 import { HomePage } from './pages/HomePage';
-import { LandingPage } from './pages/LandingPage';
 import { lazyPage } from './components/LazyPage';
 
+const LandingPage = lazyPage(() => import('./pages/LandingPage').then((m) => m.LandingPage));
 const PayDetailsPage = lazyPage(() => import('./pages/PayDetailsPage').then((m) => m.PayDetailsPage));
 const PosterPage = lazyPage(() => import('./pages/PosterPage').then((m) => m.PosterPage));
 const PrivacyPage = lazyPage(() => import('./pages/PrivacyPage').then((m) => m.PrivacyPage));
@@ -148,6 +148,18 @@ export function App() {
   const [locked, setLocked] = useState(false);
   const startLockDone = useRef(false);
   const [signedOut, setSignedOut] = useState(() => isSignedOut());
+
+  // Anonymous channel count: first app open per device (not the landing's embedded preview,
+  // not customers opening a Pay-me link). Loads the tiny hit chunk only when there's work.
+  useEffect(() => {
+    if (!showApp || route.name === 'payme' || isEmbeddedFrame()) return;
+    try {
+      if (localStorage.getItem('bashibook-hit-app_open') && !localStorage.getItem('bashibook-hitq')) return;
+    } catch {
+      return;
+    }
+    void import('./lib/hit').then((m) => m.hit('app_open', { once: true })).catch(() => {});
+  }, [showApp]);
   const { message, action, toast, clearToast } = useToast();
   const { t } = useLocale();
 

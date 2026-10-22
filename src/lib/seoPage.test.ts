@@ -23,7 +23,7 @@ describe('/kippa-alternative static page', () => {
     expect(html).toContain('Your book stays on your phone, works offline once opened, free.');
   });
   it('makes no claims about Kippa beyond the neutral question and trademark note', () => {
-    const kippaLines = html.split('\n').filter((l: string) => /kippa/i.test(l) && !/src=kippa|kippa-/.test(l));
+    const kippaLines = html.split('\n').filter((l: string) => /kippa/i.test(l) && !/src=kippa|kippa-|view_kippa/.test(l));
     for (const l of kippaLines) expect(l).toMatch(/Kippa alternative|trademark of its owner|not affiliated/i);
     expect(html).not.toMatch(/shut ?down|went dark|lost (their|your) data/i);
   });

@@ -3,6 +3,16 @@ import { useEffect, useState } from 'preact/hooks';
 import { MoneyInput } from '../components/MoneyInput';
 import { notifyChanged } from '../components/StatusBadge';
 import { getCustomer, getShop, listCustomers, softDeleteCustomer, upsertCustomer } from '../db/repo';
+import { hit } from '../lib/hit';
+
+/** Anonymous count when the shop goes from 0 to 1 customer (once per device). */
+async function firstCustomerHit(): Promise<void> {
+  try {
+    if ((await listCustomers()).length === 1) hit('first_customer', { once: true });
+  } catch {
+    /* ignore */
+  }
+}
 import { guardDelete } from '../lib/pinGuard';
 import { useLocale } from '../hooks/useLocale';
 import {
@@ -141,6 +151,7 @@ export function CustomerFormPage({ id, toast }: Props) {
         added += 1;
       }
       notifyChanged();
+      if (existing.length === 0 && added > 0) hit('first_customer', { once: true });
       if (added === 0) {
         toast(t('customerForm.contactsAllDupes'));
       } else if (skipped > 0) {
@@ -210,6 +221,7 @@ export function CustomerFormPage({ id, toast }: Props) {
         creditLimitKobo,
       });
       notifyChanged();
+      if (!editing) void firstCustomerHit();
       toast(editing ? t('customerForm.updated') : t('customerForm.added'));
       if (editing) goBack(`/customers/${c.id}`);
       else navigate(`/customers/${c.id}`, { replace: true });

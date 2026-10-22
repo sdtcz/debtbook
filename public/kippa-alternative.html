@@ -124,5 +124,18 @@ footer a{color:#0f766e}
   } catch (e) {}
 })();
 </script>
+<script>
+/* Anonymous channel count: page + ?src tag only, once per device per day. No cookies, no personal data. */
+(function () {
+  try {
+    var m = /[?&]src=([^&#]*)/.exec(location.search), s = '';
+    if (m) s = decodeURIComponent(m[1].replace(/\+/g, ' ')).toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 32);
+    var k = 'bashibook-hit-view_kippa-' + (s || 'direct'), d = new Date().toISOString().slice(0, 10);
+    if (localStorage.getItem(k) === d || !navigator.sendBeacon) return;
+    localStorage.setItem(k, d);
+    navigator.sendBeacon('/api/hit', new Blob([JSON.stringify(s ? { e: 'view_kippa', s: s } : { e: 'view_kippa' })], { type: 'text/plain' }));
+  } catch (e) {}
+})();
+</script>
 </body>
 </html>

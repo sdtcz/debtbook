@@ -1,3 +1,4 @@
+import { useEffect } from 'preact/hooks';
 import { PUBLIC_APP_LABEL, PUBLIC_APP_URL } from '../config';
 import { appEmbedUrl, setForceApp } from '../lib/viewportMode';
 import { QrCode } from '../components/QrCode';
@@ -38,6 +39,17 @@ export function LandingPage({ onUseAppHere }: Props) {
   // Canonical public URL (src/config.ts) — never the raw deployment host.
   const href = `${PUBLIC_APP_URL}/`;
   const embed = typeof window !== 'undefined' ? appEmbedUrl() : '/?app=1#/';
+
+  useEffect(() => {
+    // Anonymous channel count (event + src tag only), once per device per day.
+    let src: string | null = null;
+    try {
+      src = new URL(location.href).searchParams.get('src');
+    } catch {
+      /* ignore */
+    }
+    void import('../lib/hit').then((m) => m.hit('view_home', { daily: true, src })).catch(() => {});
+  }, []);
 
   const openAppHome = () => {
     setForceApp(true);
