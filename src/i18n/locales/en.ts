@@ -403,10 +403,10 @@ export const en = {
   'pro.benefitNoNag': 'No upgrade nag on Home',
   'pro.benefitFree':
     'Free still includes the offline ledger, remind, statement, local JSON backup, and PIN',
-  'pro.tryFree': 'Try Pro free for 30 days',
+  'pro.tryFree': 'Try Pro free for 5 days',
   'pro.paystack': 'Pay with secure checkout',
   'pro.demoNote': 'Demo unlocks Pro on this phone only. Paid Pro is confirmed by our server with Stripe before it unlocks.',
-  'pro.activated': 'Pro activated for 30 days (demo)',
+  'pro.activated': 'Pro activated for 5 days (demo)',
   'pro.checkoutNotConfigured':
     'Checkout not configured — use Activate Pro (demo)',
   'pro.noCheckoutUrl': 'No checkout URL — use demo activation',
@@ -730,6 +730,14 @@ export const en = {
   'reports.addShort': "+ Add",
   'reports.entry1': "1 entry",
   'reports.payers1': "1 customer paid",
+  'pro.trialDaysLeft': "Pro trial: {{n}} days left",
+  'pro.trialOneDayLeft': "Pro trial: 1 day left",
+  'pro.trialEndedTitle': "Your free trial has ended",
+  'pro.trialEndedBody': "Upgrade for $1.99/mo or $15/yr to keep CSV export and cloud backup.",
+  'pro.trialUsedNote': "The free trial can be used once per phone.",
+  'home.trialUpgrade': "Upgrade",
+  'home.trialEndedSub': "Upgrade for $1.99/mo or $15/yr",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

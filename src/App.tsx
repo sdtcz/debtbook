@@ -3,6 +3,7 @@ import { PinLock } from './components/PinLock';
 import { showsTabBar, TabBar } from './components/TabBar';
 import { Toast } from './components/Toast';
 import { getShop } from './db/repo';
+import { reconcileTrialOnStart } from './lib/trialStore';
 import { useLocale } from './hooks/useLocale';
 import { useToast } from './hooks/useToast';
 import { initLocale, t as tNow } from './i18n';
@@ -151,6 +152,8 @@ export function App() {
   const { t } = useLocale();
 
   const refreshShop = async () => {
+    // Enforce the once-per-install 5-day trial (and cap old 30-day trials) before anything reads Pro.
+    await reconcileTrialOnStart().catch(() => null);
     const shop = await getShop();
     if (shop?.locale) initLocale(shop.locale);
     setHasShop(Boolean(shop?.name));

@@ -73,6 +73,10 @@ export async function importBackup(data: unknown): Promise<{
 
   if (data.shop) {
     const shop: ShopProfile = { ...data.shop, id: 'shop' };
+    // Restoring an older backup must not hand out a fresh free trial.
+    if (existingShop?.trial && (!shop.trial || shop.trial.endsAt > existingShop.trial.endsAt)) {
+      shop.trial = existingShop.trial;
+    }
     await tx.objectStore('shop').put(shop);
   }
 

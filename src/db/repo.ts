@@ -44,6 +44,7 @@ export async function updateShopFields(
       | 'pinSalt'
       | 'pinBeforeDelete'
       | 'entitlement'
+      | 'trial'
       | 'name'
       | 'cloudBackupEnabled'
       | 'lastCloudBackupAt'

@@ -50,6 +50,7 @@ import {
 import { unlockSyncOnDevice } from '../lib/syncUnlock';
 import { buildCsvExport, downloadCsv } from '../lib/csv';
 import { getEntitlement, isPro } from '../lib/entitlement';
+import { trialStatus, type TrialStatus } from '../lib/trial';
 import {
   FEEDBACK_TOPICS,
   buildFeedbackMessage,
@@ -103,6 +104,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
   const [feedbackTopics, setFeedbackTopics] = useState<FeedbackTopicId[]>([]);
   const [feedbackNote, setFeedbackNote] = useState('');
   const [pro, setPro] = useState(false);
+  const [trial, setTrial] = useState<TrialStatus>({ state: 'available', daysLeft: 0 });
   const [entLabel, setEntLabel] = useState('Free');
   const [expLabel, setExpLabel] = useState('');
   const [cloudEnabled, setCloudEnabled] = useState(false);
@@ -134,6 +136,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
       setHasPin(Boolean(s.pinHash && s.pinSalt));
       setPinBeforeDeleteState(Boolean(s.pinBeforeDelete && s.pinHash && s.pinSalt));
       setPro(isPro(s));
+      setTrial(trialStatus(s));
       const e = getEntitlement(s);
       setEntLabel(e.plan === 'pro' ? t('common.pro') : t('common.free'));
       setExpLabel(
@@ -919,7 +922,15 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
             <span class="settings-row-body">
               <span class="settings-row-title">{t('settings.proTitle')}</span>
               <span class="settings-row-sub">
-                {pro ? t('settings.proSubPro') : t('settings.proSubFree')}
+                {trial.state === 'active'
+                  ? trial.daysLeft === 1
+                    ? t('pro.trialOneDayLeft')
+                    : t('pro.trialDaysLeft', { n: trial.daysLeft })
+                  : trial.state === 'ended' && !pro
+                    ? t('pro.trialEndedTitle')
+                    : pro
+                      ? t('settings.proSubPro')
+                      : t('settings.proSubFree')}
               </span>
             </span>
             <span class="settings-row-trail">

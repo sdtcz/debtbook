@@ -5581,3 +5581,22 @@ a.btn.payme-cta-btn {
   background: radial-gradient(circle at 35% 30%, #fffbeb, #fde68a 55%, #fcd34d);
   box-shadow: 0 0 0 6px rgba(180, 83, 9, 0.08), 0 8px 20px rgba(180, 83, 9, 0.14);
 }
+
+/* ---------- Pro trial (5 days, once per phone) ---------- */
+.pro-trial-chip {
+  display: flex; align-items: center; gap: 10px; min-height: var(--tap);
+  margin: -2px 0 12px; padding: 8px 12px; border-radius: 14px;
+  background: var(--primary-soft); color: #134e4a; text-decoration: none; font-weight: 700;
+}
+.pro-trial-chip-text { flex: 1; min-width: 0; }
+.pro-trial-chip-cta {
+  flex: none; padding: 6px 12px; border-radius: 999px; background: var(--primary); color: #fff; font-size: 0.9rem;
+}
+.pro-trial-status { background: var(--primary-soft); color: #134e4a; }
+.pro-trial-ended-home { text-decoration: none; color: inherit; padding: 10px 12px; gap: 12px; border-color: #fcd34d; background: #fffbeb; min-height: 60px; }
+.pro-trial-ended-home .pro-hint-soft-title { color: #78350f; }
+.pro-trial-ended {
+  border: 1px solid #fcd34d; background: #fffbeb; padding: 16px; margin-bottom: 12px;
+}
+.pro-trial-ended h2 { margin: 0 0 6px; font-size: 1.1rem; color: #78350f; }
+.pro-trial-ended p { margin: 0 0 12px; color: #713f12; }

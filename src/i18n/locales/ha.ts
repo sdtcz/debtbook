@@ -405,10 +405,10 @@ export const ha: Record<MessageKey, string> = {
   'pro.benefitNoNag': 'Babu nasihancin haɓaka a Gida',
   'pro.benefitFree':
     'Kyauta har yanzu tana da littafin offline, tunatarwa, bayani, ajiyar JSON, da PIN',
-  'pro.tryFree': 'Gwada Pro kyauta kwana 30',
+  'pro.tryFree': 'Gwada Pro kyauta kwana 5',
   'pro.paystack': 'Biya ta checkout mai tsaro',
   'pro.demoNote': 'Demo yana buɗe Pro a wannan waya kawai. Sabar mu tana tabbatar da biyan Pro da Stripe kafin ya buɗe.',
-  'pro.activated': 'An kunna Pro na kwana 30 (demo)',
+  'pro.activated': 'An kunna Pro na kwana 5 (demo)',
   'pro.checkoutNotConfigured':
     'Ba a saita checkout ba — yi amfani da Activate Pro (demo)',
   'pro.noCheckoutUrl': 'Babu URL na checkout — yi amfani da demo',
@@ -732,6 +732,14 @@ export const ha: Record<MessageKey, string> = {
   'reports.addShort': "+ Ƙara",
   'reports.entry1': "shigarwa 1",
   'reports.payers1': "abokin ciniki 1 ya biya",
+  'pro.trialDaysLeft': "Gwajin Pro: saura kwana {{n}}",
+  'pro.trialOneDayLeft': "Gwajin Pro: saura kwana 1",
+  'pro.trialEndedTitle': "Gwajin kyautarka ya ƙare",
+  'pro.trialEndedBody': "Haɓaka da $1.99/wata ko $15/shekara don ci gaba da CSV da ajiyar girgije.",
+  'pro.trialUsedNote': "Ana iya amfani da gwajin kyauta sau ɗaya a kowace waya.",
+  'home.trialUpgrade': "Haɓaka",
+  'home.trialEndedSub': "Haɓaka da $1.99/wata ko $15/shekara",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

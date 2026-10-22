@@ -1,19 +1,23 @@
+import { TRIAL_DAYS } from './trial';
 import type { Entitlement, Plan, ShopProfile } from './types';
 
 export function getEntitlement(shop: ShopProfile | null | undefined): Entitlement {
   const e = shop?.entitlement;
   if (!e) return { plan: 'free' };
-  if (e.plan === 'pro' && e.exp != null && e.exp < Date.now()) {
+  // A trial can never outlive its marker (e.g. after restoring an old backup).
+  let exp = e.exp;
+  if (e.source === 'demo' && exp != null && shop?.trial) exp = Math.min(exp, shop.trial.endsAt);
+  if (e.plan === 'pro' && exp != null && exp < Date.now()) {
     return { plan: 'free', source: 'expired' };
   }
-  return e;
+  return exp === e.exp ? e : { ...e, exp };
 }
 
 export function isPro(shop: ShopProfile | null | undefined): boolean {
   return getEntitlement(shop).plan === 'pro';
 }
 
-export function demoProEntitlement(days = 30): Entitlement {
+export function demoProEntitlement(days = TRIAL_DAYS): Entitlement {
   return {
     plan: 'pro',
     exp: Date.now() + days * 24 * 60 * 60 * 1000,

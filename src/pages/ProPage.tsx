@@ -3,7 +3,9 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { notifyChanged } from '../components/StatusBadge';
 import { getShop, setEntitlement } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
-import { demoProEntitlement, getEntitlement, isPro } from '../lib/entitlement';
+import { getEntitlement, isPro } from '../lib/entitlement';
+import { trialStatus } from '../lib/trial';
+import { startTrial, TrialAlreadyUsedError } from '../lib/trialStore';
 import {
   clearRefFromHash,
   entitlementFromPayment,
@@ -37,10 +39,13 @@ export function ProPage({ toast }: Props) {
   const activateDemo = async () => {
     setBusy(true);
     try {
-      await setEntitlement(demoProEntitlement(30));
+      await startTrial();
       notifyChanged();
       await refresh();
       toast(t('pro.activated'));
+    } catch (err) {
+      await refresh();
+      toast(err instanceof TrialAlreadyUsedError ? t('pro.trialUsedNote') : t('pro.checkoutUnavailable'));
     } finally {
       setBusy(false);
     }
@@ -157,6 +162,13 @@ export function ProPage({ toast }: Props) {
   const ent = getEntitlement(shop);
   const pro = isPro(shop);
   const canPay = !pro || ent.source === 'demo';
+  const trial = trialStatus(shop);
+  const trialLeft =
+    trial.state === 'active'
+      ? trial.daysLeft === 1
+        ? t('pro.trialOneDayLeft')
+        : t('pro.trialDaysLeft', { n: trial.daysLeft })
+      : '';
 
   return (
     <div class="app-shell">
@@ -180,7 +192,15 @@ export function ProPage({ toast }: Props) {
               <p class="pro-soft-meta">{t('pro.orYear')}</p>
             </div>
           </div>
-          {pro ? (
+          {trial.state === 'active' ? (
+            <div class="pro-soft-status pro-trial-status" role="status">
+              <span aria-hidden="true">⏳</span>
+              <span>
+                <strong>{trialLeft}</strong>
+                {ent.exp ? t('pro.until', { date: new Date(ent.exp).toLocaleDateString('en-NG') }) : ''}
+              </span>
+            </div>
+          ) : pro ? (
             <div class="pro-soft-status">
               <span aria-hidden="true">✓</span>
               <span>
@@ -195,6 +215,21 @@ export function ProPage({ toast }: Props) {
             </div>
           ) : null}
         </section>
+
+        {trial.state === 'ended' && !pro && (
+          <section class="card pro-trial-ended" role="alert" aria-labelledby="pro-trial-ended-title">
+            <h2 id="pro-trial-ended-title">{t('pro.trialEndedTitle')}</h2>
+            <p>{t('pro.trialEndedBody')}</p>
+            <div class="pro-pay-buttons">
+              <button class="btn btn-primary" type="button" disabled={busy || verifying} onClick={() => tryCheckout('monthly')}>
+                {t('pro.payMonthly')}
+              </button>
+              <button class="btn btn-primary" type="button" disabled={busy || verifying} onClick={() => tryCheckout('yearly')}>
+                {t('pro.payYearly')}
+              </button>
+            </div>
+          </section>
+        )}
 
         <section class="card pro-soft-card">
           <div class="settings-group-label" style={{ marginTop: 0 }}>
@@ -256,7 +291,7 @@ export function ProPage({ toast }: Props) {
             </div>
           )}
 
-          {!pro && (
+          {!pro && trial.state === 'available' && (
             <button
               class="btn btn-primary"
               type="button"
@@ -266,6 +301,7 @@ export function ProPage({ toast }: Props) {
               {t('pro.tryFree')}
             </button>
           )}
+          {!pro && trial.state === 'ended' && <p class="pro-soft-note">{t('pro.trialUsedNote')}</p>}
 
           {canPay && (
             <div class="pro-pay">

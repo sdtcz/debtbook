@@ -405,10 +405,10 @@ export const yo: Record<MessageKey, string> = {
   'pro.benefitNoNag': 'Kò sí ìránlọ́wọ́ gbéga ní Ilé',
   'pro.benefitFree':
     'Ọ̀fẹ́ ṣì ní ìwé offline, ìránnilétí, àkọọ́lẹ̀, àfípadà JSON, àti PIN',
-  'pro.tryFree': 'Gbìyànjú Pro ọ̀fẹ́ fún ọjọ́ 30',
+  'pro.tryFree': 'Gbìyànjú Pro ọ̀fẹ́ fún ọjọ́ 5',
   'pro.paystack': 'San pẹ̀lú checkout aláàbò',
   'pro.demoNote': 'Demo ń ṣí Pro lórí ẹ̀rọ yìí nìkan. Olùpèsè wa ń jẹ́rìí ìsanwó Pro pẹ̀lú Stripe kí ó tó ṣí.',
-  'pro.activated': 'A ti tan Pro fún ọjọ́ 30 (demo)',
+  'pro.activated': 'A ti tan Pro fún ọjọ́ 5 (demo)',
   'pro.checkoutNotConfigured':
     'A kò ṣètò checkout — lo Activate Pro (demo)',
   'pro.noCheckoutUrl': 'Kò sí URL checkout — lo demo',
@@ -732,6 +732,14 @@ export const yo: Record<MessageKey, string> = {
   'reports.addShort': "+ Fi kún",
   'reports.entry1': "àkọsílẹ̀ 1",
   'reports.payers1': "oníbàárà 1 ti sanwó",
+  'pro.trialDaysLeft': "Ìdánwò Pro: ọjọ́ {{n}} ló kù",
+  'pro.trialOneDayLeft': "Ìdánwò Pro: ọjọ́ 1 ló kù",
+  'pro.trialEndedTitle': "Ìdánwò ọ̀fẹ́ rẹ ti parí",
+  'pro.trialEndedBody': "Ṣe àfikún pẹ̀lú $1.99/oṣù tàbí $15/ọdún láti máa lo CSV àti ìpamọ́ orí ayélujára.",
+  'pro.trialUsedNote': "Ẹ̀ẹ̀kan péré ni a lè lo ìdánwò ọ̀fẹ́ lórí fóònù kan.",
+  'home.trialUpgrade': "Ṣe àfikún",
+  'home.trialEndedSub': "Ṣe àfikún pẹ̀lú $1.99/oṣù tàbí $15/ọdún",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

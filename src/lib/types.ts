@@ -9,6 +9,14 @@ export interface Entitlement {
   source?: string;
 }
 
+/** Free Pro trial bookkeeping — once per phone/install. */
+export interface TrialMarker {
+  startedAt: number;
+  endsAt: number;
+  /** Set when a pre-Oct-2026 30-day trial was cut to the 5-day rule. */
+  capped?: boolean;
+}
+
 export interface ShopProfile {
   id: 'shop';
   name: string;
@@ -21,6 +29,8 @@ export interface ShopProfile {
   /** Ask for the PIN before deleting a customer/entry or erasing this phone (default off) */
   pinBeforeDelete?: boolean;
   entitlement?: Entitlement;
+  /** Free trial used on this shop (kept in backups). */
+  trial?: TrialMarker;
   /** Pro cloud backup enabled on this device */
   cloudBackupEnabled?: boolean;
   /** Last successful cloud upload (unix ms) */
