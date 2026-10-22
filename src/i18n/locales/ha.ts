@@ -181,8 +181,8 @@ export const ha: Record<MessageKey, string> = {
   'settings.syncUnlockPrompt':
     "Shigar da lambar farfaɗowa don buɗe daidaitawa a wannan na'ura (ana adana a wannan waya kawai):",
   'settings.syncPro': "Daidaitawar na'urori da yawa fasalin Pro ne",
-  'settings.aboutLine1': 'BashiBook · Najeriya · {{lang}} · ₦',
-  'settings.aboutLine2': 'Littafin bashi na offline ga masu shago',
+  'settings.aboutLine1': 'BashiBook · {{lang}} · ₦',
+  'settings.aboutLine2': 'Littafin bashi na offline ga {{shops}}',
   'settings.aboutTip': '',
   'settings.language': 'Harshe',
   'settings.languageChanged': 'An saita harshe zuwa {{lang}}',
@@ -581,7 +581,7 @@ export const ha: Record<MessageKey, string> = {
   'receipt.send': 'Aika rasit',
   'receipt.sendSub': 'Shigarwa ta ƙarshe: {{amount}}',
 
-  'growth.footer': 'An rubuta a BashiBook · littafin bashi kyauta ga shaguna',
+  'growth.footer': 'An rubuta a BashiBook · littafin bashi kyauta ga {{shops}}',
   'growth.footerToggle': 'Saka layin BashiBook a saƙonni',
   'growth.footerToggleSub': 'Ƙaramin layi + hanyar haɗi ƙarƙashin tunatarwa, rasit da Biya-ni',
   'growth.inviteMessage': 'Ina amfani da BashiBook don ajiye bashi a waya. Kyauta ne, yana aiki ba intanet bayan an buɗe shi, kuma yana aika tunatarwar WhatsApp. Gwada shi:',
@@ -770,6 +770,9 @@ export const ha: Record<MessageKey, string> = {
 
   "pro.manageBilling": "Sarrafa ko soke biyan Pro",
   "pro.manageBillingSub": "Shafin biyan kuɗi na Stripe · shiga da imel ɗin da ke kan rasit ɗinka",
+
+  "region.shops": "ƙananan shaguna",
+  "region.shopsNG": "shagunan Najeriya",
 
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',

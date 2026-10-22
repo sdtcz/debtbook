@@ -7,10 +7,13 @@ import { normalizeCheckoutReturnUrl } from './lib/checkoutReturn';
 import { captureAttribution } from './lib/growth';
 import { navigate } from './lib/router';
 import { localeReady } from './i18n';
+import { applyRegion, refreshRegion } from './lib/region';
 
 normalizeCheckoutReturnUrl();
 // First-touch src/ref tags (?app=1&src=…&ref=…) — stored on this device only.
 captureAttribution();
+// Region wording ("Nigerian shops" only in Nigeria) from the cached geo answer / device hints; refreshed after mount.
+applyRegion();
 
 registerSW({ immediate: true });
 
@@ -37,4 +40,5 @@ function mount(root: HTMLElement) {
   pinHost.id = 'pin-prompt-root';
   document.body.appendChild(pinHost);
   render(<PinPromptHost />, pinHost);
+  window.setTimeout(() => void refreshRegion(), 2000);
 }

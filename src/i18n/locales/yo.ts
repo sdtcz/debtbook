@@ -181,8 +181,8 @@ export const yo: Record<MessageKey, string> = {
   'settings.syncUnlockPrompt':
     'Tẹ kóòdù ìmúláradá láti ṣí ìṣọ̀kan lórí ẹ̀rọ yìí (a fi pamọ́ sórí fóònù yìí nìkan):',
   'settings.syncPro': 'Ìṣọ̀kan ọ̀pọ̀ ẹ̀rọ jẹ́ ẹ̀bun Pro',
-  'settings.aboutLine1': 'BashiBook · Nàìjíríà · {{lang}} · ₦',
-  'settings.aboutLine2': 'Ìwé gbèsè offline fún oníṣòwò',
+  'settings.aboutLine1': 'BashiBook · {{lang}} · ₦',
+  'settings.aboutLine2': 'Ìwé gbèsè offline fún {{shops}}',
   'settings.aboutTip': '',
   'settings.language': 'Èdè',
   'settings.languageChanged': 'A ti yí èdè sí {{lang}}',
@@ -581,7 +581,7 @@ export const yo: Record<MessageKey, string> = {
   'receipt.send': 'Fi ìwé-ẹ̀rí ránṣẹ́',
   'receipt.sendSub': 'Àkọsílẹ̀ tó kẹ́yìn: {{amount}}',
 
-  'growth.footer': 'A kọ ọ́ sínú BashiBook · ìwé gbèsè ọ̀fẹ́ fún ṣọ́ọ̀bù',
+  'growth.footer': 'A kọ ọ́ sínú BashiBook · ìwé gbèsè ọ̀fẹ́ fún {{shops}}',
   'growth.footerToggle': 'Fi ìlà BashiBook kún ọ̀rọ̀',
   'growth.footerToggleSub': 'Ìlà kékeré + ìjápọ̀ lábẹ́ ìránnilétí, ìwé-ẹ̀rí àti San-fún-mi',
   'growth.inviteMessage': 'Mo ń lo BashiBook láti kọ gbèsè sórí fóònù. Ọ̀fẹ́ ni, ó ń ṣiṣẹ́ láìsí íńtánẹ́ẹ̀tì lẹ́yìn tí o bá ti ṣí i, ó sì ń fi ìránnilétí WhatsApp ránṣẹ́. Gbìyànjú rẹ̀:',
@@ -770,6 +770,9 @@ export const yo: Record<MessageKey, string> = {
 
   "pro.manageBilling": "Ṣàkóso tàbí fagilé àsansílẹ̀ Pro",
   "pro.manageBillingSub": "Ojú-ìwé ìsanwó Stripe · wọlé pẹ̀lú ímeèlì tó wà lórí rìsíìtì rẹ",
+
+  "region.shops": "àwọn ṣọ́ọ̀bù kékeré",
+  "region.shopsNG": "àwọn ṣọ́ọ̀bù ní Nàìjíríà",
 
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',

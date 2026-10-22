@@ -2,6 +2,8 @@ import { useEffect } from 'preact/hooks';
 import { PUBLIC_APP_LABEL, PUBLIC_APP_URL } from '../config';
 import { appEmbedUrl, setForceApp } from '../lib/viewportMode';
 import { QrCode } from '../components/QrCode';
+import { useLocale } from '../hooks/useLocale';
+import { isRegionNigeria, t as tr } from '../i18n';
 
 const FEATURES = [
   {
@@ -39,6 +41,11 @@ export function LandingPage({ onUseAppHere }: Props) {
   // Canonical public URL (src/config.ts) — never the raw deployment host.
   const href = `${PUBLIC_APP_URL}/`;
   const embed = typeof window !== 'undefined' ? appEmbedUrl() : '/?app=1#/';
+  // Landing copy is English; {{shops}} is "Nigerian shops" only for visitors in Nigeria.
+  useLocale(); // re-render when the region answer arrives
+  const ng = isRegionNigeria();
+  const enShops = tr(ng ? 'region.shopsNG' : 'region.shops', undefined, 'en');
+  const seo = ng ? '/ng' : '';
 
   useEffect(() => {
     // Anonymous channel count (event + src tag only), once per device per day.
@@ -83,7 +90,7 @@ export function LandingPage({ onUseAppHere }: Props) {
             ₦
           </span>
           <span class="landing-logo-text">BashiBook</span>
-          <span class="landing-tag-chip">Nigeria · ₦ · PWA</span>
+          <span class="landing-tag-chip">{ng ? 'Nigeria · ₦ · PWA' : 'Works offline · PWA'}</span>
         </div>
         <div class="landing-nav-actions">
           <button type="button" class="landing-nav-ghost" onClick={previewInBrowser}>
@@ -108,7 +115,7 @@ export function LandingPage({ onUseAppHere }: Props) {
               <span class="landing-title-accent">Remind. Recover.</span>
             </h1>
             <p class="glow-hint">
-              Offline credit (bashi) book for Nigerian shopkeepers — track who owes what,
+              Offline credit (bashi) book for {enShops} — track who owes what,
               remind on WhatsApp, back up when you are ready.
             </p>
           </section>
@@ -153,13 +160,13 @@ export function LandingPage({ onUseAppHere }: Props) {
           <footer class="landing-footer">
             <p>Bashi = debt (Hausa). Not affiliated with US DebtBook SaaS.</p>
             <p>
-              <a class="landing-footer-link" href="/kippa-alternative">
+              <a class="landing-footer-link" href={`${seo}/kippa-alternative`}>
                 Looking for a Kippa alternative?
               </a>
             </p>
             <p>
-              <a class="landing-footer-link" href="/credit-book-app">
-                Free credit book app for Nigerian shops
+              <a class="landing-footer-link" href={`${seo}/credit-book-app`}>
+                Free credit book app for {enShops}
               </a>
             </p>
           </footer>

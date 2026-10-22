@@ -90,11 +90,24 @@ function writeStored(locale: Locale): void {
 }
 
 
+/* Region: "{{shops}}" reads "Nigerian shops" only in Nigeria, "small shops" elsewhere (see lib/region). */
+let regionNigeria = false;
+
+export function setRegionNigeria(on: boolean): void {
+  if (on === regionNigeria) return;
+  regionNigeria = on;
+  applyDocumentLang(current);
+  notify();
+}
+
+export function isRegionNigeria(): boolean {
+  return regionNigeria;
+}
+
 function applyDocumentLang(locale: Locale): void {
   try {
-    // Prefer en-NG so native date inputs lean toward dd/mm for Nigeria
-    const lang = locale === 'en' ? 'en-NG' : locale === 'ha' ? 'ha-NG' : 'yo-NG';
-    document.documentElement.lang = lang;
+    // en-NG etc. only in Nigeria (native date inputs lean toward dd/mm there); plain tags elsewhere.
+    document.documentElement.lang = regionNigeria ? `${locale}-NG` : locale;
   } catch {
     /* ignore SSR / non-DOM */
   }
@@ -134,6 +147,9 @@ type Vars = Record<string, string | number>;
 export function t(key: MessageKey, vars?: Vars, locale?: Locale): string {
   const loc = locale || current;
   let s = catalogs[loc]?.[key] ?? en[key] ?? String(key);
+  if (s.includes('{{shops}}') && !(vars && 'shops' in vars)) {
+    s = s.replace(/\{\{shops\}\}/g, t(regionNigeria ? 'region.shopsNG' : 'region.shops', undefined, loc));
+  }
   if (vars) {
     for (const [k, v] of Object.entries(vars)) {
       s = s.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), String(v));

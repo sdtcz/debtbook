@@ -87,7 +87,7 @@ describe('brand footer (one line, ends the message)', () => {
     );
     for (const msg of [receipt, remind, stmt]) {
       const lines = msg.split('\n');
-      expect(lines[lines.length - 1]).toBe(`Recorded in BashiBook · free credit book for shops ${link}`);
+      expect(lines[lines.length - 1]).toBe(`Recorded in BashiBook · free credit book for small shops ${link}`);
       expect(lines[lines.length - 2]).toBe('');
       expect(msg.match(/BashiBook ·/g)).toHaveLength(1);
     }

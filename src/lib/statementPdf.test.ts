@@ -131,9 +131,9 @@ describe('buildStatementPdf', () => {
 
   it('footer matches the Recorded-in line used in messages, plus the site', () => {
     const host = PUBLIC_APP_URL.replace(/^https?:\/\//, '');
-    expect(s).toContain(`(Recorded in BashiBook \\267 free credit book for shops \\267 ${host})`);
+    expect(s).toContain(`(Recorded in BashiBook \\267 free credit book for small shops \\267 ${host})`);
     // Footer (left) and page number (right) must not overlap on A4.
-    const footer = `Recorded in BashiBook · free credit book for shops · ${host}`;
+    const footer = `Recorded in BashiBook · free credit book for small shops · ${host}`;
     expect(40 + textWidth(footer, 8) + 10).toBeLessThan(A4.w - 40 - textWidth('Page 10 of 10', 8));
   });
 

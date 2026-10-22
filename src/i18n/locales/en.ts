@@ -91,7 +91,7 @@ export const en = {
   'home.chaseClose': 'Close',
   'home.chaseSent': 'Sent',
 
-  'setup.tagline': 'Your credit book on your phone. Write who owe you, remind them on WhatsApp, collect your money. Data stays on this phone. Works offline once opened.',
+  'setup.tagline': 'Your credit book on your phone. Write down who owes you, remind them on WhatsApp, collect your money. Data stays on this phone. Works offline once opened.',
   'setup.shopName': 'Shop name',
   'setup.placeholder': 'e.g. Mama Ngozi Provision',
   'setup.errorName': 'Enter your shop name',
@@ -179,8 +179,8 @@ export const en = {
   'settings.syncUnlockPrompt':
     'Enter your recovery code to unlock sync on this device (stored only on this phone):',
   'settings.syncPro': 'Multi-device sync is a Pro cloud feature',
-  'settings.aboutLine1': 'BashiBook · Nigeria · {{lang}} · ₦',
-  'settings.aboutLine2': 'Offline credit book (bashi) for shopkeepers',
+  'settings.aboutLine1': 'BashiBook · {{lang}} · ₦',
+  'settings.aboutLine2': 'Offline credit book (bashi) for {{shops}}',
   'settings.aboutTip': 'Bashi = debt (Hausa)',
   'settings.language': 'Language',
   'settings.languageChanged': 'Language set to {{lang}}',
@@ -579,7 +579,7 @@ export const en = {
   'receipt.send': 'Send receipt',
   'receipt.sendSub': 'Last entry: {{amount}}',
 
-  'growth.footer': 'Recorded in BashiBook · free credit book for shops',
+  'growth.footer': 'Recorded in BashiBook · free credit book for {{shops}}',
   'growth.footerToggle': 'Add BashiBook line to messages',
   'growth.footerToggleSub': 'Small line + link under reminders, receipts and Pay-me',
   'growth.inviteMessage': 'I use BashiBook to keep my credit book on my phone. It is free, works offline once opened, and helps me send WhatsApp reminders. Try it:',
@@ -768,6 +768,9 @@ export const en = {
 
   "pro.manageBilling": "Manage or cancel subscription",
   "pro.manageBillingSub": "Stripe billing page · sign in with the email on your receipt",
+
+  "region.shops": "small shops",
+  "region.shopsNG": "Nigerian shops",
 
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
