@@ -46,6 +46,17 @@ function isHexId(id: string): boolean {
   return /^[a-f0-9]{64}$/i.test(id);
 }
 
+type Access = 'private' | 'public';
+
+/** Private stores (Vercel's current default) and older public stores both work. */
+function accessOrder(): Access[] {
+  return process.env.BLOB_ACCESS === 'public' ? ['public', 'private'] : ['private', 'public'];
+}
+
+function isAccessMismatch(err: unknown): boolean {
+  return err instanceof Error && /(private|public) access on a (public|private) store/i.test(err.message);
+}
+
 function blobPath(backupId: string): string {
   return `${PATH_PREFIX}/${backupId.toLowerCase()}.json`;
 }
@@ -104,14 +115,24 @@ export default async function handler(req: Req, res: Res) {
 
     try {
       const { put } = await import('@vercel/blob');
-      await put(blobPath(backupId), JSON.stringify(payload), {
-        access: 'public',
-        addRandomSuffix: false,
-        allowOverwrite: true,
-        contentType: 'application/json',
-        token,
-      });
-      res.status(200).json({ ok: true, backupId: payload.backupId });
+      let lastErr: unknown;
+      for (const access of accessOrder()) {
+        try {
+          await put(blobPath(backupId), JSON.stringify(payload), {
+            access,
+            addRandomSuffix: false,
+            allowOverwrite: true,
+            contentType: 'application/json',
+            token,
+          });
+          res.status(200).json({ ok: true, backupId: payload.backupId });
+          return;
+        } catch (err) {
+          lastErr = err;
+          if (!isAccessMismatch(err)) break;
+        }
+      }
+      throw lastErr;
     } catch (err) {
       res.status(500).json({
         ok: false,
@@ -130,11 +151,31 @@ export default async function handler(req: Req, res: Res) {
     }
 
     try {
-      const { list } = await import('@vercel/blob');
+      const { get } = await import('@vercel/blob');
       const pathname = blobPath(id);
-      const { blobs } = await list({ prefix: pathname, limit: 10, token });
-      const hit = blobs.find((b) => b.pathname === pathname) || blobs[0];
-      if (!hit) {
+      let text: string | null = null;
+      let lastErr: unknown;
+      let found = false;
+      for (const access of accessOrder()) {
+        try {
+          const hit = await get(pathname, { access, token, useCache: false });
+          if (hit && hit.statusCode === 200 && hit.stream) {
+            text = await new Response(hit.stream).text();
+            found = true;
+          }
+          lastErr = undefined;
+          break;
+        } catch (err) {
+          lastErr = err;
+          if (/not ?found/i.test(err instanceof Error ? err.message : '')) {
+            lastErr = undefined;
+            break;
+          }
+          if (!isAccessMismatch(err)) break;
+        }
+      }
+      if (lastErr) throw lastErr;
+      if (!found || text == null) {
         res.status(404).json({
           ok: false,
           message: 'No cloud backup found for this recovery code',
@@ -142,16 +183,7 @@ export default async function handler(req: Req, res: Res) {
         return;
       }
 
-      const fetched = await fetch(hit.url);
-      if (!fetched.ok) {
-        res.status(502).json({
-          ok: false,
-          message: 'Failed to read stored backup blob',
-        });
-        return;
-      }
-
-      const data = (await fetched.json()) as {
+      const data = JSON.parse(text) as {
         backupId?: string;
         ciphertext?: string;
         iv?: string;
