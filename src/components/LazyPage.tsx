@@ -10,8 +10,13 @@ import { LoadError } from './LoadError';
 export function lazyPage<P extends object>(load: () => Promise<ComponentType<P>>): ComponentType<P> & { preload: () => void } {
   let cached: ComponentType<P> | null = null;
   let pending: Promise<ComponentType<P>> | null = null;
+  // Flaky 2G: retry twice by itself (1.5 s, then 4 s) before showing the "Try again" screen.
+  const loadWithRetry = (left = 2, wait = 1500): Promise<ComponentType<P>> =>
+    load().catch((e) =>
+      left > 0 ? new Promise<void>((r) => setTimeout(r, wait)).then(() => loadWithRetry(left - 1, wait * 2.7)) : Promise.reject(e),
+    );
   const get = () => {
-    pending ??= load().then((c) => (cached = c));
+    pending ??= loadWithRetry().then((c) => (cached = c));
     pending.catch(() => {
       pending = null;
     });

@@ -15,6 +15,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
+      includeManifestIcons: false,
       manifest: {
         name: 'BashiBook',
         short_name: 'BashiBook',
@@ -74,7 +75,29 @@ export default defineConfig({
         navigateFallbackAllowlist: [/^\/(index\.html)?(\?.*)?$/],
         // Static SEO page + crawler files are served by the network, never the app shell.
         navigateFallbackDenylist: [/^\/api\//, /^\/kippa-alternative/, /^\/credit-book-app/, /^\/ng\//, /^\/(robots\.txt|sitemap\.xml)$/],
-        globIgnores: ['**/kippa-alternative.html', '**/credit-book-app.html', '**/ng/*.html', '**/404.html'],
+        // Not precached (saves ~33 kB on every first visit and every update): Hausa / Yoruba strings
+        // (fetched when chosen), the marketing landing page, and icons the browser fetches itself.
+        // They are cached on first use by the runtime rule below.
+        globIgnores: [
+          '**/kippa-alternative.html',
+          '**/credit-book-app.html',
+          '**/ng/*.html',
+          '**/404.html',
+          '**/assets/ha-*.js',
+          '**/assets/yo-*.js',
+          '**/assets/LandingPage-*.js',
+          'favicon.ico',
+          'icons/icon-512.png',
+          'icons/icon-192.png',
+        ],
+        runtimeCaching: [
+          {
+            // Hashed file names never change content, so cache-first is safe.
+            urlPattern: ({ url, sameOrigin }) => sameOrigin && /^\/assets\/.+-[\w-]{8}\.(js|css)$/.test(url.pathname),
+            handler: 'CacheFirst',
+            options: { cacheName: 'bb-lazy-assets', expiration: { maxEntries: 30 } },
+          },
+        ],
       },
       devOptions: {
         enabled: true,
@@ -84,5 +107,20 @@ export default defineConfig({
   build: {
     target: 'es2020',
     cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        // The entry keeps a FIXED name (served with must-revalidate, precached by revision), so
+        // lazy chunks that import from it keep their hashes when only the entry changes: an update
+        // re-downloads the files that really changed instead of every chunk (~90 kB → ~40 kB).
+        entryFileNames: 'app.js',
+        // Rarely-changing parts of the start-up code get their own hashed chunks, so a deploy
+        // doesn't re-send them: the UI library + IndexedDB wrapper, and the English strings.
+        manualChunks(id) {
+          if (/node_modules\/(preact|idb)\//.test(id)) return 'vendor';
+          if (id.endsWith('/src/i18n/locales/en.ts')) return 'en';
+          return undefined;
+        },
+      },
+    },
   },
 });

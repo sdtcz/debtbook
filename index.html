@@ -35,11 +35,14 @@
       @keyframes boot{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
       @media (prefers-reduced-motion:reduce){#boot i::after{animation:none;width:100%}}
       #app:not(:empty)~#boot{display:none}
+      /* Flaky 2G: if the app has not started after 15 s (a file failed to arrive), say how to retry. */
+      #boot small{font:600 1rem/1.4 system-ui,sans-serif;color:#0f766e;opacity:0;animation:bootretry 0s 15s forwards}
+      @keyframes bootretry{to{opacity:1}}
     </style>
   </head>
   <body>
     <div id="app"></div>
-    <div id="boot" aria-hidden="true">BashiBook<i></i></div>
+    <div id="boot">BashiBook<i></i><small>Slow network? Reload the page to try again.</small></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

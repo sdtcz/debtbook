@@ -24,9 +24,6 @@ import {
   isPhoneLikeViewport,
   shouldShowApp,
 } from './lib/viewportMode';
-import { CustomerDetailPage } from './pages/CustomerDetailPage';
-import { EntryFormPage } from './pages/EntryFormPage';
-import { HomePage } from './pages/HomePage';
 import { lazyPage } from './components/LazyPage';
 
 const LandingPage = lazyPage(() => import('./pages/LandingPage').then((m) => m.LandingPage));
@@ -41,9 +38,12 @@ const SuppliersPage = lazyPage(() => import('./pages/suppliers/SupplierPages').t
 const SupplierFormPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SupplierFormPage));
 const SupplierDetailPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SupplierDetailPage));
 const SupplierEntryPage = lazyPage(() => import('./pages/suppliers/SupplierPages').then((m) => m.SupplierEntryPage));
-import { PayMePage } from './pages/PayMePage';
 import { SignedOutPage } from './pages/SignedOutPage';
 // First-run only: kept out of the main bundle (precached by the service worker).
+const CustomerDetailPage = lazyPage(() => import('./pages/CustomerDetailPage').then((m) => m.CustomerDetailPage));
+const EntryFormPage = lazyPage(() => import('./pages/EntryFormPage').then((m) => m.EntryFormPage));
+const HomePage = lazyPage(() => import('./pages/HomePage').then((m) => m.HomePage));
+const PayMePage = lazyPage(() => import('./pages/PayMePage').then((m) => m.PayMePage));
 const SetupPage = lazyPage(() => import('./pages/SetupPage').then((m) => m.SetupPage));
 const ForgotPinSheet = lazyPage(() => import('./components/ForgotPinSheet').then((m) => m.ForgotPinSheet));
 
@@ -174,6 +174,7 @@ export function App() {
     if (shop?.locale) initLocale(shop.locale);
     setCurrency(shop?.currency);
     setHasShop(Boolean(shop?.name));
+    if (shop?.name) HomePage.preload();
     setShopName(shop?.name);
     setPinHash(shop?.pinHash);
     setPinSalt(shop?.pinSalt);
@@ -336,6 +337,7 @@ export function App() {
   }
 
   if (!hasShop || route.name === 'setup') {
+    HomePage.preload(); // next screen after setup: fetch it while the owner types
     return (
       <>
         {frame(

@@ -1,6 +1,7 @@
 import { currencySymbol } from '../lib/money';
 import { defaultCurrency } from '../lib/currency';
-import { useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
+import { wantsSaveData } from '../lib/saveData';
 import { PUBLIC_APP_LABEL, PUBLIC_APP_URL } from '../config';
 import { appEmbedUrl, setForceApp } from '../lib/viewportMode';
 import { QrCode } from '../components/QrCode';
@@ -42,6 +43,8 @@ type Props = {
 export function LandingPage({ onUseAppHere }: Props) {
   // Canonical public URL (src/config.ts) — never the raw deployment host.
   const href = `${PUBLIC_APP_URL}/`;
+  // Save-Data: the live preview loads a whole second copy of the app, so only on tap.
+  const [preview, setPreview] = useState(() => !wantsSaveData());
   const embed = typeof window !== 'undefined' ? appEmbedUrl() : '/?app=1#/';
   // Landing copy is English; {{shops}} is "Nigerian shops" only for visitors in Nigeria.
   useLocale(); // re-render when the region answer arrives
@@ -179,12 +182,18 @@ export function LandingPage({ onUseAppHere }: Props) {
           <div class="landing-stage-glow" aria-hidden="true" />
           <div class="phone-frame" aria-label="Live BashiBook preview">
             <div class="phone-notch" aria-hidden="true" />
-            <iframe
-              class="phone-screen"
-              title="BashiBook app preview"
-              src={embed}
-              allow="clipboard-write"
-            />
+            {preview ? (
+              <iframe
+                class="phone-screen"
+                title="BashiBook app preview"
+                src={embed}
+                allow="clipboard-write"
+              />
+            ) : (
+              <button type="button" class="btn btn-primary landing-preview-btn" onClick={() => setPreview(true)}>
+                Show live preview
+              </button>
+            )}
           </div>
           <div class="landing-phone-reflect" aria-hidden="true" />
           <p class="landing-stage-caption">Live preview · tap around inside the phone</p>

@@ -5703,3 +5703,22 @@ a.settings-row {
 .forgot-step { border-top: 1px solid var(--border, #e2e8f0); padding: 14px 0; }
 .forgot-danger h3 { color: var(--danger, #b91c1c); }
 .forgot-msg { color: var(--danger, #b91c1c); font-weight: 600; }
+
+/* ── Save-Data / prefers-reduced-data: no motion, blur or decoration (cheap phones, costly data) ── */
+.save-data *,
+.save-data *::before,
+.save-data *::after {
+  animation: none !important;
+  transition: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.save-data .landing-orb,
+.save-data .landing-noise,
+.save-data .landing-grid,
+.save-data .landing-naira-wm,
+.save-data .landing-stage-glow,
+.save-data .landing-phone-reflect {
+  display: none !important;
+}
+.landing-preview-btn { margin: auto; }

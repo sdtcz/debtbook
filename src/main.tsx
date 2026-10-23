@@ -8,12 +8,14 @@ import { captureAttribution } from './lib/growth';
 import { navigate } from './lib/router';
 import { localeReady } from './i18n';
 import { applyRegion, refreshRegion } from './lib/region';
+import { applySaveData } from './lib/saveData';
 
 normalizeCheckoutReturnUrl();
 // First-touch src/ref tags (?app=1&src=…&ref=…) — stored on this device only.
 captureAttribution();
 // Region wording ("Nigerian shops" only in Nigeria) from the cached geo answer / device hints; refreshed after mount.
 applyRegion();
+applySaveData();
 
 registerSW({ immediate: true });
 
