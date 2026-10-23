@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'preact/hooks';
 import { isRegionNigeria } from '../i18n';
-import { CURRENCIES, currencySymbol, setCurrency } from '../lib/money';
-import { currencyLabel, defaultCurrency } from '../lib/currency';
+import { currencySymbol, setCurrency } from '../lib/money';
+import { defaultCurrency } from '../lib/currency';
+import { CurrencyOptions } from '../components/CurrencyOptions';
 import { saveShop, setShopLocale } from '../db/repo';
 import { notifyChanged } from '../components/StatusBadge';
 import { useLocale } from '../hooks/useLocale';
@@ -109,11 +110,7 @@ export function SetupPage({ onDone }: Props) {
             value={currency}
             onChange={(e) => setPicked((e.target as HTMLSelectElement).value)}
           >
-            {CURRENCIES.map(([code]) => (
-              <option key={code} value={code}>
-                {currencyLabel(code, locale)}
-              </option>
-            ))}
+            <CurrencyOptions />
           </select>
         </div>
         <button class="btn btn-primary" type="submit" disabled={busy}>

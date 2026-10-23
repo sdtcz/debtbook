@@ -1,5 +1,5 @@
-import { CURRENCIES, currencySymbol, getCurrency, setCurrency } from '../lib/money';
-import { currencyLabel } from '../lib/currency';
+import { currencySymbol, getCurrency, setCurrency } from '../lib/money';
+import { CurrencyOptions } from '../components/CurrencyOptions';
 import { BackButton } from '../components/BackButton';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { LogoutSheet } from '../components/LogoutSheet';
@@ -790,11 +790,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
               value={getCurrency()}
               onChange={(e) => void changeCurrency((e.target as HTMLSelectElement).value)}
             >
-              {CURRENCIES.map(([code]) => (
-                <option key={code} value={code}>
-                  {currencyLabel(code, locale)}
-                </option>
-              ))}
+              <CurrencyOptions />
             </select>
             <div class="hint">{t('settings.currencyHint')}</div>
           </div>

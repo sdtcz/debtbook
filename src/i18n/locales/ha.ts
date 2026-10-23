@@ -819,6 +819,9 @@ export const ha: Record<MessageKey, string> = {
   "customerForm.phonePlaceholderAny": "+… (tare da lambar ƙasa)",
   "customerForm.phoneNeedsCode": "Ƙara lambar ƙasa (fara da +) don WhatsApp ya iya samun wannan lambar.",
 
+  "currency.groupAfrica": "Afirka",
+  "currency.groupOther": "Sauran kuɗaɗe",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

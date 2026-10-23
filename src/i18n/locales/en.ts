@@ -817,6 +817,9 @@ export const en = {
   "customerForm.phonePlaceholderAny": "+… (with country code)",
   "customerForm.phoneNeedsCode": "Add the country code (start with +) so WhatsApp can find this number.",
 
+  "currency.groupAfrica": "Africa",
+  "currency.groupOther": "Other currencies",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',
