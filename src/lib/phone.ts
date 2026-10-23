@@ -65,10 +65,30 @@ export function normalizeWhatsAppDigits(phone: string, dial: string | null = dia
   if (raw.startsWith('+')) return digits.length >= 8 ? digits : null;
   if (digits.startsWith('00')) digits = digits.slice(2);
   else if (digits.startsWith('0')) {
-    if (!dial || digits.length < 8) return null;
+    if (!dial || digits.length - 1 < minNational(dial)) return null;
     digits = dial + digits.slice(1);
   }
   return digits.length >= 10 ? digits : null;
+}
+
+/**
+ * Shortest mobile number after the trunk 0, by calling code. Source: libphonenumber
+ * PhoneNumberMetadata.xml, <mobile><possibleLengths national=…> (fetched 22 Oct 2026).
+ * Every other code in DIAL_CODES is 9 digits (South Africa's shorter lengths are not mobiles).
+ */
+const MIN_NATIONAL: Readonly<Record<string, number>> = {
+  '234': 10, '20': 10, '44': 10, '91': 10, '92': 10, '880': 10, '63': 10,
+  '232': 8, '291': 7, '243': 7, '231': 7, '252': 7,
+};
+
+export function minNational(dial: string): number {
+  return MIN_NATIONAL[dial] ?? 9;
+}
+
+/** A local (leading 0) number with a known country code that is too short for WhatsApp. */
+export function looksTooShort(phone: string, dial: string | null = dialCode()): boolean {
+  const digits = phone.replace(/\D/g, '');
+  return !!dial && !phone.trim().startsWith('+') && /^0[1-9]/.test(digits) && digits.length - 1 < minNational(dial);
 }
 
 /** A local number we can't turn international: ask for the +country code. */

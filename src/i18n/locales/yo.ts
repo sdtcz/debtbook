@@ -822,6 +822,8 @@ export const yo: Record<MessageKey, string> = {
   "currency.groupAfrica": "Áfíríkà",
   "currency.groupOther": "Àwọn owó mìíràn",
 
+  "customerForm.phoneTooShort": "Nọ́ńbà yìí dà bí ẹni pé ó kúrú jù fún WhatsApp. Ṣàyẹ̀wò rẹ̀, tàbí tẹ̀ ẹ́ pẹ̀lú + àti kóòdù orílẹ̀-èdè.",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

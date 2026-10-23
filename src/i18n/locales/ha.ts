@@ -822,6 +822,8 @@ export const ha: Record<MessageKey, string> = {
   "currency.groupAfrica": "Afirka",
   "currency.groupOther": "Sauran kuɗaɗe",
 
+  "customerForm.phoneTooShort": "Wannan lambar ta yi gajarta don WhatsApp. Duba ta, ko rubuta ta da + da lambar ƙasa.",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

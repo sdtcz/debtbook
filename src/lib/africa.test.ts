@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { CURRENCIES, currencySymbol, formatMoney, formatMoneyWhole, info, parseAmount, quickAmounts, setCurrency } from './money';
 import { currencyForCountry, currencyGroups, currencyLabel, defaultCurrency } from './currency';
-import { DIAL_CODES, dialCode, normalizeWhatsAppDigits, shopCountry } from './phone';
+import { DIAL_CODES, dialCode, looksTooShort, minNational, normalizeWhatsAppDigits, shopCountry } from './phone';
 
 afterEach(() => setCurrency('NGN'));
 
@@ -110,5 +110,43 @@ describe('dial codes', () => {
     expect(shopCountry('ZAR', 'NA')).toBe('NA');
     expect(shopCountry('ZAR', 'GB')).toBe('ZA');
     expect(shopCountry('ZAR', null)).toBe('ZA');
+  });
+});
+
+describe('per-country minimum length (libphonenumber mobile lengths)', () => {
+  it('Nigeria rejects too-short local numbers again (10 digits after the 0)', () => {
+    expect(normalizeWhatsAppDigits('0803 123 4567', '234')).toBe('2348031234567');
+    expect(normalizeWhatsAppDigits('0803 123 456', '234')).toBeNull();
+    expect(normalizeWhatsAppDigits('08031234', '234')).toBeNull();
+    expect(looksTooShort('08031234', '234')).toBe(true);
+    expect(looksTooShort('0803 123 4567', '234')).toBe(false);
+  });
+
+  it("Eritrea's 7-digit and Sierra Leone's 8-digit mobiles still work", () => {
+    expect(normalizeWhatsAppDigits('07 123 456', '291')).toBe('2917123456');
+    expect(normalizeWhatsAppDigits('07 123 45', '291')).toBeNull();
+    expect(normalizeWhatsAppDigits('076 123 456', '232')).toBe('23276123456');
+    expect(normalizeWhatsAppDigits('076 123 45', '232')).toBeNull();
+  });
+
+  it('default is 9 digits after the 0 (Ghana, Kenya…)', () => {
+    expect(minNational('233')).toBe(9);
+    expect(normalizeWhatsAppDigits('024 412 3456', '233')).toBe('233244123456');
+    expect(normalizeWhatsAppDigits('024 412 345', '233')).toBeNull();
+    expect(looksTooShort('024 412 345', '233')).toBe(true);
+  });
+
+  it('every dial code has a minimum between 7 and 10; + numbers and unknown regions are not "too short"', () => {
+    for (const d of new Set(Object.values(DIAL_CODES))) expect(minNational(d)).toBeGreaterThanOrEqual(7);
+    for (const d of new Set(Object.values(DIAL_CODES))) expect(minNational(d)).toBeLessThanOrEqual(10);
+    expect(looksTooShort('+234 803', '234')).toBe(false);
+    expect(looksTooShort('0803', null)).toBe(false);
+  });
+
+  it('too short: WhatsApp opens without a number (no broken wa.me link)', async () => {
+    const { buildWhatsAppUri } = await import('./sms');
+    setCurrency('NGN');
+    expect(buildWhatsAppUri('0803 123 456', 'hi')).toBeNull();
+    expect(buildWhatsAppUri('0803 123 4567', 'hi')).toBe('https://wa.me/2348031234567?text=hi');
   });
 });

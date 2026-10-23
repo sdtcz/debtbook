@@ -820,6 +820,8 @@ export const en = {
   "currency.groupAfrica": "Africa",
   "currency.groupOther": "Other currencies",
 
+  "customerForm.phoneTooShort": "This number looks too short for WhatsApp. Check it, or type it with + and the country code.",
+
   'locale.name.en': 'English',
   'locale.name.ha': 'Hausa',
   'locale.name.yo': 'Yorùbá',

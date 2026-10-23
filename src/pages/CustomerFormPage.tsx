@@ -22,7 +22,7 @@ import {
 } from '../lib/contacts';
 import { parseAmount, currencySymbol } from '../lib/money';
 import { goBack, goHome, navigate } from '../lib/router';
-import { needsCountryCode, normalizeWhatsAppDigits, isNigeriaShop } from '../lib/phone';
+import { looksTooShort, needsCountryCode, normalizeWhatsAppDigits, isNigeriaShop } from '../lib/phone';
 import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
@@ -72,6 +72,7 @@ export function CustomerFormPage({ id, toast }: Props) {
   const editing = Boolean(id);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [phoneTyping, setPhoneTyping] = useState(false);
   const [note, setNote] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [creditLimit, setCreditLimit] = useState('');
@@ -345,6 +346,8 @@ export function CustomerFormPage({ id, toast }: Props) {
                 value={phone}
                 placeholder={t(isNigeriaShop() ? 'customerForm.phonePlaceholder' : 'customerForm.phonePlaceholderAny')}
                 onInput={(e) => setPhone((e.target as HTMLInputElement).value)}
+                onFocus={() => setPhoneTyping(true)}
+                onBlur={() => setPhoneTyping(false)}
               />
               <button
                 type="button"
@@ -357,7 +360,11 @@ export function CustomerFormPage({ id, toast }: Props) {
               </button>
             </div>
             <div class="hint">
-              {needsCountryCode(phone) ? t('customerForm.phoneNeedsCode') : t('customerForm.phoneHint')}
+              {needsCountryCode(phone)
+                ? t('customerForm.phoneNeedsCode')
+                : !phoneTyping && looksTooShort(phone)
+                  ? t('customerForm.phoneTooShort')
+                  : t('customerForm.phoneHint')}
             </div>
           </div>
           <button
