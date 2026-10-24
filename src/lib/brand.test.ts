@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { existsSync, statSync } from 'node:fs';
+// node:fs without @types/node (the app tsconfig type-checks tests in the build).
+type Fs = { existsSync(p: string): boolean; statSync(p: string): { size: number } };
+const { existsSync, statSync } = (await import(/* @vite-ignore */ 'node:' + 'fs')) as Fs;
 import viteConfig from '../../vite.config.ts?raw';
 import indexHtml from '../../index.html?raw';
 import cbNeutral from '../../public/credit-book-app.html?raw';
