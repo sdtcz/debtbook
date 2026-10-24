@@ -14,7 +14,7 @@ export default defineConfig({
     preact(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/icon.svg', 'icons/apple-touch-icon.png'],
+      includeAssets: ['icons/icon.svg', 'brand/wordmark.svg', 'brand/wordmark-reverse.svg'],
       includeManifestIcons: false,
       manifest: {
         name: 'BashiBook',
@@ -50,23 +50,26 @@ export default defineConfig({
         start_url: '/?app=1',
         lang: 'en',
         icons: [
-          {
-            src: 'icons/icon-192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: 'icons/icon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-          {
-            src: 'icons/icon-512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
+          { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: 'icons/maskable-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
+          { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'icons/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
         ],
+        // Shown by Android's richer install sheet. WebP (~60 kB each), fetched only by the install UI.
+        screenshots: [
+          ['See who owes you, at a glance', 1],
+          ['Every sale and payment, in order', 2],
+          ['Add a credit sale in seconds', 3],
+          ['Remind on WhatsApp in one tap', 4],
+          ['Get paid faster', 5],
+        ].map(([label, n]) => ({
+          src: `screenshots/screenshot-${n}.webp`,
+          sizes: '1080x1920',
+          type: 'image/webp',
+          form_factor: 'narrow' as const,
+          label: label as string,
+        })),
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
@@ -89,6 +92,11 @@ export default defineConfig({
           'favicon.ico',
           'icons/icon-512.png',
           'icons/icon-192.png',
+          'icons/maskable-192.png',
+          'icons/icon-maskable-512.png',
+          'apple-touch-icon.png',
+          'og-image*.png',
+          'favicon.svg',
         ],
         runtimeCaching: [
           {

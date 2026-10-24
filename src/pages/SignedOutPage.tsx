@@ -1,4 +1,3 @@
-import { currencySymbol } from '../lib/money';
 import { useLocale } from '../hooks/useLocale';
 import { LOCALE_OPTIONS } from '../i18n';
 
@@ -32,9 +31,7 @@ export function SignedOutPage({ shopName, onSignIn, onErase }: Props) {
         })}
       </div>
       <div class="setup-soft-hero">
-        <div class="setup-crest" aria-hidden="true">
-          {currencySymbol()}
-        </div>
+        <img class="signed-out-mark" src="/icons/icon.svg" width={56} height={56} alt="" />
         <div class="setup-kicker">{t('signedOut.kicker')}</div>
         <h1>{t('signedOut.title')}</h1>
         <p>{t('signedOut.body', { shop: shopName })}</p>

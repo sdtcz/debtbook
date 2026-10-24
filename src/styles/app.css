@@ -5722,3 +5722,16 @@ a.settings-row {
   display: none !important;
 }
 .landing-preview-btn { margin: auto; }
+
+/* ── Brand lockup: speech-bubble "B" mark + wordmark + tagline (final pack, Oct 2026) ── */
+.brand-lockup { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-mark { width: 44px; height: 44px; border-radius: 12px; flex: none; display: block; }
+.brand-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.brand-h1 { margin: 0; line-height: 0; font-size: inherit; }
+.brand-wordmark { display: block; width: 132px; height: 26px; }
+.brand-tagline { font-size: 0.85rem; font-weight: 600; color: #475569; line-height: 1.2; }
+.brand-lockup.reverse .brand-tagline { color: #e2e8f0; }
+.landing-nav-brand .brand-mark { width: 36px; height: 36px; border-radius: 10px; }
+.landing-nav-brand .brand-wordmark { width: 112px; height: 22px; }
+.setup-soft-hero .brand-lockup { margin: 0 0 10px; }
+.signed-out-mark { width: 56px; height: 56px; border-radius: 16px; display: block; margin: 0 0 6px; }

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'preact/hooks';
 import { isRegionNigeria } from '../i18n';
-import { currencySymbol, setCurrency } from '../lib/money';
+import { setCurrency } from '../lib/money';
 import { defaultCurrency } from '../lib/currency';
 import { CurrencyOptions } from '../components/CurrencyOptions';
+import { BrandLockup } from '../components/BrandLockup';
 import { saveShop, setShopLocale } from '../db/repo';
 import { notifyChanged } from '../components/StatusBadge';
 import { useLocale } from '../hooks/useLocale';
@@ -71,11 +72,8 @@ export function SetupPage({ onDone }: Props) {
       </div>
 
       <div class="setup-soft-hero">
-        <div class="setup-crest" aria-hidden="true">
-          {currencySymbol()}
-        </div>
         <div class="setup-kicker">{t('setup.welcome')}</div>
-        <h1>BashiBook</h1>
+        <BrandLockup heading />
         <p>{t('setup.tagline')}</p>
         <ul class="setup-chips">
           <li>✓ {t('setup.chipOffline')}</li>

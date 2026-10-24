@@ -5,6 +5,7 @@ import { wantsSaveData } from '../lib/saveData';
 import { PUBLIC_APP_LABEL, PUBLIC_APP_URL } from '../config';
 import { appEmbedUrl, setForceApp } from '../lib/viewportMode';
 import { QrCode } from '../components/QrCode';
+import { BrandLockup } from '../components/BrandLockup';
 import { useLocale } from '../hooks/useLocale';
 import { isRegionNigeria, t as tr } from '../i18n';
 
@@ -92,10 +93,7 @@ export function LandingPage({ onUseAppHere }: Props) {
 
       <nav class="landing-nav">
         <div class="landing-nav-brand">
-          <span class="landing-logo-mark" aria-hidden="true">
-            {sym}
-          </span>
-          <span class="landing-logo-text">BashiBook</span>
+          <BrandLockup reverse />
           <span class="landing-tag-chip">{ng ? 'Nigeria · ₦ · PWA' : 'Works offline · PWA'}</span>
         </div>
         <div class="landing-nav-actions">
