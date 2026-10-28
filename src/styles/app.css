@@ -5735,3 +5735,11 @@ a.settings-row {
 .landing-nav-brand .brand-wordmark { width: 112px; height: 22px; }
 .setup-soft-hero .brand-lockup { margin: 0 0 10px; }
 .signed-out-mark { width: 56px; height: 56px; border-radius: 16px; display: block; margin: 0 0 6px; }
+
+/* Domain move (old address only) */
+.move-overlay { position: fixed; inset: 0; z-index: 90; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.move-card { background: var(--surface, #fff); border-radius: 18px; padding: 20px; max-width: 380px; width: 100%; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25); }
+.move-card h2 { margin: 0 0 8px; color: var(--primary); }
+.move-card .btn { display: block; width: 100%; margin-top: 8px; text-align: center; box-sizing: border-box; }
+.move-pill { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(76px + env(safe-area-inset-bottom, 0px)); z-index: 90; border: 0; border-radius: 999px; padding: 10px 16px; font-weight: 700; background: var(--primary); color: #fff; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); }
+.move-in { text-align: center; }

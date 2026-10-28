@@ -3,6 +3,7 @@
 > DRAFT for legal review against the Nigeria Data Protection Act 2023 (NDPA) and the NDPC's General Application and Implementation Directive. Not published. Not legal advice.
 
 Last updated: [date]
+Website: https://bashibook.app
 
 ## 1. Data controller
 [Operator legal name], [address]. Contact for privacy questions and requests: [privacy email]. [Data Protection Officer: name/contact, if required.] [NDPC registration as a data controller/processor of major importance: number, if required.]

@@ -9,6 +9,7 @@ import { navigate } from './lib/router';
 import { localeReady } from './i18n';
 import { applyRegion, refreshRegion } from './lib/region';
 import { applySaveData } from './lib/saveData';
+import { MOVE_OLD_ORIGIN } from './config';
 
 normalizeCheckoutReturnUrl();
 // First-touch src/ref tags (?app=1&src=…&ref=…) — stored on this device only.
@@ -33,7 +34,17 @@ document.addEventListener('click', (e) => {
 
 const root = document.getElementById('app');
 // Hausa/Yoruba users: wait for their strings (precached; ~instant offline) to avoid an English flash.
-if (root) void localeReady().finally(() => mount(root));
+const start = (then?: () => void) => root && void localeReady().finally(() => (mount(root), then?.()));
+if (location.origin === MOVE_OLD_ORIGIN && window.top === window) {
+  // Old address: books stay here until moved (IndexedDB is per address); empty phones go to bashibook.app.
+  import('./lib/moveOld')
+    .then((m) => m.oldHostBoot().then((stay) => stay && start(m.mountMoveCard)))
+    .catch(() => start());
+} else if (location.hash.startsWith('#/move-in') && root) {
+  void localeReady().finally(() => import('./lib/moveIn').then((m) => m.mountMoveIn(root), () => start()));
+} else {
+  start();
+}
 
 function mount(root: HTMLElement) {
   render(<App />, root);

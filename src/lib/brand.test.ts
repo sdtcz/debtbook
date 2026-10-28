@@ -38,7 +38,7 @@ describe('logo pack (speech-bubble B)', () => {
   });
 
   it('index: 1200×630 share image, svg favicon, root apple-touch-icon', () => {
-    expect(indexHtml).toContain('content="https://debtbook-neon.vercel.app/og-image.png"');
+    expect(indexHtml).toContain('content="https://bashibook.app/og-image.png"');
     expect(indexHtml).toContain('<meta property="og:image:width" content="1200" />');
     expect(indexHtml).toContain('<meta name="twitter:card" content="summary_large_image" />');
     expect(indexHtml).toContain('href="/favicon.svg"');

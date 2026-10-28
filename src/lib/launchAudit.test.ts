@@ -34,7 +34,7 @@ describe('404 handling', () => {
 describe('index.html share tags', () => {
   it('has description, canonical, og and twitter tags', () => {
     expect(indexHtml).toMatch(/<meta name="description" content="[^"]{50,160}" \/>/);
-    expect(indexHtml).toContain('<link rel="canonical" href="https://debtbook-neon.vercel.app/" />');
+    expect(indexHtml).toContain('<link rel="canonical" href="https://bashibook.app/" />');
     for (const p of ['og:title', 'og:description', 'og:url', 'og:image', 'og:type']) expect(indexHtml).toContain(`property="${p}"`);
     for (const n of ['twitter:card', 'twitter:title', 'twitter:image']) expect(indexHtml).toContain(`name="${n}"`);
     expect(indexHtml).toContain('href="/favicon.ico"');

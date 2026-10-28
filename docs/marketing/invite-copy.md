@@ -5,7 +5,7 @@ The app's default "Invite a trader" message is plain English (`growth.inviteMess
 
 The Pidgin lines below are **marketing copy only**: use them in hand-picked posts,
 WhatsApp status updates or market flyers where Pidgin fits the audience. They are
-not shown in the app. Always append a tagged link, e.g. `https://debtbook-neon.vercel.app/?app=1&src=<channel>`.
+not shown in the app. Always append a tagged link, e.g. `https://bashibook.app/?app=1&src=<channel>`.
 
 ## Pidgin (pcm), Nigeria
 

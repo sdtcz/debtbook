@@ -64,7 +64,7 @@ export function brandFooterLines(src: LinkSource = 'rem'): string[] {
   return ['', `${t('growth.footer')} ${appLink(src)}`];
 }
 
-/** Host-only footer for PDFs (no tracking query), e.g. "debtbook-neon.vercel.app". */
+/** Host-only footer for PDFs (no tracking query), e.g. "bashibook.app". */
 export function brandFooterHost(): string {
   return brandFooterEnabled() ? PUBLIC_APP_URL.replace(/^https?:\/\//, '') : '';
 }

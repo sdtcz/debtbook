@@ -9,10 +9,15 @@
 const envUrl =
   (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_PUBLIC_APP_URL;
 
-export const PUBLIC_APP_URL: string = (envUrl || 'https://debtbook-neon.vercel.app').replace(
+export const PUBLIC_APP_URL: string = (envUrl || 'https://bashibook.app').replace(
   /\/+$/,
   '',
 );
+
+/** Old address (before bashibook.app). Build-time override only, for local two-port tests. */
+export const MOVE_OLD_ORIGIN: string =
+  (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_MOVE_OLD_ORIGIN ||
+  'https://debtbook-neon.vercel.app';
 
 /** Brand label shown instead of a raw host name in the UI. */
 export const PUBLIC_APP_LABEL = 'BashiBook';

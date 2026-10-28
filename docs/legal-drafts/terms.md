@@ -3,6 +3,7 @@
 > DRAFT for legal review. Not published. Not legal advice. Fill in every `[placeholder]`.
 
 Last updated: [date]
+Website: https://bashibook.app
 
 ## 1. Who we are
 BashiBook ("we", "us") is operated by [operator legal name], [registered address], [country of registration]. Contact: [support email].

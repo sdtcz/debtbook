@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { IDBFactory } from 'fake-indexeddb';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getDb, resetDbCache } from '../db/schema';
 import { getShop, saveShop, setEntitlement, updateShopFields } from '../db/repo';
 import { getEntitlement, isPro } from './entitlement';
@@ -103,6 +103,12 @@ async function freshDb() {
 
 describe('trial once per phone (IndexedDB + localStorage)', () => {
   beforeEach(freshDb);
+  // Code under test also reads the clock (e.g. importBackup): pin it to the test's "now".
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(now);
+  });
+  afterEach(() => vi.useRealTimers());
 
   it('starts once; re-tapping or restarting after it ends is refused', async () => {
     await saveShop('Shop');

@@ -3,6 +3,19 @@
   "framework": null,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/((?!api/|assets/|icons/|brand/|screenshots/|app\\.js$|sw\\.js$|workbox-|manifest\\.webmanifest$|favicon\\.|apple-touch-icon\\.png$|index\\.html$).+)",
+      "has": [
+        {
+          "type": "host",
+          "value": "debtbook-neon.vercel.app"
+        }
+      ],
+      "destination": "https://bashibook.app/$1",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",

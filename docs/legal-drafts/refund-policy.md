@@ -3,6 +3,7 @@
 > DRAFT for legal review. Not published. Not legal advice.
 
 Last updated: [date]
+Website: https://bashibook.app
 
 ## Plans and billing
 - BashiBook Pro costs [USD 1.99] per month or [USD 15] per year, billed in US dollars by Stripe. Your bank may add currency conversion or foreign transaction fees.

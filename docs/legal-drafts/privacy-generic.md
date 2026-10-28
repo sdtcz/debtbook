@@ -3,6 +3,7 @@
 > DRAFT for legal review. A GDPR/UK-GDPR-style baseline for users outside Nigeria; check local law (e.g. Ghana Data Protection Act, Kenya DPA, South Africa POPIA) before publishing in a specific market. Not legal advice.
 
 Last updated: [date]
+Website: https://bashibook.app
 
 ## Who is responsible
 [Operator legal name], [address]. Privacy contact: [privacy email]. [EU/UK representative, if required.]

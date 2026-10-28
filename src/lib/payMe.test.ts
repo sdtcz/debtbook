@@ -63,7 +63,7 @@ describe('hasPayMeDetails', () => {
 describe('buildPayMePageUrl', () => {
   it('encodes kobo amount and details', () => {
     const url = buildPayMePageUrl({
-      origin: 'https://debtbook-neon.vercel.app',
+      origin: 'https://bashibook.app',
       shop: shop({
         name: 'Mama Shop',
         payBankName: 'Opay',
@@ -74,7 +74,7 @@ describe('buildPayMePageUrl', () => {
       amountKobo: 150050,
       customerName: 'Chidi',
     });
-    expect(url.startsWith('https://debtbook-neon.vercel.app/#/payme?')).toBe(
+    expect(url.startsWith('https://bashibook.app/#/payme?')).toBe(
       true,
     );
     const q = url.split('?')[1];

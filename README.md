@@ -3,7 +3,7 @@
 Offline-first **customer credit ledger** (book debt / udhar) for African shopkeepers.  
 **Nigeria · English · ₦ Naira** · Vite + Preact + IndexedDB + PWA.
 
-Live: https://debtbook-neon.vercel.app
+Live: https://bashibook.app (the old https://debtbook-neon.vercel.app address redirects; see docs/domain-move.md)
 
 **Public URL:** every user-facing link (Pay-me links, reminders footer, invite links, landing QR) is built from `PUBLIC_APP_URL` in `src/config.ts` (override with `VITE_PUBLIC_APP_URL` at build time). Switching to a custom domain is a one-line change there. `api/checkout.ts` keeps its own Stripe return-origin allow-list (`DEFAULT_ORIGIN`) — add the new domain there too when it is attached.
 
@@ -37,7 +37,7 @@ npm test
 
 **Cloud backup / multi-device sync (Pro):** `api/cloud-backup.ts` stores encrypted blobs via [Vercel Blob](https://vercel.com/docs/storage/vercel-blob). Sync MVP reuses that snapshot channel: Unlock sync on a device (recovery code in IndexedDB only) → Sync now / auto-push. `GET ?id=&meta=1` returns timestamps without ciphertext. Requires `BLOB_READ_WRITE_TOKEN` (501 without it). Recovery code is never uploaded or logged.
 
-**Real payments (Stripe):** `api/checkout.ts` creates a Stripe Checkout Session (subscription mode, inline `price_data`), `api/verify.ts` confirms it server-side (paid + active subscription) before Pro unlocks, and `api/webhook.ts` verifies `Stripe-Signature`. They return 501 until `STRIPE_SECRET_KEY` (checkout/verify) and `STRIPE_WEBHOOK_SECRET` (webhook) are set on Vercel. Webhook endpoint: `https://debtbook-neon.vercel.app/api/webhook` — events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.updated`, `customer.subscription.deleted`. The earlier Paystack flow is in git history (commit f805ac5).
+**Real payments (Stripe):** `api/checkout.ts` creates a Stripe Checkout Session (subscription mode, inline `price_data`), `api/verify.ts` confirms it server-side (paid + active subscription) before Pro unlocks, and `api/webhook.ts` verifies `Stripe-Signature`. They return 501 until `STRIPE_SECRET_KEY` (checkout/verify) and `STRIPE_WEBHOOK_SECRET` (webhook) are set on Vercel. Webhook endpoint: `https://bashibook.app/api/webhook` (the old `https://debtbook-neon.vercel.app/api/webhook` keeps answering: /api is never redirected) — events `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.updated`, `customer.subscription.deleted`. The earlier Paystack flow is in git history (commit f805ac5).
 
 ## Features (v2)
 
