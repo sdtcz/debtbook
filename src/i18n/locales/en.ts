@@ -830,7 +830,7 @@ export const en = {
   "move.pill": "Move your book to bashibook.app",
   "move.working": "Opening bashibook.app… keep this page open until it says done.",
   "move.doneTitle": "Your book has moved",
-  "move.done": "{{customers}} customers and {{entries}} entries are now at bashibook.app. Use bashibook.app from now on and add it to your home screen. A copy stays here.",
+  "move.done": "Your book is now at bashibook.app (customers: {{customers}}, entries: {{entries}}). Use bashibook.app from now on and add it to your home screen. A copy stays here.",
   "move.open": "Open bashibook.app",
   "move.popupBlocked": "Your browser did not open bashibook.app.",
   "move.declined": "You kept the book that was already at bashibook.app.",
