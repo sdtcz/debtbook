@@ -471,7 +471,7 @@ export function App() {
         tabbed ? (
           <div class="tabbed">
             {page}
-            <TabBar route={route} />
+            <TabBar route={route} locked={locked} />
           </div>
         ) : (
           page

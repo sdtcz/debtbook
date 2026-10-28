@@ -35,7 +35,7 @@ export function showsTabBar(route: Route): boolean {
   return activeTab(route) !== null;
 }
 
-export function TabBar({ route }: { route: Route }) {
+export function TabBar({ route, locked = false }: { route: Route; locked?: boolean }) {
   const { t } = useLocale();
   const active = activeTab(route);
   const labels: Record<TabId, string> = {
@@ -63,11 +63,28 @@ export function TabBar({ route }: { route: Route }) {
     navigate(tab.path, { replace: route.name !== 'home' && route.name !== 'customer' });
   };
 
+  const suppliers = route.name === 'suppliers' || route.name === 'supplier';
+  const addLabel = suppliers ? t('supplier.add') : t('home.addCustomer');
+  const add = locked ? (
+    <span aria-hidden="true" />
+  ) : (
+    <button
+      key="add"
+      class="tabbar-add"
+      type="button"
+      aria-label={addLabel}
+      title={addLabel}
+      onClick={() => navigate(suppliers ? '/suppliers/new' : '/customers/new')}
+    >
+      +
+    </button>
+  );
+
   return (
     <nav class="tabbar" aria-label={t('nav.label')}>
-      {TABS.map((tab) => {
+      {TABS.map((tab, i) => {
         const on = tab.id === active;
-        return (
+        const btn = (
           <button
             key={tab.id}
             type="button"
@@ -91,6 +108,8 @@ export function TabBar({ route }: { route: Route }) {
             <span>{labels[tab.id]}</span>
           </button>
         );
+        // Centre slot: "+" sits flush in the bar so it never floats over content.
+        return i === 2 ? [add, btn] : btn;
       })}
     </nav>
   );

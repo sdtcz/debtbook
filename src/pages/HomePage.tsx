@@ -790,18 +790,6 @@ export function HomePage({ locked, toast }: Props) {
         )}
       </main>
 
-      {!locked && !loading && hasCustomers && (
-        <button
-          class={rows.length >= 3 ? 'fab fab-compact' : 'fab'}
-          type="button"
-          aria-label={t('home.addCustomer')}
-          title={t('home.addCustomer')}
-          onClick={() => navigate('/customers/new')}
-        >
-          + <span class="label">{t('home.fabCustomer')}</span>
-        </button>
-      )}
-
       {chaseSheetOpen && shop && ChaseAllSheet && (
         <ChaseAllSheet
           shopName={shop.name}

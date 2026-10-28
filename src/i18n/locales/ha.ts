@@ -52,7 +52,6 @@ export const ha: Record<MessageKey, string> = {
   'home.nothingHere': 'Babu komai a nan.',
   'home.clearFilters': 'Share tacewa',
   'home.addCustomer': 'Ƙara abokin ciniki',
-  'home.fabCustomer': 'Abokin ciniki',
   'home.credit': '+ Bashi',
   'home.payment': '− Biya',
   'home.metaOverdue': '{{n}} sun wuce lokaci',

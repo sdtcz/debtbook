@@ -434,32 +434,6 @@ a {
   color: #fff;
 }
 
-/* FAB */
-.fab {
-  position: fixed;
-  right: max(16px, calc(50% - 240px + 16px));
-  bottom: calc(16px + var(--safe-bottom));
-  min-width: 56px;
-  min-height: 56px;
-  border-radius: 999px;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  font-size: 1.5rem;
-  font-weight: 700;
-  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.45);
-  cursor: pointer;
-  z-index: 30;
-  padding: 0 18px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.fab span.label {
-  font-size: 0.95rem;
-}
-
 .search-wrap {
   margin-bottom: 12px;
 }
@@ -691,7 +665,6 @@ a {
 button,
 .btn,
 .icon-btn,
-.fab,
 .list-item,
 .seg button {
   transition: transform 100ms ease, background-color 120ms ease, opacity 120ms ease;
@@ -700,7 +673,6 @@ button,
 button:active:not(:disabled),
 .btn:active:not(:disabled),
 .icon-btn:active,
-.fab:active,
 .seg button:active {
   transform: scale(0.97);
 }
@@ -4699,7 +4671,7 @@ button:active:not(:disabled),
   max-width: 480px;
   z-index: 40;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr 1fr 64px 1fr 1fr;
   background: var(--surface);
   border-top: 1px solid var(--border);
   box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.06);
@@ -4732,13 +4704,10 @@ button:active:not(:disabled),
   background: var(--primary-soft);
 }
 .tabbed .main {
-  padding-bottom: calc(88px + 64px + var(--safe-bottom));
-}
-.tabbed .fab {
-  bottom: calc(76px + var(--safe-bottom));
+  padding-bottom: calc(80px + var(--safe-bottom));
 }
 body.has-tabbar .toast {
-  bottom: calc(148px + var(--safe-bottom));
+  bottom: calc(84px + var(--safe-bottom));
 }
 .desktop-app-screen .tabbed {
   height: 100%;
@@ -5259,8 +5228,8 @@ a.btn.payme-cta-btn {
   outline-offset: 2px;
 }
 /* Light ring on dark/teal surfaces. */
-:where(.topbar, .toast, .fab, .btn-primary, .landing) :focus-visible,
-:where(.fab, .btn-primary, .toast-action):focus-visible {
+:where(.topbar, .toast, .tabbar-add, .btn-primary, .landing) :focus-visible,
+:where(.tabbar-add, .btn-primary, .toast-action):focus-visible {
   outline-color: #fde68a;
 }
 .load-error {
@@ -5771,8 +5740,6 @@ a.settings-row {
 .actions-grid .entry-btn{min-height:44px;font-weight:700;background:var(--surface);border:1.5px solid var(--border);color:var(--ink)}
 .actions-grid .entry-btn.payment{color:var(--ok)}
 .statement-pdf-btn,.statement-pdf-btn.btn-secondary{background:var(--surface);border:1px solid var(--border);color:var(--ink)}
-/* P2: keep the add button inside the desktop phone frame. */
-.desktop-app-screen .fab,.desktop-app-screen .tabbed .fab{position:absolute;right:16px;bottom:76px}
 /* P2: landing CTA contrast ≥ 4.5:1 (white on #0f766e is 5.5:1). */
 .landing-nav-primary,.landing-cta{background:linear-gradient(135deg,#0f766e,#115e59)}
 .landing-nav-primary:hover,.landing-cta:hover{background:linear-gradient(135deg,#0d6b63,#0f4f4b)}
@@ -5785,4 +5752,4 @@ a.settings-row {
 .week-collected-kicker{display:block}
 /* P3: small spacing/wrap fixes. */
 .save-shop-btn{margin-top:10px}
-.fab-compact{width:56px;padding:0;justify-content:center;font-size:1.75rem}.fab-compact .label{display:none}
+.tabbar-add{align-self:center;justify-self:center;width:52px;height:52px;border:0;border-radius:16px;background:var(--primary);color:#fff;font-size:1.75rem;font-weight:700;box-shadow:0 4px 12px #0f766e59}

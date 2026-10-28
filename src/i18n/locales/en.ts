@@ -50,7 +50,6 @@ export const en = {
   'home.nothingHere': 'Nothing here.',
   'home.clearFilters': 'Clear filters',
   'home.addCustomer': 'Add customer',
-  'home.fabCustomer': 'Customer',
   'home.credit': '+ Credit',
   'home.payment': '− Payment',
   'home.metaOverdue': '{{n}} overdue',

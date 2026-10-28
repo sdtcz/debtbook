@@ -52,7 +52,6 @@ export const yo: Record<MessageKey, string> = {
   'home.nothingHere': 'Kò sí nǹkan níbí.',
   'home.clearFilters': 'Pa àwọn àṣẹ̀ rẹ́',
   'home.addCustomer': 'Fi oníbàárà kún un',
-  'home.fabCustomer': 'Oníbàárà',
   'home.credit': '+ Gbèsè',
   'home.payment': '− Ìsanwó',
   'home.metaOverdue': '{{n}} ti pẹ́',
