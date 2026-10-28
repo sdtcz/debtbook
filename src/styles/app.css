@@ -5757,3 +5757,44 @@ a.settings-row {
 .setup-checks li{display:flex;gap:8px;align-items:flex-start;font-weight:600;color:var(--text);font-size:.92rem}
 .setup-checks li::before{content:"✓";color:var(--primary);font-weight:800}
 .setup-restore{display:block;margin:10px auto 0;min-height:44px;color:var(--primary);font-weight:700}
+
+/* ── QA fixes (Figma Bro, Oct 28) ───────────────────────────────────── */
+/* P1: red means overdue only. Plain owing = neutral row + amber pill. */
+.soft-list-row.debt{background:var(--surface);border-color:var(--border)}
+.soft-list-row.debt .soft-list-avatar{background:var(--accent-soft);color:var(--accent-ink);box-shadow:none}
+.soft-list-row.debt .soft-list-qa{border-top-color:rgba(15,23,42,.08)}
+.amount-pill.debt{background:var(--accent-soft);color:var(--accent-ink)}
+.balance-soft-hero.debt{background:var(--surface);border-color:var(--border)}
+.balance-soft-hero.debt .balance-soft-avatar{background:var(--accent-soft);color:var(--accent-ink);box-shadow:none}
+.balance-soft-hero.debt .balance-soft-amount{color:var(--ink)}
+.soft-list-row.debt.overdue{background:linear-gradient(160deg,#fff 0%,#fef2f2 100%);border-color:rgba(185,28,28,.14)}
+.soft-list-row.debt.overdue .soft-list-avatar{background:linear-gradient(145deg,var(--danger),#991b1b);color:#fff;box-shadow:0 0 0 5px rgba(185,28,28,.08)}
+.soft-list-row.debt.overdue .soft-list-qa{border-top-color:rgba(185,28,28,.1)}
+.amount-pill.debt.overdue{background:var(--danger-soft);color:var(--danger)}
+.balance-soft-hero.debt.overdue{background:linear-gradient(160deg,#fef2f2 0%,#fff7ed 100%);border-color:rgba(185,28,28,.18)}
+.balance-soft-hero.debt.overdue .balance-soft-avatar{background:linear-gradient(145deg,var(--danger),#991b1b);color:#fff;box-shadow:0 0 0 6px rgba(185,28,28,.08)}
+.balance-soft-hero.debt.overdue .balance-soft-amount{color:var(--danger)}
+/* History: a credit sale is a normal event, not an alarm. */
+.history-soft-row.credit{background:var(--surface);border-color:var(--border)}
+.history-soft-row.credit .history-soft-avatar{background:var(--accent-soft);color:var(--accent-ink);box-shadow:none}
+.history-soft-row.credit .history-soft-type,.history-soft-row.credit .history-soft-amt{color:var(--ink)}
+.soft-list-qa .qa-credit{color:var(--ink)}
+/* P2: one primary on the customer page. */
+.actions-grid .entry-btn{min-height:44px;font-weight:700;background:var(--surface);border:1.5px solid var(--border);color:var(--ink)}
+.actions-grid .entry-btn.payment{color:var(--ok)}
+.statement-pdf-btn,.statement-pdf-btn.btn-secondary{background:var(--surface);border:1px solid var(--border);color:var(--ink)}
+/* P2: keep the add button inside the desktop phone frame. */
+.desktop-app-screen .fab,.desktop-app-screen .tabbed .fab{position:absolute;right:16px;bottom:76px}
+/* P2: landing CTA contrast ≥ 4.5:1 (white on #0f766e is 5.5:1). */
+.landing-nav-primary,.landing-cta{background:linear-gradient(135deg,#0f766e,#115e59)}
+.landing-nav-primary:hover,.landing-cta:hover{background:linear-gradient(135deg,#0d6b63,#0f4f4b)}
+/* P2: landing hero shows the B logo, no currency watermark. */
+.landing-soft-glow .glow-crest-logo{background:none;padding:0;overflow:hidden}
+.landing-soft-glow .glow-crest-logo img{width:100%;height:100%;display:block;border-radius:inherit}
+/* P3: this-week tile matches the supplier tile. */
+.home-stats .week-collected-kicker{color:var(--muted);font-size:.8rem;font-weight:700}
+.home-stats .week-collected-title{color:var(--ink);font-size:1.05rem;font-weight:800}
+.week-collected-kicker{display:block}
+/* P3: small spacing/wrap fixes. */
+.save-shop-btn{margin-top:10px}
+.period-chip{white-space:nowrap}

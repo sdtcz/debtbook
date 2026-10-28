@@ -383,6 +383,7 @@ export const yo: Record<MessageKey, string> = {
   'entry.tallyAria': 'Iyokù ṣáájú àti lẹ́yìn àkọsílẹ̀ yìí',
 
   'money.placeholder': '0.00 tàbí 3k',
+  'money.placeholderWhole': '0 tàbí 3k',
   'money.hint': '{{code}} ({{sym}}) — ìmọ̀ràn: tẹ 3k fún {{sym}}3,000',
   'money.quickAmounts': 'Iye kíákíá',
 
@@ -760,6 +761,7 @@ export const yo: Record<MessageKey, string> = {
   'home.chaseTodaySent': "Ti fi ránṣẹ́",
   'home.chaseTodayShare': "Pín",
   'home.weekCollected': "A gba {{amount}} lọ́sẹ̀ yìí",
+  'home.weekCollectedLabel': "Owó tí a gbà lọ́sẹ̀ yìí",
   'home.weekCollectedSub': "Ìsanwó {{n}} láti ọ̀dọ̀ oníbàárà {{c}}",
   'home.weekCollectedOne': "Ìsanwó 1",
   'home.weekCollectedNone': "Kò sí ìsanwó tí a kọ sílẹ̀ lọ́sẹ̀ yìí síbẹ̀",

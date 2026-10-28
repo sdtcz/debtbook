@@ -381,6 +381,7 @@ export const en = {
   'entry.tallyAria': 'Balance before and after this entry',
 
   'money.placeholder': '0.00 or 3k',
+  'money.placeholderWhole': '0 or 3k',
   'money.hint': '{{code}} ({{sym}}) — tip: type 3k for {{sym}}3,000',
   'money.quickAmounts': 'Quick amounts',
 
@@ -758,6 +759,7 @@ export const en = {
   'home.chaseTodaySent': "Sent",
   'home.chaseTodayShare': "Share",
   'home.weekCollected': "{{amount}} collected this week",
+  'home.weekCollectedLabel': "Collected this week",
   'home.weekCollectedSub': "{{n}} payments from {{c}} customers",
   'home.weekCollectedOne': "1 payment",
   'home.weekCollectedNone': "No payments recorded yet this week",

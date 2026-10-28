@@ -1,5 +1,5 @@
 import { useLocale } from '../hooks/useLocale';
-import { currencySymbol, quickAmounts } from '../lib/money';
+import { WHOLE_WHEN_ROUND, currencySymbol, getCurrency, quickAmounts } from '../lib/money';
 
 interface Props {
   id: string;
@@ -22,7 +22,7 @@ export function MoneyInput({ id, label, value, onInput, autoFocus }: Props) {
         class="input"
         inputMode="decimal"
         autocomplete="off"
-        placeholder={t('money.placeholder')}
+        placeholder={t(WHOLE_WHEN_ROUND.has(getCurrency()) ? 'money.placeholderWhole' : 'money.placeholder')}
         value={value}
         autofocus={autoFocus}
         onInput={(e) => {

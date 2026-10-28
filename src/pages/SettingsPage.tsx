@@ -776,7 +776,7 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
               onInput={(e) => setName((e.target as HTMLInputElement).value)}
             />
           </div>
-          <button class="btn btn-primary" type="submit" disabled={busy}>
+          <button class="btn btn-primary save-shop-btn" type="submit" disabled={busy}>
             {t('settings.saveShopName')}
           </button>
         </form>

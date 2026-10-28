@@ -371,7 +371,7 @@ export function HomePage({ locked, toast }: Props) {
         </section>
 
         <div class="home-stats">
-        {iOwe && (
+        {iOwe && (hasCustomers || iOwe.count > 0 || iOwe.total > 0) && (
           <a class={`iowe-home-card${iOwe.total > 0 ? ' owing' : ''}`} href={href('/suppliers')}>
             <span class="iowe-home-icon" aria-hidden="true">
               📦
@@ -396,9 +396,8 @@ export function HomePage({ locked, toast }: Props) {
               {currencySymbol()}
             </span>
             <span class="week-collected-body">
-              <span class="week-collected-title">
-                {t('home.weekCollected', { amount: formatMoney(week.collectedKobo) })}
-              </span>
+              <span class="week-collected-kicker">{t('home.weekCollectedLabel')}</span>
+              <span class="week-collected-title">{formatMoney(week.collectedKobo)}</span>
               <span class="week-collected-sub">
                 {week.paymentCount === 0
                   ? t('home.weekCollectedNone')
@@ -414,66 +413,6 @@ export function HomePage({ locked, toast }: Props) {
           </a>
         )}
         </div>
-
-        {!locked && todays.length > 0 && (
-          <section
-            class={`card chase-today${chasePrompt ? ' digest-card-emphasize' : ''}`}
-            aria-labelledby="chase-today-title"
-          >
-            <div class="chase-today-head">
-              <h2 id="chase-today-title" class="chase-today-title">
-                {t('home.chaseTodayTitle', { n: todays.length })}
-              </h2>
-              <p class="chase-today-sub">{t('home.chaseTodaySub')}</p>
-            </div>
-            <button type="button" class="chase-today-overdue" onClick={openOverdue}>
-              {t('home.digestMeta', { n: digest.count, amount: formatMoney(digest.totalOverdueKobo) })}
-              <span aria-hidden="true"> · {t('home.digestOpen')} →</span>
-            </button>
-            <ol class="chase-today-list">
-              {todays.map((it, i) => {
-                const done = chasedIds.has(it.row.customer.id);
-                return (
-                  <li key={it.row.customer.id} class={`chase-today-row${done ? ' done' : ''}`}>
-                    <span class="chase-today-rank" aria-hidden="true">
-                      {i + 1}
-                    </span>
-                    <a class="chase-today-body" href={href(`/customers/${it.row.customer.id}`)}>
-                      <span class="chase-today-name">{it.row.customer.name}</span>
-                      <span class="chase-today-meta">
-                        {formatMoney(it.row.balanceKobo)} ·{' '}
-                        {it.daysOverdue === 1
-                          ? t('home.chaseTodayLateOne')
-                          : t('home.chaseTodayLate', { n: it.daysOverdue })}
-                      </span>
-                    </a>
-                    <button
-                      type="button"
-                      class={`btn chase-today-wa${done ? ' done' : ''}`}
-                      aria-label={t('home.chaseTodayWaAria', { name: it.row.customer.name })}
-                      onClick={() => chaseOne(it.row)}
-                    >
-                      {done ? `✓ ${t('home.chaseTodaySent')}` : it.row.customer.phone ? 'WhatsApp' : t('home.chaseTodayShare')}
-                    </button>
-                  </li>
-                );
-              })}
-            </ol>
-            <div class="chase-today-actions">
-              <button type="button" class="btn btn-secondary" onClick={openChaseSheet}>
-                {t('home.chaseAll')}
-              </button>
-              <button type="button" class="btn btn-ghost" onClick={shareDigest}>
-                {t('home.digestWhatsApp')}
-              </button>
-              {chasePrompt && (
-                <button type="button" class="btn btn-ghost" onClick={dismissChasePrompt}>
-                  {t('home.chasePromptDismiss')}
-                </button>
-              )}
-            </div>
-          </section>
-        )}
 
         {flash && (
           <div class="digest-flash" role="status">
@@ -504,73 +443,6 @@ export function HomePage({ locked, toast }: Props) {
               ›
             </span>
           </a>
-        )}
-
-        {!locked &&
-          !nudgeHidden &&
-          shouldShowBackupNudge({
-            customerCount: rows.length,
-            cloudBackupAt: shop?.lastCloudBackupAt,
-          }) && (
-            <div class="growth-card nudge" role="status">
-              <div class="growth-card-body">
-                <strong>{t('growth.backupNudgeTitle')}</strong>
-                <span>{t('growth.backupNudgeBody')}</span>
-              </div>
-              <div class="growth-card-actions">
-                <button
-                  type="button"
-                  class="btn btn-primary"
-                  onClick={async () => {
-                    if (!(await guardExport(getShop))) return;
-                    const data = await exportBackup();
-                    const stamp = new Date().toISOString().slice(0, 10);
-                    downloadJson(`bashibook-backup-${stamp}.json`, data);
-                    rememberBackupExported();
-                    setNudgeHidden(true);
-                    notify(t('settings.backupDownloaded'));
-                  }}
-                >
-                  {t('growth.backupNudgeBtn')}
-                </button>
-                <button
-                  type="button"
-                  class="pro-hint-dismiss"
-                  aria-label={t('common.dismiss')}
-                  onClick={() => {
-                    dismissBackupNudge();
-                    setNudgeHidden(true);
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          )}
-
-        {!locked && !inviteHidden && rows.length >= 3 && (
-          <div class="growth-card invite">
-            <div class="growth-card-body">
-              <strong>{t('growth.inviteCardTitle')}</strong>
-              <span>{t('growth.inviteCardBody')}</span>
-            </div>
-            <div class="growth-card-actions">
-              <button type="button" class="btn btn-secondary" onClick={openInviteWhatsApp}>
-                {t('growth.inviteCta')}
-              </button>
-              <button
-                type="button"
-                class="pro-hint-dismiss"
-                aria-label={t('common.dismiss')}
-                onClick={() => {
-                  dismissInviteCard();
-                  setInviteHidden(true);
-                }}
-              >
-                ×
-              </button>
-            </div>
-          </div>
         )}
 
         <div class="search-wrap">
@@ -691,7 +563,7 @@ export function HomePage({ locked, toast }: Props) {
               const status = rowStatusLine(row, t);
               return (
                 <div
-                  class={`list-item-wrap soft-list-row ${tone}`}
+                  class={`list-item-wrap soft-list-row ${tone}${overdue ? ' overdue' : ''}`}
                   key={row.customer.id}
                 >
                   <a
@@ -722,7 +594,7 @@ export function HomePage({ locked, toast }: Props) {
                         <div class="hint row-status soft-list-hint">{status}</div>
                       )}
                     </div>
-                    <div class={`amount-pill soft-list-pill ${tone}`}>
+                    <div class={`amount-pill soft-list-pill ${tone}${overdue ? ' overdue' : ''}`}>
                       {locked
                         ? '••••'
                         : formatMoney(Math.abs(row.balanceKobo))}
@@ -759,6 +631,134 @@ export function HomePage({ locked, toast }: Props) {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Below the list so the first customer rows stay above the fold (QA P1). */}
+        {!locked && todays.length > 0 && (
+          <section
+            class={`card chase-today${chasePrompt ? ' digest-card-emphasize' : ''}`}
+            aria-labelledby="chase-today-title"
+          >
+            <div class="chase-today-head">
+              <h2 id="chase-today-title" class="chase-today-title">
+                {t('home.chaseTodayTitle', { n: todays.length })}
+              </h2>
+              <p class="chase-today-sub">{t('home.chaseTodaySub')}</p>
+            </div>
+            <button type="button" class="chase-today-overdue" onClick={openOverdue}>
+              {t('home.digestMeta', { n: digest.count, amount: formatMoney(digest.totalOverdueKobo) })}
+              <span aria-hidden="true"> · {t('home.digestOpen')} →</span>
+            </button>
+            <ol class="chase-today-list">
+              {todays.map((it, i) => {
+                const done = chasedIds.has(it.row.customer.id);
+                return (
+                  <li key={it.row.customer.id} class={`chase-today-row${done ? ' done' : ''}`}>
+                    <span class="chase-today-rank" aria-hidden="true">
+                      {i + 1}
+                    </span>
+                    <a class="chase-today-body" href={href(`/customers/${it.row.customer.id}`)}>
+                      <span class="chase-today-name">{it.row.customer.name}</span>
+                      <span class="chase-today-meta">
+                        {formatMoney(it.row.balanceKobo)} ·{' '}
+                        {it.daysOverdue === 1
+                          ? t('home.chaseTodayLateOne')
+                          : t('home.chaseTodayLate', { n: it.daysOverdue })}
+                      </span>
+                    </a>
+                    <button
+                      type="button"
+                      class={`btn chase-today-wa${done ? ' done' : ''}`}
+                      aria-label={t('home.chaseTodayWaAria', { name: it.row.customer.name })}
+                      onClick={() => chaseOne(it.row)}
+                    >
+                      {done ? `✓ ${t('home.chaseTodaySent')}` : it.row.customer.phone ? 'WhatsApp' : t('home.chaseTodayShare')}
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+            <div class="chase-today-actions">
+              <button type="button" class="btn btn-secondary" onClick={openChaseSheet}>
+                {t('home.chaseAll')}
+              </button>
+              <button type="button" class="btn btn-ghost" onClick={shareDigest}>
+                {t('home.digestWhatsApp')}
+              </button>
+              {chasePrompt && (
+                <button type="button" class="btn btn-ghost" onClick={dismissChasePrompt}>
+                  {t('home.chasePromptDismiss')}
+                </button>
+              )}
+            </div>
+          </section>
+        )}
+
+        {!locked &&
+          !nudgeHidden &&
+          shouldShowBackupNudge({
+            customerCount: rows.length,
+            cloudBackupAt: shop?.lastCloudBackupAt,
+          }) && (
+            <div class="growth-card nudge" role="status">
+              <div class="growth-card-body">
+                <strong>{t('growth.backupNudgeTitle')}</strong>
+                <span>{t('growth.backupNudgeBody')}</span>
+              </div>
+              <div class="growth-card-actions">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  onClick={async () => {
+                    if (!(await guardExport(getShop))) return;
+                    const data = await exportBackup();
+                    const stamp = new Date().toISOString().slice(0, 10);
+                    downloadJson(`bashibook-backup-${stamp}.json`, data);
+                    rememberBackupExported();
+                    setNudgeHidden(true);
+                    notify(t('settings.backupDownloaded'));
+                  }}
+                >
+                  {t('growth.backupNudgeBtn')}
+                </button>
+                <button
+                  type="button"
+                  class="pro-hint-dismiss"
+                  aria-label={t('common.dismiss')}
+                  onClick={() => {
+                    dismissBackupNudge();
+                    setNudgeHidden(true);
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          )}
+
+        {!locked && !inviteHidden && rows.length >= 3 && (
+          <div class="growth-card invite">
+            <div class="growth-card-body">
+              <strong>{t('growth.inviteCardTitle')}</strong>
+              <span>{t('growth.inviteCardBody')}</span>
+            </div>
+            <div class="growth-card-actions">
+              <button type="button" class="btn btn-secondary" onClick={openInviteWhatsApp}>
+                {t('growth.inviteCta')}
+              </button>
+              <button
+                type="button"
+                class="pro-hint-dismiss"
+                aria-label={t('common.dismiss')}
+                onClick={() => {
+                  dismissInviteCard();
+                  setInviteHidden(true);
+                }}
+              >
+                ×
+              </button>
+            </div>
           </div>
         )}
 

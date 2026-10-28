@@ -383,6 +383,7 @@ export const ha: Record<MessageKey, string> = {
   'entry.tallyAria': 'Saura kafin da bayan wannan shigarwa',
 
   'money.placeholder': '0.00 ko 3k',
+  'money.placeholderWhole': '0 ko 3k',
   'money.hint': '{{code}} ({{sym}}) — shawara: rubuta 3k don {{sym}}3,000',
   'money.quickAmounts': 'Adadi na sauri',
 
@@ -760,6 +761,7 @@ export const ha: Record<MessageKey, string> = {
   'home.chaseTodaySent': "An aika",
   'home.chaseTodayShare': "Raba",
   'home.weekCollected': "An karɓi {{amount}} a wannan mako",
+  'home.weekCollectedLabel': "An karɓa a wannan mako",
   'home.weekCollectedSub': "Biya {{n}} daga abokan ciniki {{c}}",
   'home.weekCollectedOne': "Biya 1",
   'home.weekCollectedNone': "Ba a rubuta biya ba tukuna a wannan mako",

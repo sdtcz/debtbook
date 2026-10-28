@@ -7,7 +7,6 @@ import {
   creditLimitStatus,
   getCustomer,
   getCustomerBalance,
-  getRecentEntryForUndo,
   getShop,
   softDeleteEntry,
 } from '../db/repo';
@@ -17,7 +16,7 @@ import { balanceLabel,
   balanceTone,
   formatMoney, currencySymbol } from '../lib/money';
 import { hasPayMeDetails, sendPayMeRequest } from '../lib/payMe';
-import { buildEntryReceiptMessage, remindCustomer, sendTextToCustomer } from '../lib/sms';
+import { remindCustomer } from '../lib/sms';
 import { buildStatement, shareOrCopyText } from '../lib/statement';
 import { navigate } from '../lib/router';
 import { guardDelete } from '../lib/pinGuard';
@@ -70,20 +69,13 @@ export function CustomerDetailPage({ id, toast }: Props) {
   const [entries, setEntries] = useState<Entry[]>([]);
   const [balanceKobo, setBalanceKobo] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [canUndo, setCanUndo] = useState(false);
-  const [recentEntry, setRecentEntry] = useState<Entry | null>(null);
   const [pdfOpen, setPdfOpen] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
 
   const load = async () => {
     setLoading(true);
     try {
-      const [s, c, bal, recent] = await Promise.all([
-        getShop(),
-        getCustomer(id),
-        getCustomerBalance(id),
-        getRecentEntryForUndo(id),
-      ]);
+      const [s, c, bal] = await Promise.all([getShop(), getCustomer(id), getCustomerBalance(id)]);
       if (!c) {
         toast(t('customer.notFound'));
         navigate('/', { replace: true });
@@ -93,8 +85,6 @@ export function CustomerDetailPage({ id, toast }: Props) {
       setCustomer(c);
       setEntries(bal.entries);
       setBalanceKobo(bal.balanceKobo);
-      setCanUndo(Boolean(recent));
-      setRecentEntry(recent || null);
       setLoadFailed(false);
     } catch {
       setLoadFailed(true);
@@ -194,36 +184,6 @@ export function CustomerDetailPage({ id, toast }: Props) {
     toast(t('customer.entryDeleted'));
   };
 
-  const onSendReceipt = async () => {
-    if (!customer || !shop || !recentEntry) return;
-    const message = buildEntryReceiptMessage({
-      shopName: shop.name,
-      customerName: customer.name,
-      type: recentEntry.type,
-      amountKobo: recentEntry.amountKobo,
-      balanceKobo,
-      note: recentEntry.note,
-      at: recentEntry.occurredAt,
-    });
-    const result = await sendTextToCustomer(customer.phone, message, t('receipt.shareTitle'));
-    if (result === 'whatsapp') toast(t('customer.openingWhatsApp'));
-    else if (result === 'sms') toast(t('customer.openingSms'));
-    else if (result === 'share') toast(t('customer.shared'));
-    else if (result === 'clipboard') toast(t('customer.messageCopied'));
-    else toast(t('customer.couldNotRemind'));
-  };
-
-  const undoLast = async () => {
-    const recent = await getRecentEntryForUndo(id);
-    if (!recent) {
-      toast(t('customer.nothingToUndo'));
-      return;
-    }
-    await softDeleteEntry(recent.id);
-    notifyChanged();
-    toast(t('customer.lastUndone'));
-  };
-
   if (loading || !customer) {
     return (
       <div class="app-shell">
@@ -273,7 +233,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
 
       <main class="main detail-soft">
         <section
-          class={`balance-soft-hero ${tone}`}
+          class={`balance-soft-hero ${tone}${overdue ? ' overdue' : ''}`}
           aria-label={t('customer.balanceTitle')}
         >
           <div class="balance-soft-row">
@@ -319,14 +279,14 @@ export function CustomerDetailPage({ id, toast }: Props) {
 
         <div class="actions-grid">
           <button
-            class="btn btn-danger"
+            class="btn btn-outline entry-btn credit"
             type="button"
             onClick={() => navigate(`/customers/${id}/entry/credit`)}
           >
             {t('customer.creditSale')}
           </button>
           <button
-            class="btn btn-ok"
+            class="btn btn-outline entry-btn payment"
             type="button"
             onClick={() => navigate(`/customers/${id}/entry/payment`)}
           >
@@ -422,27 +382,6 @@ export function CustomerDetailPage({ id, toast }: Props) {
             {t('customer.statementPdf')}
           </button>
         </section>
-
-        {canUndo && recentEntry && (
-          <div class="btn-row" style={{ marginTop: 8 }}>
-            {(
-              <button
-                class="btn btn-secondary receipt-btn"
-                type="button"
-                onClick={onSendReceipt}
-                title={t('receipt.sendSub', { amount: formatMoney(recentEntry.amountKobo) })}
-              >
-                {t('receipt.send')}
-                <span class="receipt-sub">
-                  {t('receipt.sendSub', { amount: formatMoney(recentEntry.amountKobo) })}
-                </span>
-              </button>
-            )}
-            <button class="btn btn-ghost undo-link" type="button" onClick={undoLast}>
-              {t('customer.undoLast')}
-            </button>
-          </div>
-        )}
 
         {customer.note && (
           <p class="muted" style={{ marginTop: 12 }}>
