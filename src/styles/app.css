@@ -462,33 +462,6 @@ a {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
-.balance-hero {
-  text-align: center;
-  padding: 8px 0 4px;
-}
-
-.balance-hero .amount {
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.balance-hero .label {
-  color: var(--muted);
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-.balance-hero.debt .amount {
-  color: var(--danger);
-}
-.balance-hero.credit .amount {
-  color: var(--ok);
-}
-.balance-hero.zero .amount {
-  color: var(--muted);
-}
-
 .setup-screen {
   position: relative;
   min-height: 100dvh;
@@ -4879,3 +4852,7 @@ a.settings-row {
 .intro-top{display:flex;align-items:center;gap:8px;color:var(--ink)}.intro-top .setup-lang{margin-left:auto}
 .intro-wa{padding:10px 12px;font-weight:700;color:var(--primary);border-top:1px solid var(--border)}
 .intro-cta .btn-primary{min-height:56px}.intro-top .setup-lang-pill{padding:0 12px}
+/* Spec 4: Sunday week card */
+.growth-card.week{flex-direction:column;align-items:stretch}
+.week p{margin:4px 0 0;font-size:.95rem;color:var(--text)}
+.week-names{display:flex;align-items:center;gap:8px;min-height:44px;font-size:.85rem;color:var(--muted)}

@@ -14,6 +14,10 @@ export interface ReportSummary {
   collectionRatePct: number | null;
   /** Customers who paid in the period */
   payingCustomers: number;
+  /** Customers given credit in the period */
+  creditCustomers: number;
+  /** Customers who owe now (before topDebtors is cut to topN) */
+  owingCustomers: number;
   /** Outstanding now (all time, positive balances only) */
   outstandingKobo: number;
   /** Top debtors by current balance */
@@ -46,6 +50,7 @@ export function buildReport(
   let creditCount = 0;
   let paymentCount = 0;
   const payers = new Set<string>();
+  const takers = new Set<string>();
   const balances = new Map<string, number>();
 
   for (const e of entries) {
@@ -56,6 +61,7 @@ export function buildReport(
     if (e.type === 'credit') {
       creditGivenKobo += e.amountKobo;
       creditCount += 1;
+      takers.add(e.customerId);
     } else {
       collectedKobo += e.amountKobo;
       paymentCount += 1;
@@ -86,6 +92,8 @@ export function buildReport(
         ? Math.min(100, Math.round((collectedKobo / creditGivenKobo) * 100))
         : null,
     payingCustomers: payers.size,
+    creditCustomers: takers.size,
+    owingCustomers: debtors.length,
     outstandingKobo,
     topDebtors: debtors.slice(0, topN),
   };

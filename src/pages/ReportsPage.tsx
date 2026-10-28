@@ -9,6 +9,7 @@ import { formatMoney, currencySymbol } from '../lib/money';
 import { buildReport, buildSupplierReport, type ReportPeriod } from '../lib/reports';
 import { href, navigate } from '../lib/router';
 import { shareOrCopyText } from '../lib/statement';
+import { weekFacts, weekNamesOn } from '../lib/week';
 import type { Customer, Entry, Supplier, SupplierEntry } from '../lib/types';
 import type { ToastAction } from '../hooks/useToast';
 
@@ -105,6 +106,17 @@ export function ReportsPage({ locked, toast }: Props) {
   };
 
   const hasCustomers = customers.length > 0;
+  // Spec 4: "7 days" shares the same picture + sentences as the Sunday card on Home.
+  const shareWeek = async () => {
+    const { shareMyWeek } = await import('../lib/weekShareFlow');
+    await shareMyWeek(
+      weekFacts(customers, entries),
+      shopName,
+      t as unknown as (k: string, v?: Record<string, string | number>) => string,
+      weekNamesOn(),
+      toast,
+    );
+  };
   const entriesLabel = (n: number) => (n === 1 ? t('reports.entry1') : t('reports.entries', { n }));
 
   const customerSection = (
@@ -282,8 +294,13 @@ export function ReportsPage({ locked, toast }: Props) {
             )}
 
             {!locked && (
-              <button class="btn btn-secondary" type="button" onClick={share} style={{ marginTop: 14 }}>
-                {t('reports.share')}
+              <button
+                class="btn btn-secondary"
+                type="button"
+                onClick={period === 'week' && hasCustomers ? shareWeek : share}
+                style={{ marginTop: 14 }}
+              >
+                {period === 'week' && hasCustomers ? t('week.share') : t('reports.share')}
               </button>
             )}
           </>

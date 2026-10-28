@@ -42,6 +42,8 @@ import { href, navigate } from '../lib/router';
 import { remindCustomer, shareMorningDigest } from '../lib/sms';
 import type { ToastAction } from '../hooks/useToast';
 import { deviceLocale } from '../lib/dates';
+import { weekCardDue } from '../lib/weekPrefs';
+import type { WeekCard as WeekCardType } from '../components/WeekCard';
 
 interface Props {
   locked?: boolean;
@@ -128,6 +130,15 @@ export function HomePage({ locked, toast }: Props) {
   const [ChaseAllSheet, setChaseAllSheet] = useState<typeof ChaseAllSheetType | null>(null);
   const [inviteHidden, setInviteHidden] = useState(() => inviteCardDismissed());
   const [nudgeHidden, setNudgeHidden] = useState(false);
+  // Spec 4: Sunday "your week" card. Its code (and the picture code) loads only on Sundays.
+  const [WeekCard, setWeekCard] = useState<typeof WeekCardType | null>(null);
+  const weekDue = !locked && total + rows.length > 0 && weekCardDue();
+  useEffect(() => {
+    if (!weekDue || WeekCard) return;
+    import('../components/WeekCard')
+      .then((m) => setWeekCard(() => m.WeekCard))
+      .catch(() => {});
+  }, [weekDue, WeekCard]);
 
   const notify = (msg: string) => {
     if (toast) toast(msg);
@@ -387,6 +398,8 @@ export function HomePage({ locked, toast }: Props) {
             </div>
           </div>
         </section>
+
+        {weekDue && WeekCard && <WeekCard onHide={() => setWeekCard(null)} toast={notify} />}
 
         <div class="home-stats">
         {iOwe && (hasCustomers || iOwe.count > 0 || iOwe.total > 0) && (
