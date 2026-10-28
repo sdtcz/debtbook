@@ -1,6 +1,6 @@
 import { brandFooterHost } from './growth';
 import { t } from '../i18n';
-import { formatMoney, getCurrency } from './money';
+import { formatMoneyExact as formatMoney, getCurrency } from './money';
 import type { Customer } from './types';
 
 /** Customer entries (credit/payment) or supplier entries (purchase/payment). */

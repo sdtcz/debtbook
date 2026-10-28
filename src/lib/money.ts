@@ -125,8 +125,21 @@ export function quickAmounts(code = current): string[] {
 
 /** Format hundredths as e.g. ₦1,234.56 / GH₵12.50 / USh1,235 in the shop currency. */
 export function formatMoney(minor: number, code = current): string {
+  // Kobo/cents are rarely used for these currencies: show ₦5,000 not ₦5,000.00
+  // when the amount is whole, but keep the decimals when it isn't (₦1.50).
+  if (WHOLE_WHEN_ROUND.has(code) && Number.isInteger(minor) && minor % 100 === 0) {
+    return show(nf(code, true), code, minor / 100);
+  }
   return show(nf(code), code, minor / 100);
 }
+
+/** Always the currency's own decimals (statements/PDF columns stay aligned). */
+export function formatMoneyExact(minor: number, code = current): string {
+  return show(nf(code), code, minor / 100);
+}
+
+/** Currencies shown without .00 when the value is whole. */
+export const WHOLE_WHEN_ROUND = new Set(['NGN', 'KES', 'UGX', 'TZS', 'XOF', 'XAF', 'RWF']);
 
 /** Whole units, no decimals, for large dashboard totals. */
 export function formatMoneyWhole(minor: number, code = current): string {

@@ -117,7 +117,7 @@ describe('buildPayMeMessage', () => {
     });
     expect(msg).toContain('Chidi');
     expect(msg).toContain('Mama Shop');
-    expect(msg).toContain('₦5,000.00');
+    expect(msg).toContain('₦5,000');
     expect(msg).toContain('GTBank');
     expect(msg).toContain('0123456789');
     expect(msg).toContain('https://example.com/#/payme?x=1');

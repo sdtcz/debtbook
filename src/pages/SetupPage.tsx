@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { isRegionNigeria } from '../i18n';
 import { setCurrency } from '../lib/money';
 import { defaultCurrency } from '../lib/currency';
@@ -23,6 +23,22 @@ export function SetupPage({ onDone }: Props) {
   const [picked, setPicked] = useState<string | null>(null);
   const currency = picked || defaultCurrency(isRegionNigeria());
   useEffect(() => setCurrency(currency), [currency]);
+
+  const ng = isRegionNigeria();
+  const fileRef = useRef<HTMLInputElement>(null);
+  // "Have a backup? Restore it": the same JSON backup as Settings → Restore, before any shop exists.
+  const restore = async (file: File) => {
+    setError(null);
+    try {
+      const { importBackup, readJsonFile } = await import('../lib/backup');
+      const data = await readJsonFile(file);
+      await importBackup(data);
+      notifyChanged();
+      if ((data as { shop?: unknown } | null)?.shop) onDone();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('settings.importFailed'));
+    }
+  };
 
   const submit = async (e: Event) => {
     e.preventDefault();
@@ -72,13 +88,15 @@ export function SetupPage({ onDone }: Props) {
       </div>
 
       <div class="setup-soft-hero">
-        <div class="setup-kicker">{t('setup.welcome')}</div>
         <BrandLockup heading />
-        <p>{t('setup.tagline')}</p>
-        <ul class="setup-chips">
-          <li>✓ {t('setup.chipOffline')}</li>
-          <li>{t('setup.chipCurrency')}</li>
-          <li>{LOCALE_OPTIONS.map((o) => o.nativeName).join(' · ')}</li>
+        <h2 class="setup-title">
+          {ng && locale === 'en' ? t('setup.titleNg') : t('setup.title')}
+        </h2>
+        <p>{t('setup.lede')}</p>
+        <ul class="setup-checks">
+          <li>{t('setup.check1')}</li>
+          <li>{t('setup.check2')}</li>
+          <li>{t('setup.check3')}</li>
         </ul>
       </div>
 
@@ -88,7 +106,7 @@ export function SetupPage({ onDone }: Props) {
           <input
             id="shop-name"
             class="input"
-            placeholder={t('setup.placeholder')}
+            placeholder={ng ? t('setup.placeholder') : t('setup.placeholderNeutral')}
             value={name}
             autofocus
             maxlength={80}
@@ -115,6 +133,22 @@ export function SetupPage({ onDone }: Props) {
           {busy ? t('common.saving') : t('setup.start')}
         </button>
       </form>
+      <button type="button" class="btn btn-ghost setup-restore" onClick={() => fileRef.current?.click()}>
+        {t('setup.restore')}
+      </button>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="application/json,.json"
+        class="sr-only"
+        tabIndex={-1}
+        aria-label={t('settings.importBackupFile')}
+        onChange={(e) => {
+          const f = (e.target as HTMLInputElement).files?.[0];
+          if (f) void restore(f);
+          (e.target as HTMLInputElement).value = '';
+        }}
+      />
     </main>
   );
 }

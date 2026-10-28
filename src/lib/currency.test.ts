@@ -11,7 +11,8 @@ describe('shop currency', () => {
   it('existing shops (NGN or no currency saved) keep Naira formatting exactly', () => {
     setCurrency(undefined);
     expect(getCurrency()).toBe('NGN');
-    expect(formatMoney(500000)).toBe('₦5,000.00');
+    expect(formatMoney(500000)).toBe('₦5,000'); // whole naira: no .00 (QW-D)
+    expect(formatMoney(500050)).toBe('₦5,000.50');
     setCurrency('XYZ'); // unknown → NGN
     expect(formatMoney(150)).toBe('₦1.50');
   });
@@ -35,6 +36,8 @@ describe('shop currency', () => {
     expect(formatMoney(150000)).not.toMatch(/\.\d\d$/); // shilling has no cents
     setCurrency('USD');
     expect(formatMoney(199)).toBe('$1.99');
+    expect(formatMoney(500)).toBe('$5.00'); // USD keeps cents
+    expect(formatMoney(150000, 'KES')).toMatch(/1,500$/);
     expect(currencySymbol()).toBe('$');
   });
 

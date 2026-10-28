@@ -370,6 +370,7 @@ export function HomePage({ locked, toast }: Props) {
           </div>
         </section>
 
+        <div class="home-stats">
         {iOwe && (
           <a class={`iowe-home-card${iOwe.total > 0 ? ' owing' : ''}`} href={href('/suppliers')}>
             <span class="iowe-home-icon" aria-hidden="true">
@@ -389,6 +390,30 @@ export function HomePage({ locked, toast }: Props) {
             </span>
           </a>
         )}
+        {!locked && hasCustomers && week && (
+          <a class="week-collected" href={href('/reports')}>
+            <span class="week-collected-icon" aria-hidden="true">
+              {currencySymbol()}
+            </span>
+            <span class="week-collected-body">
+              <span class="week-collected-title">
+                {t('home.weekCollected', { amount: formatMoney(week.collectedKobo) })}
+              </span>
+              <span class="week-collected-sub">
+                {week.paymentCount === 0
+                  ? t('home.weekCollectedNone')
+                  : week.paymentCount === 1
+                  ? t('home.weekCollectedOne')
+                  : t('home.weekCollectedSub', { n: week.paymentCount, c: week.customerCount })}
+                {week.lastWeekKobo > 0 ? ` · ${t('home.weekCollectedLast', { amount: formatMoney(week.lastWeekKobo) })}` : ''}
+              </span>
+            </span>
+            <span class="chev" aria-hidden="true">
+              ›
+            </span>
+          </a>
+        )}
+        </div>
 
         {!locked && todays.length > 0 && (
           <section
@@ -450,30 +475,6 @@ export function HomePage({ locked, toast }: Props) {
           </section>
         )}
 
-        {!locked && hasCustomers && week && (
-          <a class="week-collected" href={href('/reports')}>
-            <span class="week-collected-icon" aria-hidden="true">
-              {currencySymbol()}
-            </span>
-            <span class="week-collected-body">
-              <span class="week-collected-title">
-                {t('home.weekCollected', { amount: formatMoney(week.collectedKobo) })}
-              </span>
-              <span class="week-collected-sub">
-                {week.paymentCount === 0
-                  ? t('home.weekCollectedNone')
-                  : week.paymentCount === 1
-                  ? t('home.weekCollectedOne')
-                  : t('home.weekCollectedSub', { n: week.paymentCount, c: week.customerCount })}
-                {week.lastWeekKobo > 0 ? ` · ${t('home.weekCollectedLast', { amount: formatMoney(week.lastWeekKobo) })}` : ''}
-              </span>
-            </span>
-            <span class="chev" aria-hidden="true">
-              ›
-            </span>
-          </a>
-        )}
-
         {flash && (
           <div class="digest-flash" role="status">
             {flash}
@@ -503,32 +504,6 @@ export function HomePage({ locked, toast }: Props) {
               ›
             </span>
           </a>
-        )}
-
-        {!pro && !locked && hasCustomers && !proHintDismissed && trial.state !== 'ended' && (
-          <div class="pro-hint-soft">
-            <a
-              class="pro-hint-soft-link"
-              href={href('/settings/pro')}
-            >
-              <span class="pro-hint-crest" aria-hidden="true">
-                ★
-              </span>
-              <span class="pro-hint-soft-body">
-                <span class="pro-hint-soft-title">{t('home.proHintTitle')}</span>
-                <span class="pro-hint-soft-sub">{t('home.proHintSub')}</span>
-              </span>
-              <span class="pro-hint-soft-price">{t('home.proHintPrice')}</span>
-            </a>
-            <button
-              type="button"
-              class="pro-hint-dismiss"
-              aria-label={t('common.dismiss')}
-              onClick={dismissProHint}
-            >
-              ×
-            </button>
-          </div>
         )}
 
         {!locked &&
@@ -784,6 +759,31 @@ export function HomePage({ locked, toast }: Props) {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {!pro && !locked && hasCustomers && !proHintDismissed && trial.state !== 'ended' && (
+          <div class="pro-hint-soft pro-hint-below">
+            <a
+              class="pro-hint-soft-link"
+              href={href('/settings/pro')}
+            >
+              <span class="pro-hint-crest" aria-hidden="true">
+                ★
+              </span>
+              <span class="pro-hint-soft-body">
+                <span class="pro-hint-soft-title">{t('home.proHintTitle')}</span>
+                <span class="pro-hint-soft-sub">{t('home.proHintSub')}</span>
+              </span>
+            </a>
+            <button
+              type="button"
+              class="pro-hint-dismiss"
+              aria-label={t('common.dismiss')}
+              onClick={dismissProHint}
+            >
+              ×
+            </button>
           </div>
         )}
           </>

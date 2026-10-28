@@ -51,6 +51,10 @@ function fmtWhen(ts: number): string {
   });
 }
 
+function firstName(name: string): string {
+  return name.trim().split(/\s+/)[0] || name;
+}
+
 function fmtDue(ts: number): string {
   return new Date(ts).toLocaleDateString(deviceLocale(), {
     day: 'numeric',
@@ -365,17 +369,30 @@ export function CustomerDetailPage({ id, toast }: Props) {
               </p>
             </div>
           </div>
-          <div class={`collect-soft-tiles${balanceKobo > 0 ? '' : ' two'}`}>
-            <button class="collect-tile" type="button" onClick={onRemind}>
-              <span class="collect-tile-icon" aria-hidden="true">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />
-                </svg>
-              </span>
-              <span class="collect-tile-label">{t('customer.remind')}</span>
+          {balanceKobo > 0 && (
+            // One obvious next step when they owe you: the WhatsApp reminder.
+            <button class="btn btn-primary remind-primary" data-act="remind" type="button" onClick={onRemind}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />
+              </svg>
+              {customer.phone
+                ? t('customer.remindOnWhatsApp', { name: firstName(customer.name) })
+                : t('customer.remindShare', { name: firstName(customer.name) })}
             </button>
+          )}
+          <div class="collect-soft-tiles two">
+            {balanceKobo <= 0 && (
+              <button class="collect-tile" type="button" onClick={onRemind}>
+                <span class="collect-tile-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />
+                  </svg>
+                </span>
+                <span class="collect-tile-label">{t('customer.remind')}</span>
+              </button>
+            )}
             {balanceKobo > 0 && (
-              <button class="collect-tile hero" type="button" onClick={onPayMe}>
+              <button class="collect-tile" type="button" onClick={onPayMe}>
                 <span class="collect-tile-icon naira" aria-hidden="true">{currencySymbol()}</span>
                 <span class="collect-tile-label">{t('customer.payMe')}</span>
               </button>
@@ -406,9 +423,9 @@ export function CustomerDetailPage({ id, toast }: Props) {
           </button>
         </section>
 
-        {canUndo && (
+        {canUndo && recentEntry && (
           <div class="btn-row" style={{ marginTop: 8 }}>
-            {recentEntry && (
+            {(
               <button
                 class="btn btn-secondary receipt-btn"
                 type="button"
@@ -421,7 +438,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
                 </span>
               </button>
             )}
-            <button class="btn btn-ghost" type="button" onClick={undoLast}>
+            <button class="btn btn-ghost undo-link" type="button" onClick={undoLast}>
               {t('customer.undoLast')}
             </button>
           </div>
