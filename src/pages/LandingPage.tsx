@@ -1,5 +1,3 @@
-import { currencySymbol } from '../lib/money';
-import { defaultCurrency } from '../lib/currency';
 import { useEffect, useState } from 'preact/hooks';
 import { wantsSaveData } from '../lib/saveData';
 import { PUBLIC_APP_LABEL, PUBLIC_APP_URL } from '../config';
@@ -52,7 +50,6 @@ export function LandingPage({ onUseAppHere }: Props) {
   const ng = isRegionNigeria();
   const enShops = tr(ng ? 'region.shopsNG' : 'region.shops', undefined, 'en');
   const seo = ng ? '/ng' : '';
-  const sym = currencySymbol(defaultCurrency(ng));
 
   useEffect(() => {
     // Anonymous channel count (event + src tag only), once per device per day.
@@ -88,7 +85,6 @@ export function LandingPage({ onUseAppHere }: Props) {
         <div class="landing-orb landing-orb-c" />
         <div class="landing-grid" />
         <div class="landing-noise" />
-        <div class="landing-naira-wm">{sym}</div>
       </div>
 
       <nav class="landing-nav">
@@ -109,8 +105,8 @@ export function LandingPage({ onUseAppHere }: Props) {
       <div class="landing-shell">
         <section class="landing-narrative landing-soft-glow">
           <section class="glow-crest-hero" aria-labelledby="landing-title">
-            <div class="glow-crest" aria-hidden="true">
-              {sym}
+            <div class="glow-crest glow-crest-logo" aria-hidden="true">
+              <img src="/icons/icon.svg" alt="" width="64" height="64" decoding="async" />
             </div>
             <p class="glow-kicker">Offline credit ledger</p>
             <h1 id="landing-title" class="landing-title">

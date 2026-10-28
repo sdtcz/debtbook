@@ -44,7 +44,7 @@ export default defineConfig({
           },
         ],
         theme_color: '#0f766e',
-        background_color: '#f8fafc',
+        background_color: '#fffbeb',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/?app=1',

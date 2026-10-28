@@ -3,7 +3,7 @@ import { PinLock } from './components/PinLock';
 import { showsTabBar, TabBar } from './components/TabBar';
 import { Toast } from './components/Toast';
 import { getShop } from './db/repo';
-import { setCurrency, currencySymbol } from './lib/money';
+import { setCurrency } from './lib/money';
 import { reconcileTrialOnStart } from './lib/trialStore';
 import { useLocale } from './hooks/useLocale';
 import { useToast } from './hooks/useToast';
@@ -88,7 +88,6 @@ function DesktopAppStage({
         <div class="landing-orb landing-orb-c" />
         <div class="landing-grid" />
         <div class="landing-noise" />
-        <div class="landing-naira-wm">{currencySymbol()}</div>
       </div>
       <button type="button" class="showcase-back-btn" onClick={onBack}>
         ← Showcase home

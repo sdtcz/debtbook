@@ -6,11 +6,12 @@ import vercelJson from '../../vercel.json?raw';
 import viteConfig from '../../vite.config.ts?raw';
 
 describe('/credit-book-app static page', () => {
-  it('has title, meta description, canonical, four languages and FAQ JSON-LD', () => {
+  it('has title, meta description, canonical, three languages (Pidgin only on /ng/) and FAQ JSON-LD', () => {
     expect(html).toMatch(/<title>[^<]*Credit book app[^<]*<\/title>/);
     expect(html).toMatch(/<meta name="description" content="[^"]{50,160}">/);
     expect(html).toContain(`<link rel="canonical" href="${PUBLIC_APP_URL}/credit-book-app">`);
-    for (const lang of ['en', 'pcm', 'ha', 'yo']) expect(html).toContain(`<section id="${lang}" lang="${lang}">`);
+    for (const lang of ['en', 'ha', 'yo']) expect(html).toContain(`<section id="${lang}" lang="${lang}">`);
+    expect(html).not.toMatch(/lang="pcm"|Pidgin/); // Pidgin only on /ng/*
     const blocks = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
     expect(blocks.map((b) => b['@type']).sort()).toEqual(['FAQPage', 'SoftwareApplication']);
     const faq = blocks.find((b) => b['@type'] === 'FAQPage');
@@ -25,7 +26,7 @@ describe('/credit-book-app static page', () => {
   });
   it('tags app links src=cb and passes ?src through as cb-<src>', () => {
     const ctas = html.match(/<a class="cta" href="[^"]+">/g) || [];
-    expect(ctas.length).toBe(4);
+    expect(ctas.length).toBe(3);
     for (const a of ctas) expect(a).toContain('href="/?app=1&amp;src=cb"');
     const code = html.match(/<script>\n([\s\S]*?)<\/script>/)![1];
     const run = (search: string) => {

@@ -15,11 +15,12 @@ const read = (p: string) => files[p];
 
 describe('/kippa-alternative static page', () => {
   const html = read('public/kippa-alternative.html');
-  it('has title, meta description, canonical and the four languages', () => {
+  it('has title, meta description, canonical and the three languages (Pidgin only on /ng/)', () => {
     expect(html).toMatch(/<title>[^<]*Kippa alternative[^<]*<\/title>/);
     expect(html).toMatch(/<meta name="description" content="[^"]{50,160}">/);
     expect(html).toContain(`<link rel="canonical" href="${PUBLIC_APP_URL}/kippa-alternative">`);
-    for (const lang of ['en', 'pcm', 'ha', 'yo']) expect(html).toContain(`<section id="${lang}" lang="${lang}">`);
+    for (const lang of ['en', 'ha', 'yo']) expect(html).toContain(`<section id="${lang}" lang="${lang}">`);
+    expect(html).not.toMatch(/lang="pcm"|Pidgin/); // Pidgin only on /ng/*
     expect(html).toContain('Your book stays on your phone, works offline once opened, free.');
   });
   it('makes no claims about Kippa beyond the neutral question and trademark note', () => {
@@ -33,7 +34,7 @@ describe('/kippa-alternative static page', () => {
   });
   it('passes ?src= through to the app link, sanitised, with the static href as fallback', () => {
     const ctas = html.match(/<a class="cta" href="[^"]+">/g) || [];
-    expect(ctas.length).toBe(4);
+    expect(ctas.length).toBe(3);
     for (const a of ctas) expect(a).toContain('href="/?app=1&amp;src=kippa"');
     const code = html.match(/<script>\n([\s\S]*?)<\/script>/)![1];
     const run = (search: string) => {
