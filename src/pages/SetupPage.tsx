@@ -17,7 +17,7 @@ const INTRO_KEY = 'bb-intro';
 /** Spec 2: first phone visit with no book sees one intro screen; ?app=1 (installed PWA) and desktop skip it. */
 export function wantsIntro(): boolean {
   try {
-    return isPhoneLikeViewport() && !isForcedApp() && sessionStorage.getItem(INTRO_KEY) !== '1';
+    return isPhoneLikeViewport() && !isForcedApp() && localStorage.getItem(INTRO_KEY) !== '1';
   } catch {
     return false;
   }
@@ -37,7 +37,7 @@ export function SetupPage({ onDone, fresh = false }: Props) {
   const nameRef = useRef<HTMLInputElement>(null);
   const toForm = () => {
     try {
-      sessionStorage.setItem(INTRO_KEY, '1');
+      localStorage.setItem(INTRO_KEY, '1');
     } catch {
       /* private mode: show the form anyway */
     }

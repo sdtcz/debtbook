@@ -67,7 +67,13 @@ export function LandingPage({ onUseAppHere }: Props) {
     } catch {
       /* ignore */
     }
-    void import('../lib/hit').then((m) => m.hit('view_home', { daily: true, src })).catch(() => {});
+    // QA Oct 28: never compete with first paint. After the load event, on idle, via sendBeacon (lib/hit).
+    const go = () => void import('../lib/hit').then((m) => m.hit('view_home', { daily: true, src })).catch(() => {});
+    const idle = () =>
+      'requestIdleCallback' in window ? requestIdleCallback(go, { timeout: 4000 }) : setTimeout(go, 1);
+    if (document.readyState === 'complete') idle();
+    else addEventListener('load', idle, { once: true });
+    return () => removeEventListener('load', idle);
   }, []);
 
   useEffect(() => {
@@ -166,7 +172,10 @@ export function LandingPage({ onUseAppHere }: Props) {
                   <div class="lp-av">S</div>
                   <div class="lp-nm">
                     <b>Sam</b>
-                    <small>Owes for 4 days · 2 bags of rice</small>
+                    <small class="lp-sw">
+                      <span class="f1">Owes for 4 days · 2 bags of rice</span>
+                      <span class="f3">Settled · paid today</span>
+                    </small>
                   </div>
                   <div class="lp-amt">
                     <span class="f1">

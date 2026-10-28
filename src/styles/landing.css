@@ -102,3 +102,4 @@
 .lp-sticky{display:flex;position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:#fffbebf2;border-top:1px solid var(--b);z-index:9;transform:translateY(110%);transition:transform .2s}
 .lp-sticky.on{transform:none}.lp-sticky .lp-btn{flex:1}
 }
+.lp-sw{display:grid}.lp-sw>span{grid-area:1/1}

@@ -17,6 +17,7 @@ import { getUnlockedRecoveryCode } from './lib/syncUnlock';
 import { isPayMeHash, navigate, parseHash, type Route } from './lib/router';
 import { guardEraseDownload } from './lib/pinGuard';
 import { isSignedOut, signIn, signOutAndErase } from './lib/session';
+import { refreshRegion } from './lib/region';
 import type { ComponentChildren } from 'preact';
 import {
   clearForceApp,
@@ -132,6 +133,8 @@ function useAppMode(): [boolean, () => void, () => void] {
   return [showApp, forceApp, backToShowcase];
 }
 
+let geoAsked = false;
+
 export function App() {
   const [showApp, forceApp, backToShowcase] = useAppMode();
   const desktopStage = useDesktopAppStage(showApp);
@@ -142,6 +145,18 @@ export function App() {
   const [pinSalt, setPinSalt] = useState<string | undefined>();
   const [shopName, setShopName] = useState<string | undefined>();
   const [locked, setLocked] = useState(false);
+
+  // /api/geo (cached a week) only once the app shell runs: phones, ?app=1, Pay-me, or after "Start" on the
+  // desktop landing. Until it answers, currency/wording use the cached answer or device hints as before.
+  useEffect(() => {
+    if (!showApp || geoAsked) return;
+    geoAsked = true;
+    const id = window.setTimeout(() => void refreshRegion(), 2000);
+    return () => {
+      window.clearTimeout(id);
+      geoAsked = false;
+    };
+  }, [showApp]);
   const [forgotPin, setForgotPin] = useState(false);
   const startLockDone = useRef(false);
   const [signedOut, setSignedOut] = useState(() => isSignedOut());

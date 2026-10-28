@@ -10,8 +10,7 @@ function stub({ phone, search = '', seen = false }: { phone: boolean; search?: s
     location: { search },
     matchMedia: (q: string) => ({ matches: phone && q.includes('max-width: 640px') }),
   });
-  vi.stubGlobal('localStorage', { getItem: () => null });
-  vi.stubGlobal('sessionStorage', { getItem: (k: string) => store.get(k) ?? null });
+  vi.stubGlobal('localStorage', { getItem: (k: string) => store.get(k) ?? null });
 }
 
 describe('Phone intro (Spec 2)', () => {
@@ -20,7 +19,7 @@ describe('Phone intro (Spec 2)', () => {
     stub({ phone: true });
     expect(wantsIntro()).toBe(true);
     stub({ phone: true, seen: true });
-    expect(wantsIntro()).toBe(false); // tapped Start this session
+    expect(wantsIntro()).toBe(false); // tapped Start once on this phone (any tab or session)
     stub({ phone: true, search: '?app=1' });
     expect(wantsIntro()).toBe(false); // installed PWA launch
     stub({ phone: false });
@@ -35,5 +34,12 @@ describe('Phone intro (Spec 2)', () => {
     expect(intro).toContain("t('setup.introCta')");
     expect((intro.match(/btn-primary/g) || []).length).toBe(1);
     expect(setup).toContain('nameRef.current?.focus()');
+  });
+});
+
+describe('QA live fixes (Oct 28, Figma Bro)', () => {
+  it('intro flag lives in localStorage: once per phone', () => {
+    expect(setup).not.toContain('sessionStorage');
+    expect(setup).toContain("localStorage.setItem(INTRO_KEY, '1')");
   });
 });

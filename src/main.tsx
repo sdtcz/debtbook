@@ -7,14 +7,15 @@ import { normalizeCheckoutReturnUrl } from './lib/checkoutReturn';
 import { captureAttribution } from './lib/growth';
 import { navigate } from './lib/router';
 import { localeReady } from './i18n';
-import { applyRegion, refreshRegion } from './lib/region';
+import { applyRegion } from './lib/region';
 import { applySaveData } from './lib/saveData';
 import { MOVE_OLD_ORIGIN } from './config';
 
 normalizeCheckoutReturnUrl();
 // First-touch src/ref tags (?app=1&src=…&ref=…) — stored on this device only.
 captureAttribution();
-// Region wording ("Nigerian shops" only in Nigeria) from the cached geo answer / device hints; refreshed after mount.
+// Region wording ("Nigerian shops" only in Nigeria) from the cached geo answer / device hints.
+// /api/geo itself runs only once the app opens (App.tsx), never on the desktop landing.
 applyRegion();
 applySaveData();
 
@@ -53,5 +54,4 @@ function mount(root: HTMLElement) {
   pinHost.id = 'pin-prompt-root';
   document.body.appendChild(pinHost);
   render(<PinPromptHost />, pinHost);
-  window.setTimeout(() => void refreshRegion(), 2000);
 }

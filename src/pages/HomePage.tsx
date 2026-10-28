@@ -69,6 +69,9 @@ function nameInitial(name: string): string {
   return trimmed.charAt(0).toUpperCase();
 }
 
+/** Hero meta: long names would wrap the hero to 4 lines (QA P3-4). */
+export const shortName = (name: string): string => (name.length > 18 ? `${name.slice(0, 17)}…` : name);
+
 /** Row line A: debt age / due date, overdue, settled or paid extra (no amounts, safe when locked). */
 export function rowAgeLine(
   row: CustomerBalance,
@@ -332,7 +335,7 @@ export function HomePage({ locked, toast }: Props) {
     }
     if (oldest) {
       const n = daysSince(oldest.oldestUnpaidAt!);
-      if (n > 0) parts.push(t(n === 1 ? 'home.metaOldestOne' : 'home.metaOldest', { name: oldest.customer.name, n }));
+      if (n > 0) parts.push(t(n === 1 ? 'home.metaOldestOne' : 'home.metaOldest', { name: shortName(oldest.customer.name), n }));
     }
     return parts.join(' · ');
   })();
@@ -610,7 +613,7 @@ export function HomePage({ locked, toast }: Props) {
                     </div>
                     <div class="meta soft-list-meta">
                       <div class="name">
-                        {row.customer.name}
+                        <span class="nt">{row.customer.name}</span>
                         {overdue && (
                           <span class="overdue-badge">{t('common.overdue')}</span>
                         )}

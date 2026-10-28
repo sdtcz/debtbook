@@ -226,6 +226,8 @@ a {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Long names ellipsize; the Overdue / limit badges never do */
+.soft-list-meta .name{display:flex;align-items:center}.soft-list-meta .name .nt{min-width:0;overflow:hidden;text-overflow:ellipsis}.soft-list-meta .name>span:not(.nt){flex:none}
 
 .list-item .hint {
   color: var(--muted);
@@ -3960,7 +3962,7 @@ body.has-tabbar .toast {
   padding: 14px;
 }
 .report-tile.debt {
-  border-top: 3px solid var(--danger);
+  border-top: 3px solid var(--ink);
 }
 .report-tile.ok {
   border-top: 3px solid var(--ok);
@@ -4070,7 +4072,7 @@ a.settings-row.report-debtor {
 }
 .growth-card-actions .btn {
   width: auto;
-  min-height: 40px;
+  min-height: 44px;
   padding: 6px 12px;
   font-size: 0.85rem;
 }
@@ -4664,7 +4666,7 @@ a.btn.payme-cta-btn {
 .chase-today { padding: 14px; margin-bottom: 12px; border: 1px solid #fecaca; }
 .chase-today-title { margin: 0; font-size: 1.05rem; }
 .chase-today-sub { margin: 2px 0 10px; color: var(--muted); font-size: 0.85rem; }
-.chase-today-list { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 6px; }
+.chase-today-list { list-style: none; margin: 0 0 10px; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
 .chase-today-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); }
 .chase-today-row:first-child { border-top: 0; }
 .chase-today-rank {
