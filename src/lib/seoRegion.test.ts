@@ -106,7 +106,7 @@ describe('region-neutral SEO pages + /ng/ variants', () => {
   it('landing and index.html only say Nigeria behind the region switch', () => {
     expect(indexHtml).not.toMatch(NG);
     const lines = landing.split('\n').filter((l: string) => NG.test(l.replace(/isRegionNigeria/g, '')) && !/^\s*\/\//.test(l));
-    expect(lines).toEqual([expect.stringContaining("{ng ? 'Nigeria · ₦ · Free'")]);
+    expect(lines).toEqual([]);
     expect(landing).toContain('{enShops}');
   });
 });

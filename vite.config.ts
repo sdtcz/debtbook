@@ -89,6 +89,7 @@ export default defineConfig({
           '**/assets/ha-*.js',
           '**/assets/yo-*.js',
           '**/assets/LandingPage-*.js',
+          '**/assets/LandingPage-*.css',
           'favicon.ico',
           'icons/icon-512.png',
           'icons/icon-192.png',

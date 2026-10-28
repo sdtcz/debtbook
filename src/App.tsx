@@ -82,13 +82,7 @@ function DesktopAppStage({
 }) {
   return (
     <div class="desktop-app-stage">
-      <div class="desktop-app-bg" aria-hidden="true">
-        <div class="landing-orb landing-orb-a" />
-        <div class="landing-orb landing-orb-b" />
-        <div class="landing-orb landing-orb-c" />
-        <div class="landing-grid" />
-        <div class="landing-noise" />
-      </div>
+      <div class="desktop-app-bg" aria-hidden="true" />
       <button type="button" class="showcase-back-btn" onClick={onBack}>
         ← Showcase home
       </button>

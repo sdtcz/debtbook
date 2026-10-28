@@ -36,6 +36,10 @@ describe('QA fixes (Oct 28)', () => {
   it('landing hero uses the B logo, not the currency symbol', () => {
     expect(landing).toContain('/icons/icon.svg');
     expect(landing).not.toContain('landing-naira-wm');
+    expect(landing).not.toContain('<iframe');
+    expect(landing).not.toContain('Preview in browser');
+    expect(landing).toContain("import '../styles/landing.css'");
+    expect(css).not.toMatch(/landing/);
   });
   it('round 2: entry tally red only when overdue, '+' in the tab bar, one language at a time on neutral SEO pages', () => {
     expect(entry).toContain("isOverdue(customer, afterKobo) ? ' overdue' : ''");
@@ -55,18 +59,21 @@ describe('QA fixes (Oct 28)', () => {
 describe('Desktop landing quick wins (Oct 28 competitor scan)', () => {
   it('hero matches the app promise and says only honest offline words', () => {
     expect(landing).toContain('Know who owes you.');
-    expect(landing).toContain('Get paid on WhatsApp.');
+    expect(landing).toContain('<em>Get paid</em> on WhatsApp.');
     expect(landing).toContain('Works offline once opened');
     // plain shop words: no tech jargon on the marketing page
     for (const jargon of ['IndexedDB', 'JSON', 'PWA']) expect(landing).not.toContain(jargon);
   });
   it('one primary call to action, phone CTA shows the QR without touching the hash router', () => {
-    expect((landing.match(/class="landing-cta"/g) || []).length).toBe(1);
+    // one filled CTA in the hero (the sticky copy only appears on narrow widths after it scrolls off)
+    expect((landing.match(/class="lp-btn" ref=\{cta\}/g) || []).length).toBe(1);
     expect(landing).toContain('Start my book, free');
-    expect(landing).not.toContain('landing-linkish');
-    expect(landing).toContain('id="landing-qr"');
-    expect(landing).not.toContain('href="#landing-qr"');
-    expect(css).not.toContain('.landing-linkish');
+    expect(landing).toContain('id="lp-phone"');
+    expect(landing).not.toContain('href="#lp-');
+    // FAQ: the three worries, honest about staff logins
+    for (const q of ['Will it use up my data?', 'What if I lose my phone?', 'Can my staff use it?']) expect(landing).toContain(q);
+    expect(landing).toContain('There are no separate staff logins yet');
+    expect(landing).toContain('~{KB_OPEN} kB to open');
   });
   it('Nigeria wording only through the region switch', () => {
     const code = landing.split('\n').filter((l: string) => !/^\s*\/\//.test(l)).join('\n');
