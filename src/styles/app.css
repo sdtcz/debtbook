@@ -1907,21 +1907,6 @@ button:active:not(:disabled),
   background: rgba(15, 23, 42, 0.7);
 }
 
-.landing-linkish {
-  background: none;
-  border: none;
-  padding: 8px 4px;
-  color: #5eead4;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.landing-linkish:hover {
-  color: #99f6e4;
-}
-
 /* Bento glass feature cards (Market Glow) */
 .landing-features {
   list-style: none;

@@ -10,28 +10,28 @@ import { isRegionNigeria, t as tr } from '../i18n';
 const FEATURES = [
   {
     icon: '📴',
-    title: 'Offline-first',
-    body: 'Works offline once opened. Your ledger lives on the phone in IndexedDB.',
+    title: 'Works with no network',
+    body: 'Works offline once opened. Your book stays on your phone. No sign-up.',
   },
   {
     icon: '💬',
-    title: 'WhatsApp remind',
-    body: 'One tap to nudge customers over WhatsApp (SMS / share fallback).',
+    title: 'Remind in one tap',
+    body: 'Send a polite WhatsApp reminder with the balance. SMS or share if there is no WhatsApp.',
   },
   {
     icon: '☁️',
-    title: 'Free + Pro backup',
-    body: 'Local JSON backup free; encrypted cloud backup on Pro.',
+    title: 'Never lose your book',
+    body: 'Free backup file any time. Pro adds encrypted cloud backup and restore on a new phone.',
   },
   {
     icon: '🌍',
-    title: 'Hausa & Yoruba',
-    body: 'English, Hausa, and Yoruba — switch in Settings.',
+    title: 'Your language',
+    body: 'English, Hausa and Yorùbá. Switch any time in Settings.',
   },
   {
     icon: '📇',
-    title: 'Contacts pick (Android)',
-    body: 'Add customers from the phone book when the browser allows it.',
+    title: 'Add from contacts',
+    body: 'Pick customers from your phone book on Android.',
   },
 ] as const;
 
@@ -77,6 +77,11 @@ export function LandingPage({ onUseAppHere }: Props) {
     el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   };
 
+  // "Open on your phone" from a desktop: show the QR (the hash is the app router, so no #anchor).
+  const showQr = () => {
+    document.getElementById('landing-qr')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
   return (
     <div class="landing">
       <div class="landing-bg" aria-hidden="true">
@@ -90,14 +95,14 @@ export function LandingPage({ onUseAppHere }: Props) {
       <nav class="landing-nav">
         <div class="landing-nav-brand">
           <BrandLockup reverse />
-          <span class="landing-tag-chip">{ng ? 'Nigeria · ₦ · PWA' : 'Works offline · PWA'}</span>
+          <span class="landing-tag-chip">{ng ? 'Nigeria · ₦ · Free' : 'Free · Works offline once opened'}</span>
         </div>
         <div class="landing-nav-actions">
           <button type="button" class="landing-nav-ghost" onClick={previewInBrowser}>
             Preview in browser
           </button>
           <button type="button" class="landing-nav-primary" onClick={openAppHome}>
-            Open app home
+            Start free
           </button>
         </div>
       </nav>
@@ -108,27 +113,24 @@ export function LandingPage({ onUseAppHere }: Props) {
             <div class="glow-crest glow-crest-logo" aria-hidden="true">
               <img src="/icons/icon.svg" alt="" width="64" height="64" decoding="async" />
             </div>
-            <p class="glow-kicker">Offline credit ledger</p>
+            <p class="glow-kicker">Free credit book</p>
             <h1 id="landing-title" class="landing-title">
-              Track bashi.
+              Know who owes you.
               <br />
-              <span class="landing-title-accent">Remind. Recover.</span>
+              <span class="landing-title-accent">Get paid on WhatsApp.</span>
             </h1>
             <p class="glow-hint">
-              Offline credit (bashi) book for {enShops} — track who owes what,
-              remind on WhatsApp, back up when you are ready.
+              A free credit (bashi) book for {enShops}. Write it once, remind in
+              one tap, keep a backup. Works offline once opened.
             </p>
           </section>
 
           <div class="landing-cta-row">
             <button type="button" class="landing-cta" onClick={openAppHome}>
-              Open app home
+              Start my book, free
             </button>
-            <a class="landing-cta-secondary" href={href}>
+            <button type="button" class="landing-cta-secondary" onClick={showQr}>
               Open on your phone
-            </a>
-            <button type="button" class="landing-linkish" onClick={previewInBrowser}>
-              Preview in browser
             </button>
           </div>
 
@@ -146,14 +148,14 @@ export function LandingPage({ onUseAppHere }: Props) {
             ))}
           </ul>
 
-          <div class="landing-qr-block landing-qr-soft">
+          <div class="landing-qr-block landing-qr-soft" id="landing-qr">
             <QrCode class="landing-qr" value={href} size={168} label="QR code to open BashiBook" />
             <div class="landing-qr-meta">
               <p class="landing-qr-label">Scan to open on your phone</p>
               <a class="landing-url" href={href}>
                 Open {PUBLIC_APP_LABEL} →
               </a>
-              <p class="landing-qr-hint">Best experience as an installed PWA on Android.</p>
+              <p class="landing-qr-hint">Add it to your home screen to open it in one tap.</p>
             </div>
           </div>
 

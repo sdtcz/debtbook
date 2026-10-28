@@ -46,3 +46,26 @@ describe('QA fixes (Oct 28)', () => {
     }
   });
 });
+
+describe('Desktop landing quick wins (Oct 28 competitor scan)', () => {
+  it('hero matches the app promise and says only honest offline words', () => {
+    expect(landing).toContain('Know who owes you.');
+    expect(landing).toContain('Get paid on WhatsApp.');
+    expect(landing).toContain('Works offline once opened');
+    // plain shop words: no tech jargon on the marketing page
+    for (const jargon of ['IndexedDB', 'JSON', 'PWA']) expect(landing).not.toContain(jargon);
+  });
+  it('one primary call to action, phone CTA shows the QR without touching the hash router', () => {
+    expect((landing.match(/class="landing-cta"/g) || []).length).toBe(1);
+    expect(landing).toContain('Start my book, free');
+    expect(landing).not.toContain('landing-linkish');
+    expect(landing).toContain('id="landing-qr"');
+    expect(landing).not.toContain('href="#landing-qr"');
+    expect(css).not.toContain('.landing-linkish');
+  });
+  it('Nigeria wording only through the region switch', () => {
+    const code = landing.split('\n').filter((l: string) => !/^\s*\/\//.test(l)).join('\n');
+    expect(code).not.toMatch(/Nigerian shops/);
+    expect(landing).toContain("ng ? 'region.shopsNG' : 'region.shops'");
+  });
+});
