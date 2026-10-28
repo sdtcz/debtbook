@@ -335,6 +335,7 @@ export function App() {
       <>
         {frame(
           <SetupPage
+            fresh={!hasShop}
             onDone={() => {
               setHasShop(true);
             }}

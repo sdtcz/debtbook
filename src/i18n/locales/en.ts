@@ -868,6 +868,13 @@ export const en = {
   "setup.check2": "No sign-up. Your book stays on this phone",
   "setup.check3": "Free. Backup file included",
   "setup.restore": "Have a backup? Restore it",
+  "setup.introCta": "Start my book, free",
+  "setup.introDemoName": "Sam",
+  "setup.introDemoNote": "Owes you · 2 bags of rice",
+  "setup.introDemoLabel": "Example customer row with a one-tap WhatsApp reminder",
+  "setup.introRemind": "💬 Remind {{name}} on WhatsApp",
+  "setup.introBubble": "Hello {{name}}, this is Grace's Corner Shop. Your balance is {{amount}} (2 bags of rice). Thank you!",
+  "setup.check3Kb": "Free. About {{kb}} kB of data to open",
   "setup.placeholderNeutral": "e.g. Corner Shop",
 
   'locale.name.en': 'English',

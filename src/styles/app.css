@@ -489,50 +489,6 @@ a {
   color: var(--muted);
 }
 
-.entry-row {
-  display: flex;
-  gap: 10px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.entry-row:last-child {
-  border-bottom: none;
-}
-
-.entry-row .left {
-  flex: 1;
-  min-width: 0;
-}
-
-.entry-row .type {
-  font-weight: 700;
-  font-size: 0.95rem;
-}
-
-.entry-row .type.credit {
-  color: var(--danger);
-}
-.entry-row .type.payment {
-  color: var(--ok);
-}
-
-.entry-row .when {
-  font-size: 0.75rem;
-  color: var(--muted);
-}
-
-.entry-row .note {
-  font-size: 0.85rem;
-  color: var(--muted);
-  margin-top: 2px;
-}
-
-.entry-row .amt {
-  font-weight: 750;
-  white-space: nowrap;
-}
-
 .setup-screen {
   position: relative;
   min-height: 100dvh;
@@ -585,22 +541,6 @@ a {
   border-radius: 18px;
   border: 1px solid rgba(15, 118, 110, 0.18);
   background: linear-gradient(160deg, #f0fdfa 0%, #ecfeff 100%);
-}
-
-.setup-crest {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  margin: 0 0 6px;
-  border-radius: 16px;
-  background: linear-gradient(145deg, var(--primary) 0%, #115e59 100%);
-  color: #fff;
-  font-size: 1.55rem;
-  font-weight: 800;
-  line-height: 1;
-  box-shadow: 0 0 0 7px rgba(15, 118, 110, 0.09);
 }
 
 .setup-kicker {
@@ -3438,7 +3378,6 @@ button:active:not(:disabled),
   overflow-wrap: anywhere;
 }
 
-
 /* —— Soft Match crest: Home filter/search no-matches empty —— */
 .match-soft-empty {
   margin: 8px 0 24px;
@@ -4487,7 +4426,7 @@ a.btn.payme-cta-btn {
 .iowe-hero-after { margin: 8px 0 0; font-weight: 700; color: #78350f; }
 .supplier-empty { text-align: center; }
 .supplier-empty-glyph { font-size: 2.2rem; margin-bottom: 6px; }
-.supplier-list, .supplier-history { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.supplier-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .supplier-row {
   display: flex; align-items: center; gap: 12px;
   min-height: 60px; padding: 10px 12px;
@@ -4514,22 +4453,6 @@ a.btn.payme-cta-btn {
 .btn-iowe { background: #b45309; border-color: #b45309; color: #fff; min-height: var(--tap); }
 .btn-iowe:hover { background: #92400e; }
 .seg button.active.iowe { background: #b45309; border-color: #b45309; color: #fff; }
-.supplier-hist-row {
-  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
-  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-}
-.supplier-hist-sign {
-  width: 32px; height: 32px; flex: none; border-radius: 50%; display: grid; place-items: center; font-weight: 800;
-}
-.supplier-hist-row.purchase .supplier-hist-sign { background: #fef3c7; color: #78350f; }
-.supplier-hist-row.payment .supplier-hist-sign { background: var(--ok-soft); color: var(--ok); }
-.supplier-hist-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.supplier-hist-type { font-weight: 700; }
-.supplier-hist-when, .supplier-hist-note { color: var(--muted); font-size: 0.85rem; }
-.supplier-hist-note { overflow-wrap: anywhere; }
-.supplier-hist-amt { font-weight: 800; font-variant-numeric: tabular-nums; }
-.supplier-hist-row.purchase .supplier-hist-amt { color: #92400e; }
-.supplier-hist-row.payment .supplier-hist-amt { color: var(--ok); }
 
 /* Home card */
 .iowe-home-card {
@@ -4934,7 +4857,6 @@ a.settings-row {
 .actions-grid .entry-btn.payment{color:var(--ok)}
 .statement-pdf-btn,.statement-pdf-btn.btn-secondary{background:var(--surface);border:1px solid var(--border);color:var(--ink)}
 
-
 /* P3: this-week tile matches the supplier tile. */
 .home-stats .week-collected-kicker{color:var(--muted);font-size:.8rem;font-weight:700}
 .home-stats .week-collected-title{color:var(--ink);font-size:1.05rem;font-weight:800}
@@ -4948,3 +4870,12 @@ a.settings-row {
 .list-item .row-od{color:var(--danger);font-weight:750}
 .row-bar{height:4px;border-radius:2px;background:var(--border);margin-top:6px;overflow:hidden;max-width:220px}
 .row-bar i{display:block;height:100%;background:var(--ink)}
+/* Spec 2: one-screen intro for first phone visits (step 'intro' of Setup) */
+.intro-bub{background:#e9f5ee;padding:10px 12px;font-size:.84rem;color:#14532d}
+.intro-cta{position:sticky;bottom:0;margin-top:auto;padding:14px 0 calc(12px + var(--safe-bottom));background:linear-gradient(transparent,var(--bg) 22%)}
+@media(max-height:760px){.intro-bub{display:none}}
+@media(max-height:700px){.setup-lede{display:none}}
+@media(max-height:600px){.intro-demo{display:none}}
+.intro-top{display:flex;align-items:center;gap:8px;color:var(--ink)}.intro-top .setup-lang{margin-left:auto}
+.intro-wa{padding:10px 12px;font-weight:700;color:var(--primary);border-top:1px solid var(--border)}
+.intro-cta .btn-primary{min-height:56px}.intro-top .setup-lang-pill{padding:0 12px}

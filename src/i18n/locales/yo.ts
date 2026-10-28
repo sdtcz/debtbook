@@ -870,6 +870,13 @@ export const yo: Record<MessageKey, string> = {
   "setup.check2": "Kò sí ìforúkọsílẹ̀. Ìwé rẹ wà lórí fóònù yìí",
   "setup.check3": "Ọ̀fẹ́. Fáìlì àfipamọ́ wà níbẹ̀",
   "setup.restore": "Ṣé o ní àfipamọ́? Mú un padà",
+  "setup.introCta": "Bẹ̀rẹ̀ ìwé mi, ọ̀fẹ́",
+  "setup.introDemoName": "Ṣọlá",
+  "setup.introDemoNote": "Ó jẹ ọ́ · àpò ìrẹsì 2",
+  "setup.introDemoLabel": "Àpẹẹrẹ oníbàárà pẹ̀lú ìránnilétí WhatsApp ní ìfọwọ́kàn kan",
+  "setup.introRemind": "💬 Rán {{name}} létí lórí WhatsApp",
+  "setup.introBubble": "Ẹ n lẹ́ {{name}}, ṣọ́ọ̀bù Grace nìyí. Gbèsè rẹ jẹ́ {{amount}} (àpò ìrẹsì 2). A dúpẹ́!",
+  "setup.check3Kb": "Ọ̀fẹ́. Nǹkan bí {{kb}} kB dátà láti ṣí i",
   "setup.placeholderNeutral": "àpẹẹrẹ Ṣọ́ọ̀bù Igun",
 
   'locale.name.en': 'English',

@@ -870,6 +870,13 @@ export const ha: Record<MessageKey, string> = {
   "setup.check2": "Babu rajista. Littafinka yana zaune a wannan wayar",
   "setup.check3": "Kyauta. Da fayil ɗin ajiya",
   "setup.restore": "Kana da ajiya? Maido da ita",
+  "setup.introCta": "Fara littafina, kyauta",
+  "setup.introDemoName": "Sani",
+  "setup.introDemoNote": "Yana bin ka · buhun shinkafa 2",
+  "setup.introDemoLabel": "Misalin layin kwastoma tare da tunatarwa ta WhatsApp da taɓawa ɗaya",
+  "setup.introRemind": "💬 Tunatar da {{name}} ta WhatsApp",
+  "setup.introBubble": "Sannu {{name}}, wannan shagon Grace ne. Bashinka {{amount}} ne (buhun shinkafa 2). Na gode!",
+  "setup.check3Kb": "Kyauta. Kusan {{kb}} kB na data don buɗewa",
   "setup.placeholderNeutral": "misali Shagon Kusurwa",
 
   'locale.name.en': 'English',
