@@ -32,7 +32,7 @@ function loadPdfModules() {
   });
   return pdfModules;
 }
-import { isOverdue } from '../db/repo';
+import { isOverdue, lastPaymentAt } from '../db/repo';
 import type { ToastAction } from '../hooks/useToast';
 import { deviceLocale } from '../lib/dates';
 
@@ -202,6 +202,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
   const overdue = isOverdue(customer, balanceKobo);
   const limitStatus = creditLimitStatus(balanceKobo, customer.creditLimitKobo);
   const headroom = creditHeadroomKobo(balanceKobo, customer.creditLimitKobo);
+  const paidAt = lastPaymentAt(entries);
 
   return (
     <div class="app-shell">
@@ -249,9 +250,11 @@ export function CustomerDetailPage({ id, toast }: Props) {
             </div>
           </div>
           {(customer.dueAt ||
+            paidAt ||
             (customer.creditLimitKobo != null && customer.creditLimitKobo > 0) ||
             tone === 'credit') && (
             <div class="balance-soft-hints">
+              {paidAt && <p class="balance-soft-hint">{t('home.lastPaid', { date: fmtDue(paidAt) })}</p>}
               {customer.dueAt && (
                 <p class="balance-soft-hint">
                   {t('customer.due', { date: fmtDue(customer.dueAt) })}

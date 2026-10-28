@@ -16,6 +16,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import {
   creditLimitStatus,
   daysOverdue,
+  daysSince,
   daysUntilDue,
   getDashboardBalances,
   getOverdueDigest,
@@ -36,7 +37,7 @@ import {
 import { isPro } from '../lib/entitlement';
 import { trialStatus } from '../lib/trial';
 import type { CustomerBalance, ShopProfile } from '../lib/types';
-import { balanceLabel, balanceTone, formatMoney, currencySymbol } from '../lib/money';
+import { balanceTone, formatMoney, currencySymbol } from '../lib/money';
 import { href, navigate } from '../lib/router';
 import { remindCustomer, shareMorningDigest } from '../lib/sms';
 import type { ToastAction } from '../hooks/useToast';
@@ -66,30 +67,39 @@ function nameInitial(name: string): string {
   return trimmed.charAt(0).toUpperCase();
 }
 
-function rowStatusLine(
+/** Row line A: debt age / due date, overdue, settled or paid extra (no amounts, safe when locked). */
+export function rowAgeLine(
   row: CustomerBalance,
   t: (key: MessageKey, vars?: Record<string, string | number>) => string,
-): string | null {
-  const parts: string[] = [];
-  const overdueDays = daysOverdue(row.customer, row.balanceKobo);
-  if (overdueDays != null) {
-    parts.push(
-      overdueDays === 1
-        ? t('home.dayOverdue')
-        : t('home.daysOverdue', { n: overdueDays }),
-    );
-  } else {
-    const until = daysUntilDue(row.customer, row.balanceKobo);
-    if (until != null) {
-      parts.push(
-        until === 0 ? t('home.dueToday') : t('home.dueInDays', { n: until }),
-      );
-    }
+  now = Date.now(),
+): { text: string; overdue: boolean } {
+  const od = daysOverdue(row.customer, row.balanceKobo, now);
+  if (od != null) return { text: od === 1 ? t('home.dayOverdue') : t('home.daysOverdue', { n: od }), overdue: true };
+  if (row.entryCount === 0) return { text: t('home.noEntriesYet'), overdue: false };
+  if (row.balanceKobo < 0) {
+    return {
+      text: t('home.paidExtra', { name: row.customer.name, date: row.lastPaymentAt ? fmtShortDate(row.lastPaymentAt) : '' }),
+      overdue: false,
+    };
   }
-  if (row.lastPaymentAt) {
-    parts.push(t('home.lastPaid', { date: fmtShortDate(row.lastPaymentAt) }));
+  if (row.balanceKobo === 0) {
+    return {
+      text: row.lastPaymentAt ? t('home.settledLastPaid', { date: fmtShortDate(row.lastPaymentAt) }) : t('home.settled'),
+      overdue: false,
+    };
   }
-  return parts.length ? parts.join(' · ') : null;
+  const days = row.oldestUnpaidAt != null ? daysSince(row.oldestUnpaidAt, now) : 0;
+  let text =
+    days === 0
+      ? t('home.ageToday')
+      : days === 1
+        ? t('home.ageDay')
+        : days < 60
+          ? t('home.ageDays', { n: days })
+          : t('home.ageMonths', { n: Math.floor(days / 30) });
+  const until = daysUntilDue(row.customer, row.balanceKobo, now, Infinity);
+  if (until != null) text += ` · ${until === 0 ? t('home.dueToday') : t('home.dueInDays', { n: until })}`;
+  return { text, overdue: false };
 }
 
 export function HomePage({ locked, toast }: Props) {
@@ -293,7 +303,7 @@ export function HomePage({ locked, toast }: Props) {
     const n = filtered.length ? ` (${filtered.length})` : '';
     if (filter === 'overdue') return `${t('home.sectionOverdue')}${n}`;
     if (filter === 'owes') return `${t('home.sectionOwes')}${n}`;
-    return `${t('home.sectionCustomers')}${n}`;
+    return `${t('home.sectionCustomers')}${n}${filtered.length > 1 ? ` · ${t('home.oldestFirst')}` : ''}`;
   })();
 
   const heroMeta = (() => {
@@ -305,6 +315,14 @@ export function HomePage({ locked, toast }: Props) {
         : t('home.metaCustomers', { n: rows.length }),
     );
     if (owesCount > 0) parts.push(t('home.metaOweYou', { n: owesCount }));
+    let oldest: CustomerBalance | null = null;
+    for (const r of rows) {
+      if (r.balanceKobo > 0 && r.oldestUnpaidAt != null && (!oldest || r.oldestUnpaidAt < oldest.oldestUnpaidAt!)) oldest = r;
+    }
+    if (oldest) {
+      const n = daysSince(oldest.oldestUnpaidAt!);
+      if (n > 0) parts.push(t(n === 1 ? 'home.metaOldestOne' : 'home.metaOldest', { name: oldest.customer.name, n }));
+    }
     return parts.join(' · ');
   })();
 
@@ -560,7 +578,11 @@ export function HomePage({ locked, toast }: Props) {
                 row.balanceKobo,
                 row.customer.creditLimitKobo,
               );
-              const status = rowStatusLine(row, t);
+              const age = rowAgeLine(row, t);
+              const part =
+                !locked && row.balanceKobo > 0 && (row.cyclePaidKobo ?? 0) > 0 && (row.cycleCreditKobo ?? 0) > 0
+                  ? { paid: row.cyclePaidKobo!, total: row.cycleCreditKobo! }
+                  : null;
               return (
                 <div
                   class={`list-item-wrap soft-list-row ${tone}${overdue ? ' overdue' : ''}`}
@@ -586,12 +608,16 @@ export function HomePage({ locked, toast }: Props) {
                           <span class="limit-badge near">{t('home.nearLimit')}</span>
                         )}
                       </div>
-                      <div class="hint soft-list-hint">
-                        {row.customer.phone || t('common.noPhone')} ·{' '}
-                        {balanceLabel(row.balanceKobo)}
-                      </div>
-                      {status && (
-                        <div class="hint row-status soft-list-hint">{status}</div>
+                      <div class={`hint soft-list-hint${age.overdue ? ' row-od' : ''}`}>{age.text}</div>
+                      {part && (
+                        <>
+                          <div class="hint soft-list-hint">
+                            {t('home.paidOf', { paid: formatMoney(part.paid), total: formatMoney(part.total) })}
+                          </div>
+                          <div class="row-bar" aria-hidden="true">
+                            <i style={{ width: `${Math.min(100, Math.round((part.paid / part.total) * 100))}%` }} />
+                          </div>
+                        </>
                       )}
                     </div>
                     <div class={`amount-pill soft-list-pill ${tone}${overdue ? ' overdue' : ''}`}>

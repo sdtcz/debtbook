@@ -406,6 +406,90 @@ export function lastPaymentAt(entries: Entry[]): number | undefined {
   return latest;
 }
 
+/**
+ * Open credit cycle for one customer, first-in-first-out: payments pay off the
+ * oldest credit first. Deleted entries are ignored.
+ */
+export function openCycle(entries: Entry[]): {
+  oldestUnpaidAt: number | undefined;
+  cycleCreditKobo: number;
+  cyclePaidKobo: number;
+} {
+  const es = entries
+    .filter((e) => !e.deletedAt)
+    .sort((a, b) => a.occurredAt - b.occurredAt || a.createdAt - b.createdAt);
+  let bal = 0;
+  let cycleCredit = 0;
+  let cyclePaid = 0;
+  const open: { at: number; left: number }[] = [];
+  for (const e of es) {
+    if (e.type === 'credit') {
+      if (bal <= 0) {
+        cycleCredit = 0;
+        cyclePaid = 0;
+        open.length = 0;
+      }
+      bal += e.amountKobo;
+      cycleCredit += e.amountKobo;
+      open.push({ at: e.occurredAt, left: e.amountKobo });
+    } else {
+      bal -= e.amountKobo;
+      cyclePaid += e.amountKobo;
+      let p = e.amountKobo;
+      while (p > 0 && open.length) {
+        const h = open[0]!;
+        const x = Math.min(p, h.left);
+        h.left -= x;
+        p -= x;
+        if (!h.left) open.shift();
+      }
+    }
+  }
+  const owing = bal > 0;
+  return {
+    oldestUnpaidAt: owing ? open[0]?.at : undefined,
+    cycleCreditKobo: owing ? cycleCredit : 0,
+    cyclePaidKobo: owing ? cyclePaid : 0,
+  };
+}
+
+/** Whole days since `at` (future dates count as today). */
+export function daysSince(at: number, now = Date.now()): number {
+  return Math.max(0, Math.floor((now - at) / DAY_MS));
+}
+
+/**
+ * Home order: overdue (most days late, then larger balance) → owing (oldest
+ * unpaid credit first, then larger balance) → paid extra (newest payment) →
+ * settled (most recent activity) → no entries (by name).
+ */
+export function compareCustomerRows(a: CustomerBalance, b: CustomerBalance, now = Date.now()): number {
+  const group = (r: CustomerBalance) =>
+    isOverdue(r.customer, r.balanceKobo, now)
+      ? 0
+      : r.balanceKobo > 0
+        ? 1
+        : r.balanceKobo < 0
+          ? 2
+          : r.entryCount > 0
+            ? 3
+            : 4;
+  const ga = group(a);
+  const gb = group(b);
+  if (ga !== gb) return ga - gb;
+  if (ga === 0) {
+    const d = (daysOverdue(b.customer, b.balanceKobo, now) ?? 0) - (daysOverdue(a.customer, a.balanceKobo, now) ?? 0);
+    return d || b.balanceKobo - a.balanceKobo;
+  }
+  if (ga === 1) {
+    const d = (a.oldestUnpaidAt ?? now) - (b.oldestUnpaidAt ?? now);
+    return d || b.balanceKobo - a.balanceKobo;
+  }
+  if (ga === 2) return (b.lastPaymentAt ?? 0) - (a.lastPaymentAt ?? 0);
+  if (ga === 3) return (b.lastActivityAt ?? 0) - (a.lastActivityAt ?? 0);
+  return a.customer.name.localeCompare(b.customer.name);
+}
+
 export type CreditLimitStatus = 'ok' | 'near' | 'at' | 'none';
 
 /** Soft credit-limit status: near = ≥80% used, at = balance ≥ limit. */
@@ -443,6 +527,9 @@ export async function getDashboardBalances(): Promise<{
     const { balanceKobo, creditTotalKobo, paymentTotalKobo } =
       computeBalance(active);
     const paidAt = lastPaymentAt(active);
+    const cycle = openCycle(active);
+    let lastAt: number | undefined;
+    for (const e of active) if (lastAt === undefined || e.occurredAt > lastAt) lastAt = e.occurredAt;
     results.push({
       customer,
       balanceKobo,
@@ -450,17 +537,15 @@ export async function getDashboardBalances(): Promise<{
       paymentTotalKobo,
       entryCount: active.length,
       ...(paidAt !== undefined ? { lastPaymentAt: paidAt } : {}),
+      ...(lastAt !== undefined ? { lastActivityAt: lastAt } : {}),
+      ...(cycle.oldestUnpaidAt !== undefined ? { oldestUnpaidAt: cycle.oldestUnpaidAt } : {}),
+      cycleCreditKobo: cycle.cycleCreditKobo,
+      cyclePaidKobo: cycle.cyclePaidKobo,
     });
     if (balanceKobo > 0) totalOutstandingKobo += balanceKobo;
   }
 
-  // Overdue first, then highest debt
-  results.sort((a, b) => {
-    const aOver = isOverdue(a.customer, a.balanceKobo, now) ? 1 : 0;
-    const bOver = isOverdue(b.customer, b.balanceKobo, now) ? 1 : 0;
-    if (bOver !== aOver) return bOver - aOver;
-    return b.balanceKobo - a.balanceKobo;
-  });
+  results.sort((a, b) => compareCustomerRows(a, b, now));
   return { totalOutstandingKobo, customers: results };
 }
 

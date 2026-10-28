@@ -112,6 +112,14 @@ export interface CustomerBalance {
   entryCount: number;
   /** Latest payment entry occurredAt, if any */
   lastPaymentAt?: number;
+  /** Latest entry occurredAt of any type, if any */
+  lastActivityAt?: number;
+  /** FIFO: occurredAt of the oldest credit not yet paid off (balance > 0 only) */
+  oldestUnpaidAt?: number;
+  /** Credits since the balance was last ≤ 0 (0 when nothing is owed) */
+  cycleCreditKobo?: number;
+  /** Payments since the balance was last ≤ 0 (0 when nothing is owed) */
+  cyclePaidKobo?: number;
 }
 
 /**
