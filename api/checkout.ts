@@ -44,7 +44,7 @@ export function isValidEmail(v: unknown): v is string {
   );
 }
 
-const DEFAULT_ORIGIN = 'https://debtbook-neon.vercel.app';
+const DEFAULT_ORIGIN = 'https://bashibook.app';
 
 /** Return origin from the request host, limited to safe hosts (no open redirect). */
 export function callbackOrigin(headers: Record<string, string | string[] | undefined> | undefined): string {
@@ -55,7 +55,12 @@ export function callbackOrigin(headers: Record<string, string | string[] | undef
   const host = pick('x-forwarded-host') || pick('host');
   if (!host || !/^[a-z0-9.-]+(:\d{1,5})?$/.test(host)) return DEFAULT_ORIGIN;
   if (/^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host)) return `http://${host}`;
-  if (host === 'debtbook-neon.vercel.app' || /^debtbook[a-z0-9-]*\.vercel\.app$/.test(host)) {
+  if (
+    host === 'bashibook.app' ||
+    host === 'www.bashibook.app' ||
+    host === 'debtbook-neon.vercel.app' ||
+    /^debtbook[a-z0-9-]*\.vercel\.app$/.test(host)
+  ) {
     return `https://${host}`;
   }
   return DEFAULT_ORIGIN;

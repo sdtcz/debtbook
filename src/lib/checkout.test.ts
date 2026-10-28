@@ -60,6 +60,9 @@ describe('stripe checkout session', () => {
       'https://debtbook-neon.vercel.app/?app=1&checkout=stripe&session_id={CHECKOUT_SESSION_ID}',
     );
     expect(m.cancel_url).toBe('https://debtbook-neon.vercel.app/?app=1#/pro');
+    const b = buildSessionParams('monthly', 'a@b.co', callbackOrigin({ host: 'bashibook.app' }));
+    expect(b.success_url).toBe('https://bashibook.app/?app=1&checkout=stripe&session_id={CHECKOUT_SESSION_ID}');
+    expect(b.cancel_url).toBe('https://bashibook.app/?app=1#/pro');
     expect(m.metadata?.plan).toBe('monthly');
     const y = buildSessionParams('yearly', 'a@b.co', 'https://debtbook-neon.vercel.app');
     expect(y.line_items?.[0]?.price_data).toMatchObject({ unit_amount: 1500, recurring: { interval: 'year' } });
@@ -67,7 +70,17 @@ describe('stripe checkout session', () => {
 
   it('only redirects back to safe hosts', () => {
     expect(callbackOrigin({ host: 'debtbook-neon.vercel.app' })).toBe('https://debtbook-neon.vercel.app');
-    expect(callbackOrigin({ host: 'evil.example.com' })).toBe('https://debtbook-neon.vercel.app');
+    expect(callbackOrigin({ host: 'evil.example.com' })).toBe('https://bashibook.app');
+    expect(callbackOrigin({ host: 'bashibook.app' })).toBe('https://bashibook.app');
+    expect(callbackOrigin({ host: 'www.bashibook.app' })).toBe('https://www.bashibook.app');
+    expect(callbackOrigin({ 'x-forwarded-host': 'bashibook.app', host: 'debtbook-neon.vercel.app' })).toBe('https://bashibook.app');
+    expect(callbackOrigin({ host: 'debtbook-git-main-s-dz-8.vercel.app' })).toBe('https://debtbook-git-main-s-dz-8.vercel.app');
+    expect(callbackOrigin({ host: 'bashibook.app.evil.com' })).toBe('https://bashibook.app');
+    expect(callbackOrigin({ host: 'evilbashibook.app' })).toBe('https://bashibook.app');
+    expect(callbackOrigin({ host: 'debtbook.evil.app' })).toBe('https://bashibook.app');
+    expect(callbackOrigin({ host: 'bashibook.app/x' })).toBe('https://bashibook.app');
+    expect(callbackOrigin({})).toBe('https://bashibook.app');
+    expect(callbackOrigin(undefined)).toBe('https://bashibook.app');
     expect(callbackOrigin({ host: 'localhost:5173' })).toBe('http://localhost:5173');
   });
 
