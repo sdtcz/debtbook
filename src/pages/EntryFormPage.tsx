@@ -7,6 +7,7 @@ import {
   getCustomer,
   getCustomerBalance,
   getShop,
+  isOverdue,
   softDeleteEntry,
 } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
@@ -203,7 +204,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
             <div class="entry-tally" role="group" aria-label={t('entry.tallyAria')}>
               <div class="entry-tally-cell">
                 <div class="entry-tally-label">{t('entry.tallyNow')}</div>
-                <div class={`entry-tally-amount ${balanceTone(balanceKobo)}`}>
+                <div class={`entry-tally-amount ${balanceTone(balanceKobo)}${customer && isOverdue(customer, balanceKobo) ? ' overdue' : ''}`}>
                   {formatMoney(Math.abs(balanceKobo))}
                 </div>
                 <div class="entry-tally-sub">{balanceLabel(balanceKobo)}</div>
@@ -213,7 +214,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
               </div>
               <div class="entry-tally-cell after" aria-live="polite">
                 <div class="entry-tally-label">{t('entry.tallyAfter')}</div>
-                <div class={`entry-tally-amount ${balanceTone(afterKobo)}`}>
+                <div class={`entry-tally-amount ${balanceTone(afterKobo)}${customer && isOverdue(customer, afterKobo) ? ' overdue' : ''}`}>
                   {formatMoney(Math.abs(afterKobo))}
                 </div>
                 <div class="entry-tally-sub">{balanceLabel(afterKobo)}</div>

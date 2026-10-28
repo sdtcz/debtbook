@@ -4575,6 +4575,9 @@ button:active:not(:disabled),
   overflow-wrap: anywhere;
 }
 .entry-tally-amount.debt {
+  color: var(--ink);
+}
+.entry-tally-amount.debt.overdue {
   color: var(--danger);
 }
 .entry-tally-amount.zero {
@@ -5407,15 +5410,14 @@ a.btn.payme-cta-btn {
 .reports-main .report-seg .chip {
   min-width: 0;
   min-height: 44px;
-  padding: 6px 4px;
+  padding: 6px 2px;
   border: 0;
   border-radius: 10px;
   background: transparent;
   font-size: 0.86rem;
   line-height: 1.15;
-  white-space: normal;
+  white-space: nowrap;
   text-align: center;
-  overflow-wrap: anywhere;
 }
 .reports-main .report-seg .chip.on {
   background: var(--primary-soft);
@@ -5779,6 +5781,7 @@ a.settings-row {
 .history-soft-row.credit .history-soft-avatar{background:var(--accent-soft);color:var(--accent-ink);box-shadow:none}
 .history-soft-row.credit .history-soft-type,.history-soft-row.credit .history-soft-amt{color:var(--ink)}
 .soft-list-qa .qa-credit{color:var(--ink)}
+.list + .chase-today{margin-top:14px}
 /* P2: one primary on the customer page. */
 .actions-grid .entry-btn{min-height:44px;font-weight:700;background:var(--surface);border:1.5px solid var(--border);color:var(--ink)}
 .actions-grid .entry-btn.payment{color:var(--ok)}
@@ -5797,4 +5800,4 @@ a.settings-row {
 .week-collected-kicker{display:block}
 /* P3: small spacing/wrap fixes. */
 .save-shop-btn{margin-top:10px}
-.period-chip{white-space:nowrap}
+.fab-compact{width:56px;padding:0;justify-content:center;font-size:1.75rem}.fab-compact .label{display:none}

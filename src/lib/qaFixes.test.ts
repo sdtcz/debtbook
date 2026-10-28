@@ -5,6 +5,9 @@ const { readFileSync } = (await import(/* @vite-ignore */ 'node:' + 'fs')) as Fs
 import home from '../pages/HomePage.tsx?raw';
 import detail from '../pages/CustomerDetailPage.tsx?raw';
 import landing from '../pages/LandingPage.tsx?raw';
+import entry from '../pages/EntryFormPage.tsx?raw';
+import cb from '../../public/credit-book-app.html?raw';
+import ka from '../../public/kippa-alternative.html?raw';
 
 const css = readFileSync('src/styles/app.css', 'utf8');
 
@@ -32,5 +35,14 @@ describe('QA fixes (Oct 28)', () => {
   it('landing hero uses the B logo, not the currency symbol', () => {
     expect(landing).toContain('/icons/icon.svg');
     expect(landing).not.toContain('landing-naira-wm');
+  });
+  it('round 2: entry tally red only when overdue, compact FAB, one language at a time on neutral SEO pages', () => {
+    expect(entry).toContain("isOverdue(customer, afterKobo) ? ' overdue' : ''");
+    expect(css).toMatch(/\.entry-tally-amount\.debt \{\n  color: var\(--ink\);/);
+    expect(home).toContain("rows.length >= 3 ? 'fab fab-compact' : 'fab'");
+    for (const html of [cb, ka]) {
+      expect(html).toContain('#ha,#yo{display:none}');
+      for (const id of ['en', 'ha', 'yo']) expect(html).toContain(`<a href="#${id}" hreflang="${id}">`);
+    }
   });
 });

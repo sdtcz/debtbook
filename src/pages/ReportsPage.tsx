@@ -231,7 +231,7 @@ export function ReportsPage({ locked, toast }: Props) {
               type="button"
               role="radio"
               aria-checked={period === p.id}
-              class={period === p.id ? 'chip period-chip on' : 'chip period-chip'}
+              class={period === p.id ? 'chip on' : 'chip'}
               onClick={() => setPeriod(p.id)}
             >
               {t(p.key)}

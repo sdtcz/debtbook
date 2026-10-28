@@ -44,6 +44,11 @@ li{margin:4px 0}
 .small{font-size:.85rem;color:#475569}
 footer{max-width:720px;margin:0 auto;padding:0 14px 28px;font-size:.85rem;color:#475569}
 footer a{color:#0f766e}
+/* One language at a time: English by default, Hausa/Yoruba via the nav links (#ha/#yo). All text stays in the HTML. */
+#ha,#yo{display:none}
+#ha:target,#yo:target{display:block}
+main:has(#ha:target,#yo:target) #en,main:has(#ha:target,#yo:target) #faq{display:none}
+body:not(:has(#ha:target,#yo:target)) nav a[href="#en"],body:has(#ha:target) nav a[href="#ha"],body:has(#yo:target) nav a[href="#yo"]{background:#fff;color:#0f766e}
 </style>
 </head>
 <body>

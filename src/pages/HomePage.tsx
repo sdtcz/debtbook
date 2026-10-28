@@ -792,9 +792,10 @@ export function HomePage({ locked, toast }: Props) {
 
       {!locked && !loading && hasCustomers && (
         <button
-          class="fab"
+          class={rows.length >= 3 ? 'fab fab-compact' : 'fab'}
           type="button"
           aria-label={t('home.addCustomer')}
+          title={t('home.addCustomer')}
           onClick={() => navigate('/customers/new')}
         >
           + <span class="label">{t('home.fabCustomer')}</span>
