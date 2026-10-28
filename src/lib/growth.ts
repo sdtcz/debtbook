@@ -14,7 +14,8 @@ export type LinkSource =
   | 'inv' // invite a trader
   | 'dig' // morning digest
   | 'poster'
-  | 'status';
+  | 'status'
+  | 'paid'; // "tell a shop" after a customer pays in full
 
 const FOOTER_KEY = 'bashibook-brand-footer';
 const ATTR_KEY = 'bashibook-attribution';
@@ -149,12 +150,71 @@ export function myRefCode(): string {
   return code;
 }
 
-export function buildInviteMessage(ref = myRefCode()): string {
-  return `${t('growth.inviteMessage')}\n${appLink('inv', ref)}`;
+export function buildInviteMessage(ref = myRefCode(), src: LinkSource = 'inv'): string {
+  return `${t('growth.inviteMessage')}\n${appLink(src, ref)}`;
 }
 
 export function openInviteWhatsApp(): void {
   const url = `https://wa.me/?text=${encodeURIComponent(buildInviteMessage())}`;
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
+/* ── "Tell a shop" after a customer pays in full ──────────────────────── */
+
+const PAID_INVITE_KEY = 'bashibook-paid-invite';
+/** Ask at most once per 14 days; stop for good after one share or two "Not now". */
+export const PAID_INVITE_GAP_MS = 14 * 24 * 60 * 60 * 1000;
+export const PAID_INVITE_MAX_SKIPS = 2;
+
+interface PaidInviteState {
+  shownAt?: number;
+  skips?: number;
+  shared?: boolean;
+}
+
+function readPaidInvite(): PaidInviteState {
+  try {
+    const v = JSON.parse(ls()?.getItem(PAID_INVITE_KEY) || '{}') as PaidInviteState;
+    return v && typeof v === 'object' ? v : {};
+  } catch {
+    return {};
+  }
+}
+
+function writePaidInvite(v: PaidInviteState): void {
+  try {
+    ls()?.setItem(PAID_INVITE_KEY, JSON.stringify(v));
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Happy moment = a payment that takes a customer from owing (> 0) to settled (<= 0).
+ * Only then, and only if the shop hasn't shared from here, skipped twice, or seen it in 14 days.
+ */
+export function shouldShowPaidInvite(opts: { beforeKobo: number | null; afterKobo: number; now?: number }): boolean {
+  if (opts.beforeKobo == null || !(opts.beforeKobo > 0) || opts.afterKobo > 0) return false;
+  if (!ls()) return false;
+  const st = readPaidInvite();
+  if (st.shared || (st.skips || 0) >= PAID_INVITE_MAX_SKIPS) return false;
+  const now = opts.now ?? Date.now();
+  return !(st.shownAt && now - st.shownAt < PAID_INVITE_GAP_MS);
+}
+
+export function markPaidInviteShown(now = Date.now()): void {
+  writePaidInvite({ ...readPaidInvite(), shownAt: now });
+}
+
+export function markPaidInviteSkipped(): void {
+  const st = readPaidInvite();
+  writePaidInvite({ ...st, skips: (st.skips || 0) + 1 });
+}
+
+/** Opens WhatsApp with the usual invite, tagged src=paid so this loop can be counted on its own. */
+export function openPaidInviteWhatsApp(): void {
+  writePaidInvite({ ...readPaidInvite(), shared: true });
+  const url = `https://wa.me/?text=${encodeURIComponent(buildInviteMessage(myRefCode(), 'paid'))}`;
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 

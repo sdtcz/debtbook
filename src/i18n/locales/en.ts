@@ -761,6 +761,10 @@ export const en = {
   'entry.receiptVia': "WhatsApp · {{phone}}",
   'entry.receiptNoPhone': "No phone saved, so you can share or copy it instead",
   'entry.receiptSkip': "Skip",
+  'entry.paidStepTitle': '{{name}} has paid in full',
+  'entry.paidStepWhy': 'Know another shop owner still chasing credit in a notebook? Send them BashiBook — it is free.',
+  'entry.paidStepShare': 'Tell a shop on WhatsApp',
+  'entry.paidStepSkip': 'Not now',
 
   'home.chaseTodayTitle': "Today's {{n}} to chase",
   'home.chaseTodaySub': "Biggest amount × longest overdue first. One tap each.",

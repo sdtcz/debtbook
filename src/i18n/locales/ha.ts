@@ -763,6 +763,10 @@ export const ha: Record<MessageKey, string> = {
   'entry.receiptVia': "WhatsApp · {{phone}}",
   'entry.receiptNoPhone': "Babu lambar waya, za ka iya rabawa ko kwafa",
   'entry.receiptSkip': "Tsallake",
+  'entry.paidStepTitle': '{{name}} ya biya duka bashin',
+  'entry.paidStepWhy': 'Ka san wani mai shago da ke bin bashi da littafi? Aika masa BashiBook — kyauta ne.',
+  'entry.paidStepShare': 'Faɗa wa mai shago a WhatsApp',
+  'entry.paidStepSkip': 'Ba yanzu ba',
 
   'home.chaseTodayTitle': "Mutum {{n}} da za a bi yau",
   'home.chaseTodaySub': "Babban kuɗi × wanda ya fi daɗewa tukuna. Taɓa ɗaya kowanne.",

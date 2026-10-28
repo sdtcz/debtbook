@@ -18,6 +18,12 @@ import { balanceLabel,
   formatMoney,
   parseAmount, currencySymbol } from '../lib/money';
 import { goBack, navigate } from '../lib/router';
+import {
+  markPaidInviteShown,
+  markPaidInviteSkipped,
+  openPaidInviteWhatsApp,
+  shouldShowPaidInvite,
+} from '../lib/growth';
 import type { ToastAction } from '../hooks/useToast';
 
 interface Props {
@@ -39,7 +45,10 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
   const [error, setError] = useState<string | null>(null);
   /** After a credit sale: "Send receipt to {customer}" is the default next step. */
   const [receiptStep, setReceiptStep] = useState<{ entry: Entry; balanceKobo: number; shopName: string } | null>(null);
+  // "Tell a shop" step: a payment just cleared this customer's balance.
+  const [paidStep, setPaidStep] = useState<Entry | null>(null);
   const sendRef = useRef<HTMLButtonElement>(null);
+  const shareRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     getCustomer(customerId).then((c) => {
@@ -98,6 +107,12 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
         setReceiptStep({ entry, balanceKobo: bal.balanceKobo, shopName: shop?.name || '' });
         return;
       }
+      const after = await getCustomerBalance(customerId);
+      if (shouldShowPaidInvite({ beforeKobo: balanceKobo, afterKobo: after.balanceKobo })) {
+        markPaidInviteShown();
+        setPaidStep(entry);
+        return;
+      }
       finish(entry);
     } catch (err) {
       setError(err instanceof Error ? err.message : t('entry.couldNotSave'));
@@ -133,6 +148,28 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [receiptStep]);
+
+  useEffect(() => {
+    if (!paidStep) return;
+    shareRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') skipPaidInvite();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [paidStep]);
+
+  const skipPaidInvite = () => {
+    if (!paidStep) return;
+    markPaidInviteSkipped();
+    finish(paidStep);
+  };
+
+  const sharePaidInvite = () => {
+    if (!paidStep) return;
+    openPaidInviteWhatsApp();
+    finish(paidStep, t('customer.openingWhatsApp'));
+  };
 
   const sendReceipt = async () => {
     if (!receiptStep || !customer) return;
@@ -277,6 +314,25 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
           </button>
         </form>
       </main>
+      {paidStep && customer && (
+        <div class="chase-sheet-overlay receipt-step-overlay" role="dialog" aria-modal="true" aria-labelledby="paid-step-title">
+          <div class="chase-sheet receipt-step paid-step">
+            <div class="receipt-step-check" aria-hidden="true">
+              ✓
+            </div>
+            <h2 id="paid-step-title" class="receipt-step-title">
+              {t('entry.paidStepTitle', { name: customer.name })}
+            </h2>
+            <p class="receipt-step-why">{t('entry.paidStepWhy')}</p>
+            <button ref={shareRef} class="btn btn-whatsapp receipt-step-send" type="button" onClick={sharePaidInvite}>
+              <span>{t('entry.paidStepShare')}</span>
+            </button>
+            <button class="btn btn-ghost receipt-step-skip" type="button" onClick={skipPaidInvite}>
+              {t('entry.paidStepSkip')}
+            </button>
+          </div>
+        </div>
+      )}
       {receiptStep && customer && (
         <div class="chase-sheet-overlay receipt-step-overlay" role="dialog" aria-modal="true" aria-labelledby="receipt-step-title">
           <div class="chase-sheet receipt-step">

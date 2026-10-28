@@ -763,6 +763,10 @@ export const yo: Record<MessageKey, string> = {
   'entry.receiptVia': "WhatsApp · {{phone}}",
   'entry.receiptNoPhone': "Kò sí nọ́ńbà fóònù, o lè pín in tàbí dà á kọ",
   'entry.receiptSkip': "Fò ó",
+  'entry.paidStepTitle': '{{name}} ti san gbogbo gbèsè',
+  'entry.paidStepWhy': 'Ṣé o mọ oníṣòwò mìíràn tó ń kọ gbèsè sínú ìwé? Fi BashiBook ránṣẹ́ sí wọn — ọ̀fẹ́ ni.',
+  'entry.paidStepShare': 'Sọ fún oníṣòwò lórí WhatsApp',
+  'entry.paidStepSkip': 'Kì í ṣe báyìí',
 
   'home.chaseTodayTitle': "Ènìyàn {{n}} láti lépa lónìí",
   'home.chaseTodaySub': "Owó tó pọ̀ jù × ẹni tó ti pẹ́ jù ló kọ́kọ́. Tẹ̀ ẹ́ lẹ́ẹ̀kan fún ọ̀kọ̀ọ̀kan.",
