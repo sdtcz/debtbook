@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.bashibook.twa",
+      "sha256_cert_fingerprints": [
+        "B3:D1:7C:A4:0F:D6:4F:9C:04:99:14:0C:AE:E8:47:94:66:06:98:06:60:05:1C:12:1A:73:7B:ED:BF:B3:80:32"
+      ]
+    }
+  }
+]
