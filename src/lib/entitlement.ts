@@ -10,7 +10,7 @@ export function getEntitlement(shop: ShopProfile | null | undefined): Entitlemen
   let exp = e.exp;
   if (e.source === 'demo' && exp != null && shop?.trial) exp = Math.min(exp, shop.trial.endsAt);
   // Paid Pro with a renewal reference: 3 days' grace past expiry while the renewal check can't get through.
-  const grace = e.ref && e.source?.startsWith('stripe') ? GRACE_MS : 0;
+  const grace = e.ref && (e.source?.startsWith('stripe') || e.source?.startsWith('play')) ? GRACE_MS : 0;
   if (e.plan === 'pro' && exp != null && exp + grace < Date.now()) {
     return { plan: 'free', source: 'expired' };
   }

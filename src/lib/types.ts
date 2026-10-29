@@ -7,7 +7,10 @@ export interface Entitlement {
   /** Unix ms expiry; omit for perpetual / until revoked */
   exp?: number;
   source?: string;
-  /** Stripe Checkout Session id: re-asked at /api/verify near expiry so renewals extend Pro. */
+  /**
+   * Renewal reference. source stripe-*: Checkout Session id, re-asked at /api/verify near expiry.
+   * source play-*: Google Play purchase token, re-asked at /api/play-verify (lib/playBilling).
+   */
   ref?: string;
 }
 

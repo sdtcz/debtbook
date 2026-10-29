@@ -21,6 +21,12 @@ import {
 import type { ShopProfile } from '../lib/types';
 import type { ToastAction } from '../hooks/useToast';
 import { deviceLocale } from '../lib/dates';
+import { mayHavePlayBilling, playAppHint } from '../lib/playEnv';
+import type { PlayPlan } from '../lib/playBilling';
+
+/** Which checkout this page shows. Inside the Play app it's Google Play Billing only, never Stripe. */
+type StoreState = 'checking' | 'web' | 'play' | 'play-unavailable';
+const loadPlay = () => import('../lib/playBilling');
 
 interface Props {
   toast: (msg: string, opts?: { ms?: number; action?: ToastAction }) => void;
@@ -111,6 +117,70 @@ export function ProPage({ toast }: Props) {
     return () => window.removeEventListener('hashchange', check);
   }, []);
 
+  const [store, setStore] = useState<StoreState>(() => (mayHavePlayBilling() ? 'checking' : 'web'));
+  const [playPrice, setPlayPrice] = useState<Partial<Record<PlayPlan, string>>>({});
+  useEffect(() => {
+    if (store !== 'checking') return;
+    let live = true;
+    loadPlay()
+      .then(async (m) => {
+        const found = await m.detectStore();
+        if (found.store !== 'play' || !found.service) return live && setStore(found.store);
+        const [configured, prices] = await Promise.all([m.playConfigured(), m.playPrices(found.service, deviceLocale())]);
+        if (!live) return;
+        setPlayPrice(prices);
+        // 501 not_configured: show "coming soon" instead of taking money we can't verify yet.
+        setStore(configured === false ? 'play-unavailable' : 'play');
+      })
+      .catch(() => live && setStore(playAppHint() ? 'play-unavailable' : 'web'));
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  const playDone = async (exp: number | undefined) => {
+    notifyChanged();
+    await refresh();
+    const text = t('pro.paidSuccess', { date: new Date(exp || Date.now()).toLocaleDateString(deviceLocale()) });
+    setVerifyMsg({ kind: 'ok', text });
+    toast(text, { ms: 5000 });
+  };
+
+  const buyPlay = async (p: PlayPlan) => {
+    setBusy(true);
+    hit('pro_checkout', { once: true });
+    try {
+      const m = await loadPlay();
+      const { result, ent } = await m.buyWithPlay(p, getEntitlement(await getShop()), setEntitlement);
+      if (result === 'ok') await playDone(ent?.exp);
+      else if (result === 'not_configured') {
+        setStore('play-unavailable');
+        toast(t('pro.playSoon'));
+      } else if (result === 'offline') toast(t('pro.playOffline'), { ms: 6000 });
+      else if (result === 'failed') toast(t('pro.playFailed'), { ms: 6000 });
+    } catch {
+      toast(t('pro.playFailed'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const restorePlay = async () => {
+    setBusy(true);
+    try {
+      const m = await loadPlay();
+      const before = getEntitlement(await getShop());
+      const r = await m.syncPlay(before, setEntitlement, { force: true });
+      if (r === 'restored' || r === 'extended') await playDone(getEntitlement(await getShop()).exp);
+      else if (r === 'error') toast(t('pro.playFailed'));
+      else toast(t('pro.playNothing'));
+    } catch {
+      toast(t('pro.playFailed'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const tryCheckout = async (plan: ProBillingPlan) => {
     const addr = email.trim();
     if (!looksLikeEmail(addr)) {
@@ -177,30 +247,62 @@ export function ProPage({ toast }: Props) {
       : '';
 
   const [plan, setPlan] = useState<ProBillingPlan>('yearly');
-  /** One place to pick a plan, type the receipt email and pay (email sits right above the button). */
-  const payBlock = (
+  const usd = (p: ProBillingPlan) => (p === 'yearly' ? '$15' : '$1.99');
+  const planPicker = (price: (p: ProBillingPlan) => string) => (
+    <div class="pro-plans" role="radiogroup" aria-label={t('pro.planTitle')}>
+      {(['yearly', 'monthly'] as ProBillingPlan[]).map((p) => (
+        <button
+          key={p}
+          type="button"
+          role="radio"
+          aria-checked={plan === p}
+          class={`pro-plan${plan === p ? ' on' : ''}`}
+          onClick={() => setPlan(p)}
+        >
+          {p === 'yearly' && <span class="pro-plan-tag">{t('pro.planBest')}</span>}
+          <span class="pro-plan-dot" aria-hidden="true" />
+          <span class="pro-plan-text">
+            <span class="pro-plan-name">{t(p === 'yearly' ? 'pro.planYearly' : 'pro.planMonthly')}</span>
+            <span class="pro-plan-meta">{t(p === 'yearly' ? 'pro.planYearlyMeta' : 'pro.planMonthlyMeta')}</span>
+          </span>
+          <span class="pro-plan-price">{price(p)}</span>
+        </button>
+      ))}
+    </div>
+  );
+  /** Play app: Google Play prices and purchase, no email (Play sends the receipt). */
+  const playBlock = (
     <div class={`pro-pay${trialEndedPrompt ? ' in-alert' : ''}`}>
       {!trialEndedPrompt && <h2 class="pro-plan-title">{t('pro.planTitle')}</h2>}
-      <div class="pro-plans" role="radiogroup" aria-label={t('pro.planTitle')}>
-        {(['yearly', 'monthly'] as ProBillingPlan[]).map((p) => (
+      {store === 'checking' ? (
+        <p class="pro-soft-note" role="status">{t('pro.playChecking')}</p>
+      ) : store === 'play-unavailable' ? (
+        <p class="pro-pay-status" role="status">{t('pro.playSoon')}</p>
+      ) : (
+        <>
+          {planPicker((p) => playPrice[p] || t(p === 'yearly' ? 'pro.perYear' : 'pro.perMonth'))}
           <button
-            key={p}
+            class={`btn ${!pro && trial.state === 'available' ? 'btn-secondary' : 'btn-primary'} pro-pay-cta`}
             type="button"
-            role="radio"
-            aria-checked={plan === p}
-            class={`pro-plan${plan === p ? ' on' : ''}`}
-            onClick={() => setPlan(p)}
+            disabled={busy}
+            onClick={() => buyPlay(plan)}
           >
-            {p === 'yearly' && <span class="pro-plan-tag">{t('pro.planBest')}</span>}
-            <span class="pro-plan-dot" aria-hidden="true" />
-            <span class="pro-plan-text">
-              <span class="pro-plan-name">{t(p === 'yearly' ? 'pro.planYearly' : 'pro.planMonthly')}</span>
-              <span class="pro-plan-meta">{t(p === 'yearly' ? 'pro.planYearlyMeta' : 'pro.planMonthlyMeta')}</span>
-            </span>
-            <span class="pro-plan-price">{t(p === 'yearly' ? 'pro.perYear' : 'pro.perMonth')}</span>
+            {t('pro.playSubscribe', { price: playPrice[plan] || usd(plan) })}
           </button>
-        ))}
-      </div>
+          <p class="pro-soft-note">🔒 {t('pro.playBilledBy')}</p>
+          <button class="btn btn-secondary" type="button" disabled={busy} onClick={restorePlay}>
+            {t('pro.playRestore')}
+          </button>
+        </>
+      )}
+      {!pro && !trialEndedPrompt && <p class="pro-soft-note">{t('pro.demoNote')}</p>}
+    </div>
+  );
+  /** One place to pick a plan, type the receipt email and pay (email sits right above the button). */
+  const stripeBlock = (
+    <div class={`pro-pay${trialEndedPrompt ? ' in-alert' : ''}`}>
+      {!trialEndedPrompt && <h2 class="pro-plan-title">{t('pro.planTitle')}</h2>}
+      {planPicker((p) => t(p === 'yearly' ? 'pro.perYear' : 'pro.perMonth'))}
       <div class="field">
         <label for="pro-pay-email">{t('pro.emailLabel')}</label>
         <input
@@ -226,12 +328,13 @@ export function ProPage({ toast }: Props) {
         disabled={busy || verifying}
         onClick={() => tryCheckout(plan)}
       >
-        {t('pro.continuePay', { price: plan === 'yearly' ? '$15' : '$1.99' })}
+        {t('pro.continuePay', { price: usd(plan) })}
       </button>
       <p class="pro-soft-note">🔒 {t('pro.securedBy')}</p>
       {!pro && !trialEndedPrompt && <p class="pro-soft-note">{t('pro.demoNote')}</p>}
     </div>
   );
+  const payBlock = store === 'web' ? stripeBlock : playBlock;
 
   return (
     <div class="app-shell">
@@ -370,13 +473,27 @@ export function ProPage({ toast }: Props) {
           {canPay && !trialEndedPrompt && payBlock}
         </section>
 
-        <p class="pro-soft-note pro-manage-billing">
-          <a href={STRIPE_BILLING_PORTAL_URL} target="_blank" rel="noopener noreferrer">
-            {t('pro.manageBilling')}
-          </a>
-          <br />
-          {t('pro.manageBillingSub')}
-        </p>
+        {store === 'web' ? (
+          <p class="pro-soft-note pro-manage-billing">
+            <a href={STRIPE_BILLING_PORTAL_URL} target="_blank" rel="noopener noreferrer">
+              {t('pro.manageBilling')}
+            </a>
+            <br />
+            {t('pro.manageBillingSub')}
+          </p>
+        ) : (
+          ent.source?.startsWith('play') && (
+            <p class="pro-soft-note pro-manage-billing">
+              <a
+                href={`https://play.google.com/store/account/subscriptions?package=app.bashibook.twa&sku=pro_${ent.source === 'play-yearly' ? 'yearly' : 'monthly'}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('pro.playManage')}
+              </a>
+            </p>
+          )
+        )}
       </main>
     </div>
   );

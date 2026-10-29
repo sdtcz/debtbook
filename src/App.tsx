@@ -5,6 +5,7 @@ import { Toast } from './components/Toast';
 import { getShop, setEntitlement } from './db/repo';
 import { setCurrency } from './lib/money';
 import { reconcileTrialOnStart } from './lib/trialStore';
+import { mayHavePlayBilling } from './lib/playEnv';
 import { useLocale } from './hooks/useLocale';
 import { useToast } from './hooks/useToast';
 import { initLocale, t as tNow } from './i18n';
@@ -189,7 +190,17 @@ export function App() {
     setReady(true);
     // Stripe renewals: near expiry, re-verify quietly after load (lazy chunk, at most once a day).
     const ent = shop?.entitlement;
-    if (ent?.ref && ent.exp && ent.exp - Date.now() < 2 * 864e5) {
+    if (ent?.source?.startsWith('play') || mayHavePlayBilling()) {
+      // Play app: restore purchases (listPurchases) + Play renewals, same idle/lazy pattern.
+      const run = () =>
+        void import('./lib/playBilling')
+          .then((m) => m.syncPlay(ent, setEntitlement))
+          .then((r) => r !== 'skip' && r !== 'same' && r !== 'error' && dispatchEvent(new Event('debtbook:changed')))
+          .catch(() => {});
+      if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 5000 });
+      else setTimeout(run, 3000);
+    }
+    if (ent?.ref && !ent.source?.startsWith('play') && ent.exp && ent.exp - Date.now() < 2 * 864e5) {
       const run = () =>
         void import('./lib/proRenew')
           .then((m) => m.renewPro(ent, setEntitlement))
