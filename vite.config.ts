@@ -86,6 +86,7 @@ export default defineConfig({
           '**/credit-book-app.html',
           '**/ng/*.html',
           '**/404.html',
+          '**/help.html',
           '**/assets/ha-*.js',
           '**/assets/yo-*.js',
           '**/assets/LandingPage-*.js',

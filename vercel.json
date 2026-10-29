@@ -14,6 +14,11 @@
       ],
       "destination": "https://bashibook.app/$1",
       "permanent": true
+    },
+    {
+      "source": "/privacy",
+      "destination": "/?app=1#/privacy",
+      "permanent": false
     }
   ],
   "rewrites": [
@@ -36,6 +41,10 @@
     {
       "source": "/ng/credit-book-app",
       "destination": "/ng/credit-book-app.html"
+    },
+    {
+      "source": "/help",
+      "destination": "/help.html"
     },
     {
       "source": "/",
@@ -146,6 +155,15 @@
     },
     {
       "source": "/ng/credit-book-app",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/help",
       "headers": [
         {
           "key": "Cache-Control",

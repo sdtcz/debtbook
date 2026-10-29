@@ -90,3 +90,16 @@ describe('web app manifest', () => {
     expect(urls).toEqual(['/?app=1#/customers/new', '/?app=1#/reports', '/?app=1#/pay-details']);
   });
 });
+
+describe('help page', () => {
+  const help = pages['../../public/help.html'];
+  it('is a crawlable FAQ on the new domain, served at /help and kept out of the precache', () => {
+    expect(help).toContain('<link rel="canonical" href="https://bashibook.app/help">');
+    expect(help).toContain('application/ld+json');
+    expect(help).not.toMatch(/<script>/);
+    expect(help).not.toContain('vercel.app');
+    expect(help).not.toContain('Nigerian');
+    expect(vercel.rewrites).toContainEqual({ source: '/help', destination: '/help.html' });
+    expect(viteConfig).toContain("'**/help.html'");
+  });
+});
