@@ -7,6 +7,8 @@ export interface Entitlement {
   /** Unix ms expiry; omit for perpetual / until revoked */
   exp?: number;
   source?: string;
+  /** Stripe Checkout Session id: re-asked at /api/verify near expiry so renewals extend Pro. */
+  ref?: string;
 }
 
 /** Free Pro trial bookkeeping — once per phone/install. */

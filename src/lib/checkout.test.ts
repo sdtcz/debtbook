@@ -218,7 +218,7 @@ describe('stripe return (client)', () => {
     expect(m).toEqual({ plan: 'pro', exp: t0 + 30 * DAY, source: 'stripe-monthly' });
     const y = entitlementFromPayment({ ok: true, plan: 'yearly', paidAt: t0, expiresAt: t0 + 365 * DAY });
     expect(y.exp).toBe(t0 + 365 * DAY);
-    const capped = entitlementFromPayment({ ok: true, plan: 'monthly', paidAt: t0, expiresAt: t0 + 90 * DAY });
+    const capped = entitlementFromPayment({ ok: true, plan: 'monthly', paidAt: t0, expiresAt: t0 + 90 * DAY }, undefined, t0);
     expect(capped.exp).toBe(t0 + 31 * DAY);
   });
 });

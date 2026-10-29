@@ -57,6 +57,7 @@ export interface VerifiedPayment {
   plan: ProBillingPlan;
   paidAt: number;
   expiresAt: number;
+  reference?: string;
 }
 
 export function isVerifiedPayment(v: unknown): v is VerifiedPayment {
@@ -73,27 +74,31 @@ export function isVerifiedPayment(v: unknown): v is VerifiedPayment {
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Paid (server-verified) sources, incl. legacy Paystack entitlements. */
-function isPaidSource(source: string | undefined): boolean {
+export function isPaidSource(source: string | undefined): boolean {
   return !!source && (source.startsWith('stripe') || source.startsWith('paystack'));
 }
 
 /**
  * Pro entitlement from a server-verified payment: one billing period
- * (Stripe's current_period_end), capped at 31 days monthly / 366 days yearly.
+ * (Stripe's current_period_end), capped at 31 days monthly / 366 days yearly
+ * from the later of the period start and now, so a renewed period is never cut short.
+ * Keeps the Checkout reference for renewal checks (lib/proRenew).
  */
 export function entitlementFromPayment(
   p: VerifiedPayment,
   current?: Entitlement,
   now = Date.now(),
+  ref?: string | null,
 ): Entitlement {
   const days = p.plan === 'yearly' ? 366 : 31;
   const start = Number.isFinite(p.paidAt) && p.paidAt > 0 ? p.paidAt : now;
-  let exp = Math.min(p.expiresAt, start + days * DAY_MS);
+  let exp = Math.min(p.expiresAt, Math.max(start, now) + days * DAY_MS);
   // Don't shorten an existing paid (non-demo) Pro period.
   if (current?.plan === 'pro' && isPaidSource(current.source) && current.exp && current.exp > exp) {
     exp = current.exp;
   }
-  return { plan: 'pro', exp, source: `stripe-${p.plan}` };
+  const r = cleanRef(p.reference) || cleanRef(ref) || current?.ref;
+  return r ? { plan: 'pro', exp, source: `stripe-${p.plan}`, ref: r } : { plan: 'pro', exp, source: `stripe-${p.plan}` };
 }
 
 const EMAIL_KEY = 'bashibook-pay-email';

@@ -73,7 +73,7 @@ export function ProPage({ toast }: Props) {
       const body = (await res.json().catch(() => null)) as unknown;
       if (res.ok && isVerifiedPayment(body)) {
         const current = getEntitlement(await getShop());
-        const ent = entitlementFromPayment(body, current);
+        const ent = entitlementFromPayment(body, current, Date.now(), ref);
         await setEntitlement(ent);
         notifyChanged();
         await refresh();
