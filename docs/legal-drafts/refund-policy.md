@@ -25,7 +25,7 @@ Website: https://bashibook.app
 - These rules do not reduce any rights you have under consumer law where you live.
 
 ## How to ask for a refund
-Email [support email] with the email used at checkout and the receipt number. Do not send card numbers.
+Email support@bashibook.app with the email used at checkout and the receipt number. Do not send card numbers.
 
 ## Chargebacks
 Please contact us first. We usually resolve billing problems faster than a bank dispute.

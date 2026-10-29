@@ -720,13 +720,6 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
     toast(t('settings.customerRestored', { name: c.name }));
   };
 
-  const openHelp = () => {
-    setShowFeedback(true);
-    window.setTimeout(() => {
-      feedbackRef.current?.scrollIntoView({ block: 'start' });
-    }, 50);
-  };
-
   const initial = name.trim().charAt(0).toUpperCase() || 'B';
   const lastCloudLabel = lastCloudAt
     ? t('settings.cloudLast', {
@@ -1519,20 +1512,34 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
 
         <div class="settings-group-label">{t('settings.about')}</div>
         <div class="settings-group card settings-list">
-          <button type="button" class="settings-row" onClick={openHelp}>
+          <a class="settings-row" href="mailto:support@bashibook.app?subject=BashiBook%20help">
             <span class="settings-row-icon" aria-hidden="true">
               ?
             </span>
             <span class="settings-row-body">
               <span class="settings-row-title">{t('settings.help')}</span>
-              <span class="settings-row-sub">{t('settings.helpSub')}</span>
+              <span class="settings-row-sub">support@bashibook.app</span>
             </span>
             <span class="settings-row-trail">
               <span class="chev" aria-hidden="true">
                 ›
               </span>
             </span>
-          </button>
+          </a>
+          <a class="settings-row" href="/help">
+            <span class="settings-row-icon" aria-hidden="true">
+              📖
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">{t('settings.helpFaq')}</span>
+              <span class="settings-row-sub">{t('settings.helpFaqSub')}</span>
+            </span>
+            <span class="settings-row-trail">
+              <span class="chev" aria-hidden="true">
+                ›
+              </span>
+            </span>
+          </a>
           <button type="button" class="settings-row" onClick={() => navigate('/privacy')}>
             <span class="settings-row-icon" aria-hidden="true">
               🛡

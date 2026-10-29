@@ -6,7 +6,7 @@ Last updated: [date]
 Website: https://bashibook.app
 
 ## Who is responsible
-[Operator legal name], [address]. Privacy contact: [privacy email]. [EU/UK representative, if required.]
+[Operator legal name], [address]. Privacy contact: support@bashibook.app. [EU/UK representative, if required.]
 
 ## The short version
 Your shop book is stored on your phone. We only receive data when you pay for Pro (email and payment status via Stripe) or turn on Pro cloud backup (encrypted on your phone; we cannot read it). No ads, no selling of data.
@@ -29,7 +29,7 @@ Stripe (payments) and Vercel (hosting, backup storage) in the USA [and Ireland].
 Ledger: on your device until you delete it. Cloud backup: while Pro is active and [90 days] after. Billing: [6 years]. Anonymous counts: aggregated.
 
 ## Your rights
-Access, rectification, erasure, restriction, portability, objection, and complaint to your local data protection authority. Contact [privacy email]; we reply within [30 days].
+Access, rectification, erasure, restriction, portability, objection, and complaint to your local data protection authority. Contact support@bashibook.app; we reply within [30 days].
 
 ## Security
 On-device AES-GCM encryption, HTTPS, strict security headers, optional app PIN. We never store your recovery code, so we cannot restore a cloud backup without it.

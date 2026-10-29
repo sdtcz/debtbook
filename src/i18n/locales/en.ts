@@ -539,6 +539,8 @@ export const en = {
   'settings.about': 'About & help',
   'settings.help': 'Help & support',
   'settings.helpSub': 'Tell us what broke or ask a question',
+  'settings.helpFaq': 'Help & FAQ',
+  'settings.helpFaqSub': 'Short answers to common questions',
   'settings.privacy': 'Privacy & your data',
   'settings.privacySub': 'What is stored and where',
   'settings.version': 'App version',

@@ -6,7 +6,7 @@ Last updated: [date]
 Website: https://bashibook.app
 
 ## 1. Who we are
-BashiBook ("we", "us") is operated by [operator legal name], [registered address], [country of registration]. Contact: [support email].
+BashiBook ("we", "us") is operated by [operator legal name], [registered address], [country of registration]. Contact: support@bashibook.app.
 
 ## 2. What BashiBook is
 BashiBook is a credit book (ledger) app for shops. It lets you record credit sales, payments and supplier balances, send reminders using your own WhatsApp or SMS, and back up your book. It is a record-keeping tool. It is not a bank, lender, payment service, debt collector or accounting or tax adviser.
@@ -45,4 +45,4 @@ You can stop using BashiBook at any time and erase it from your phone (Settings 
 These terms are governed by the laws of [jurisdiction]. Disputes go to the courts of [venue], unless the consumer law of your country gives you the right to bring a claim where you live.
 
 ## 12. Contact
-[support email] · [WhatsApp number, optional]
+support@bashibook.app · [WhatsApp number, optional]

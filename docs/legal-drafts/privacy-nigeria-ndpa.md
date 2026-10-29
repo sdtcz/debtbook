@@ -6,7 +6,7 @@ Last updated: [date]
 Website: https://bashibook.app
 
 ## 1. Data controller
-[Operator legal name], [address]. Contact for privacy questions and requests: [privacy email]. [Data Protection Officer: name/contact, if required.] [NDPC registration as a data controller/processor of major importance: number, if required.]
+[Operator legal name], [address]. Contact for privacy questions and requests: support@bashibook.app. [Data Protection Officer: name/contact, if required.] [NDPC registration as a data controller/processor of major importance: number, if required.]
 
 ## 2. The short version
 - Your shop book stays **on your phone**. We do not have a copy unless you turn on Pro cloud backup, and even then it is encrypted on your phone with a recovery code that only you have.
@@ -46,7 +46,7 @@ Stripe and Vercel process data outside Nigeria. We rely on [adequacy decision / 
 Encryption on the device (AES-GCM, PBKDF2), HTTPS only, strict security headers, optional PIN lock on the app, no recovery code stored by us.
 
 ## 9. Your rights (NDPA s.34–38)
-You can ask to access, correct, delete or port your data, object to processing, withdraw consent, and not be subject to purely automated decisions. Most of your data is already on your phone and in your control. Contact [privacy email]; we will answer within [30] days. You can also complain to the **Nigeria Data Protection Commission** (ndpc.gov.ng).
+You can ask to access, correct, delete or port your data, object to processing, withdraw consent, and not be subject to purely automated decisions. Most of your data is already on your phone and in your control. Contact support@bashibook.app; we will answer within [30] days. You can also complain to the **Nigeria Data Protection Commission** (ndpc.gov.ng).
 
 ## 10. Children
 BashiBook is for shop owners and is not meant for people under 18.

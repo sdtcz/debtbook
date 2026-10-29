@@ -541,6 +541,8 @@ export const yo: Record<MessageKey, string> = {
   'settings.about': 'Nípa wa & ìrànlọ́wọ́',
   'settings.help': 'Ìrànlọ́wọ́',
   'settings.helpSub': 'Sọ ohun tí kò ṣiṣẹ́ fún wa tàbí béèrè ìbéèrè',
+  'settings.helpFaq': 'Ìbéèrè àti ìdáhùn',
+  'settings.helpFaqSub': 'Ìdáhùn kúkúrú sí àwọn ìbéèrè tó wọ́pọ̀',
   'settings.privacy': 'Àṣírí & dátà rẹ',
   'settings.privacySub': 'Ohun tí a tọ́jú àti ibi tí ó wà',
   'settings.version': 'Ẹ̀dà ìṣàfilọ́lẹ̀',

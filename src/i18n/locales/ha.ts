@@ -541,6 +541,8 @@ export const ha: Record<MessageKey, string> = {
   'settings.about': 'Game da mu & taimako',
   'settings.help': 'Taimako',
   'settings.helpSub': 'Gaya mana abin da ya lalace ko ka yi tambaya',
+  'settings.helpFaq': 'Tambayoyi da amsoshi',
+  'settings.helpFaqSub': 'Gajerun amsoshi ga tambayoyin da aka saba',
   'settings.privacy': 'Sirri & bayananka',
   'settings.privacySub': 'Me aka ajiye kuma ina',
   'settings.version': 'Sigar manhaja',
