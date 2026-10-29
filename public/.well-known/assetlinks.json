@@ -1,11 +1,16 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "app.bashibook.twa",
       "sha256_cert_fingerprints": [
-        "B3:D1:7C:A4:0F:D6:4F:9C:04:99:14:0C:AE:E8:47:94:66:06:98:06:60:05:1C:12:1A:73:7B:ED:BF:B3:80:32"
+        "B3:D1:7C:A4:0F:D6:4F:9C:04:99:14:0C:AE:E8:47:94:66:06:98:06:60:05:1C:12:1A:73:7B:ED:BF:B3:80:32",
+        "1B:C4:83:60:69:8C:DA:4A:53:41:01:33:64:C6:B1:DB:E0:57:8C:6B:87:EB:33:35:87:EB:43:01:5C:39:D4:E3",
+        "5D:D5:01:59:A9:1D:9C:F8:B7:F4:98:49:88:38:69:FC:3D:A7:8F:EE:49:B1:E5:40:C3:82:EE:98:C1:21:D0:9D",
+        "CD:FB:AD:36:83:D8:CE:78:8C:4E:80:70:F8:81:A4:AA:25:AE:F4:02:A6:C8:03:D3:A8:73:FB:B0:B3:57:49:43"
       ]
     }
   }
