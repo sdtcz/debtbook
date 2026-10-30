@@ -102,4 +102,12 @@ describe('help page', () => {
     expect(vercel.rewrites).toContainEqual({ source: '/help', destination: '/help.html' });
     expect(viteConfig).toContain("'**/help.html'");
   });
+
+  it('explains data deletion in plain HTML at /help#delete-data (Play Data safety URL)', () => {
+    expect(help).toContain('<section id="delete-data">');
+    expect(help).toContain('<h2>Delete your data</h2>');
+    expect(help).toContain('Log out and erase this phone');
+    expect(help).toContain('support@bashibook.app');
+    expect(help).toContain('within 30 days');
+  });
 });
