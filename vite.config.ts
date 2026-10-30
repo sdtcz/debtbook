@@ -77,13 +77,14 @@ export default defineConfig({
         // The app is hash-routed on "/" only; any other path goes to the network (SEO pages, real 404s).
         navigateFallbackAllowlist: [/^\/(index\.html)?(\?.*)?$/],
         // Static SEO page + crawler files are served by the network, never the app shell.
-        navigateFallbackDenylist: [/^\/api\//, /^\/kippa-alternative/, /^\/credit-book-app/, /^\/ng\//, /^\/(robots\.txt|sitemap\.xml)$/],
+        navigateFallbackDenylist: [/^\/api\//, /^\/kippa-alternative/, /^\/credit-book-app/, /^\/whatsapp-payment-reminder/, /^\/ng\//, /^\/(robots\.txt|sitemap\.xml)$/],
         // Not precached (saves ~33 kB on every first visit and every update): Hausa / Yoruba strings
         // (fetched when chosen), the marketing landing page, and icons the browser fetches itself.
         // They are cached on first use by the runtime rule below.
         globIgnores: [
           '**/kippa-alternative.html',
           '**/credit-book-app.html',
+          '**/whatsapp-payment-reminder.html',
           '**/ng/*.html',
           '**/404.html',
           '**/help.html',
