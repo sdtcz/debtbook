@@ -25,85 +25,145 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is BashiBook?","acceptedAnswer":{"@type":"Answer","text":"A credit book on your phone for small shops and traders who sell on credit. Write down who owes you, remind them on WhatsApp, and see what has come back. The core credit book is free."}},{"@type":"Question","name":"Does BashiBook work offline?","acceptedAnswer":{"@type":"Answer","text":"Yes, once opened. Open it with internet the first time; after that you can add customers, sales and payments with a bad network."}},{"@type":"Question","name":"How do I move my book to a new phone?","acceptedAnswer":{"@type":"Answer","text":"Export a backup file on the old phone (Settings, Export backup), move the file to the new phone, then choose Settings, Restore backup. Pro users can restore from encrypted cloud backup with their recovery code."}},{"@type":"Question","name":"How do I cancel Pro?","acceptedAnswer":{"@type":"Answer","text":"Go to Settings, Manage or cancel subscription. It opens the Stripe billing page; sign in with the email on your receipt and cancel. Pro stays on until the end of the period you paid for."}}]}</script>
 <style>
 *{box-sizing:border-box}
+html{scroll-behavior:smooth}
 body{margin:0;font:16px/1.55 system-ui,-apple-system,Roboto,"Segoe UI",sans-serif;color:#0f172a;background:#fffbeb}
-header{background:#0f766e;color:#fff;padding:20px 18px 24px}
-header a{color:#fff;font-weight:800;font-size:1.1rem;text-decoration:none}
-main{max-width:720px;margin:0 auto;padding:8px 14px 32px}
-section{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;margin:14px 0}
-h1{font-size:1.6rem;line-height:1.2;margin:14px 0 6px}
-h2{font-size:1.2rem;margin:0 0 4px;color:#134e4a}
-h3{font-size:1.02rem;margin:14px 0 2px}
+a{color:#0f766e}
+header{background:#0f766e;background:linear-gradient(160deg,#0f766e,#115e59);color:#fff;padding:12px 16px 44px}
+.bar{max-width:720px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.bar a{color:#fff;font-weight:800;font-size:1.1rem;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+.bar .open{font-size:.95rem;padding:0 16px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35)}
+.hero{max-width:720px;margin:10px auto 0}
+.crest{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;background:#fff;color:#0f766e;font-weight:900;font-size:1.3rem;box-shadow:0 0 0 6px rgba(255,255,255,.18)}
+h1{font-size:1.7rem;line-height:1.2;margin:12px 0 4px}
+.hero p{margin:0;color:#ccfbf1}
+main{max-width:720px;margin:-28px auto 0;padding:0 14px 32px}
+.topics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.topics a:last-child{grid-column:1/-1}
+@media(min-width:560px){.topics{grid-template-columns:repeat(4,minmax(0,1fr))}.topics a:last-child{grid-column:auto}}
+.topics a{display:flex;align-items:center;gap:8px;min-height:52px;padding:8px 12px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;color:#134e4a;font-weight:700;font-size:.95rem;line-height:1.25;text-decoration:none;box-shadow:0 1px 2px rgba(15,23,42,.06)}
+.topics a span{flex:none;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#ccfbf1;font-size:.95rem}
+section{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:14px 16px;margin:14px 0;scroll-margin-top:12px}
+h2{font-size:1.2rem;margin:0 0 6px;color:#134e4a}
 p{margin:4px 0 8px}
+details{border-top:1px solid #e2e8f0}
+summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px;padding:10px 0;font-weight:700}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";flex:none;width:28px;height:28px;border-radius:50%;background:#f0fdfa;color:#0f766e;display:inline-flex;align-items:center;justify-content:center;font-weight:800}
+details[open] summary::after{content:"\2212"}
+details[open]{padding-bottom:6px}
+summary:focus-visible,.topics a:focus-visible,.cta:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+#delete-data{border-color:#fecaca}
+.contact{background:#f0fdfa;border-color:#99f6e4}
 .cta{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:12px;background:#0f766e;color:#fff;font-weight:800;text-decoration:none}
 footer{max-width:720px;margin:0 auto;padding:0 14px 28px;font-size:.9rem;color:#475569}
 footer a{display:inline-block;min-height:44px;line-height:44px;margin-right:14px;color:#0f766e}
 </style>
 </head>
 <body>
-<header><a href="/">BashiBook</a></header>
+<header><div class="bar"><a href="/">BashiBook</a><a class="open" href="/?app=1&amp;src=help">Open app</a></div>
+<div class="hero"><span class="crest" aria-hidden="true">?</span><h1>Help &amp; FAQ</h1>
+<p>Short answers to the questions shop owners ask most. Tap a topic, then tap a question.</p></div></header>
 <main>
-<h1>Help &amp; FAQ</h1>
-<p>Short answers to the questions shop owners ask most.</p>
-<p><a class="cta" href="/?app=1&amp;src=help">Open BashiBook</a></p>
+<nav class="topics" aria-label="Help topics"><a href="#start"><span aria-hidden="true">🚀</span>Getting started</a><a href="#credit"><span aria-hidden="true">📒</span>Customers &amp; credit</a><a href="#remind"><span aria-hidden="true">💬</span>Reminders &amp; Pay me</a><a href="#backup"><span aria-hidden="true">📶</span>Offline &amp; backup</a><a href="#pro"><span aria-hidden="true">★</span>BashiBook Pro</a><a href="#delete-data"><span aria-hidden="true">🗑</span>Delete your data</a><a href="#contact"><span aria-hidden="true">✉</span>Contact us</a></nav>
 
-<section>
+<section id="start">
 <h2>Getting started</h2>
-<h3>What is BashiBook?</h3>
+<details>
+<summary>What is BashiBook?</summary>
 <p>A credit book on your phone, made for small shops and traders who sell on credit. Write down who owes you, remind them on WhatsApp, and see what has come back. It is free to start, and the core credit book is free.</p>
-<h3>How do I start?</h3>
+</details>
+<details>
+<summary>How do I start?</summary>
 <p>Open <a href="/?app=1&amp;src=help">bashibook.app</a> in your phone's browser, type your shop name and start your book. You don't need to make an account. To keep it on your home screen, open your browser menu and choose "Add to Home screen" (or "Install app").</p>
-<h3>Which languages does BashiBook have?</h3>
+</details>
+<details>
+<summary>Which languages does BashiBook have?</summary>
 <p>English, Hausa and Yoruba. Change it in Settings.</p>
+</details>
 </section>
 
-<section>
+<section id="credit">
 <h2>Customers and credit</h2>
-<h3>How do I add a customer?</h3>
+<details>
+<summary>How do I add a customer?</summary>
 <p>On Home, add a customer. Type their name, and their phone number if you want to send them WhatsApp messages. Your customer does not need BashiBook.</p>
-<h3>How do I record a credit sale?</h3>
+</details>
+<details>
+<summary>How do I record a credit sale?</summary>
 <p>Open the customer, add a credit sale, type the amount and save. Their balance updates straight away. BashiBook then offers to send a receipt on WhatsApp, or you can skip it.</p>
-<h3>How do I record a payment?</h3>
+</details>
+<details>
+<summary>How do I record a payment?</summary>
 <p>Open the customer and add a payment with the amount they paid. Their balance goes down. BashiBook does not take or check payments for you, so record each payment yourself.</p>
-<h3>What is a credit limit?</h3>
+</details>
+<details>
+<summary>What is a credit limit?</summary>
 <p>The most you want a customer to owe. It is a warning, not a block: customers show a <b>Near limit</b> badge, and if a sale would take them over, BashiBook asks before recording it.</p>
-<h3>Can I track what I owe my suppliers?</h3>
+</details>
+<details>
+<summary>Can I track what I owe my suppliers?</summary>
 <p>Yes. <b>I owe suppliers</b> keeps your suppliers and what you owe each one, separate from your customers.</p>
-<h3>Can I give a customer a statement?</h3>
+</details>
+<details>
+<summary>Can I give a customer a statement?</summary>
 <p>Yes. Open the customer and share a statement of their entries and balance, for example on WhatsApp.</p>
+</details>
 </section>
 
-<section>
+<section id="remind">
 <h2>Reminders and getting paid</h2>
-<h3>How do I remind a customer?</h3>
+<details>
+<summary>How do I remind a customer?</summary>
 <p>Open the customer and tap <b>Remind</b>. WhatsApp opens with a polite message ready, and you press send. BashiBook never sends messages by itself.</p>
-<h3>Can I remind everyone who is late?</h3>
+</details>
+<details>
+<summary>Can I remind everyone who is late?</summary>
 <p>Yes. On Home, tap <b>Chase all overdue</b>. It lines up a WhatsApp reminder for each overdue customer, and you press send on each. <b>Share on WhatsApp</b> sends a short summary of who is late. For a daily nudge, turn on <b>Chase reminders</b> in Settings.</p>
-<h3>What is Pay me?</h3>
+</details>
+<details>
+<summary>What is Pay me?</summary>
 <p>Add your bank details once, then send a customer a Pay me link on WhatsApp so they can see your account details and pay by bank transfer. You can also print a <b>QR poster</b> for your counter. When the money arrives, record the payment in BashiBook.</p>
+</details>
 </section>
 
-<section>
+<section id="backup">
 <h2>Offline, backup and safety</h2>
-<h3>Does BashiBook work offline?</h3>
+<details>
+<summary>Does BashiBook work offline?</summary>
 <p>Yes, once opened. Open it with internet the first time. After that you can add customers, sales and payments even when the network is bad. Sending a WhatsApp message still needs WhatsApp to get through.</p>
-<h3>Will it use up my data?</h3>
+</details>
+<details>
+<summary>Will it use up my data?</summary>
 <p>Very little. The app saves itself on your phone after the first visit, and recording sales and payments on the free book uses no data.</p>
-<h3>Where is my book kept, and how do I back it up?</h3>
+</details>
+<details>
+<summary>Where is my book kept, and how do I back it up?</summary>
 <p>Your book is kept on your phone. Go to <b>Settings → Export backup</b> to save a free backup file. Keep a copy somewhere safe, away from the phone, and do it often.</p>
-<h3>I have a new phone. How do I move my book?</h3>
+</details>
+<details>
+<summary>I have a new phone. How do I move my book?</summary>
 <p>Export a backup file on your old phone and move the file to your new phone. Open BashiBook on the new phone and choose <b>Settings → Restore backup</b>. Restore replaces all the data on that phone, so BashiBook asks you to confirm first. With Pro, you can restore from encrypted cloud backup using your recovery code.</p>
-<h3>How do I stop other people opening my book?</h3>
+</details>
+<details>
+<summary>How do I stop other people opening my book?</summary>
 <p>Set a <b>PIN lock</b> in Settings. There is no way to reset a forgotten PIN yet, so keep your PIN safe and export a backup regularly.</p>
-<h3>Who can see my records?</h3>
+</details>
+<details>
+<summary>Who can see my records?</summary>
 <p>Your book is saved on your phone. We don't receive your customers or amounts. If you turn on Pro cloud backup, your book is encrypted on your phone before it is uploaded. Read more in <a href="/?app=1#/privacy">Privacy</a>.</p>
+</details>
 </section>
 
-<section>
+<section id="pro">
 <h2>BashiBook Pro</h2>
-<h3>What does Pro add?</h3>
+<details>
+<summary>What does Pro add?</summary>
 <p>Encrypted cloud backup and restore on a new phone. The credit book itself stays free. You can try Pro free for 5 days, once per phone.</p>
-<h3>How do I manage or cancel Pro?</h3>
+</details>
+<details>
+<summary>How do I manage or cancel Pro?</summary>
 <p>Go to <b>Settings → Manage or cancel subscription</b>, or open the <a href="https://billing.stripe.com/p/login/7sY3cwbWocB79sH9x13Ru00" rel="noopener noreferrer">Stripe billing page</a> and sign in with the email on your receipt. There you can cancel, update your card and see your invoices. Pro stays on until the end of the period you paid for.</p>
+</details>
 </section>
 
 <section id="delete-data">
@@ -113,9 +173,10 @@ footer a{display:inline-block;min-height:44px;line-height:44px;margin-right:14px
 <p>Anonymous usage counts contain no personal data, so there is nothing to delete.</p>
 </section>
 
-<section>
+<section id="contact" class="contact">
 <h2>Still stuck?</h2>
 <p>Email us at <a href="mailto:support@bashibook.app?subject=BashiBook%20help">support@bashibook.app</a> to tell us what broke or ask a question. In the app, <b>Settings → Help &amp; support</b> opens the same email.</p>
+<p><a class="cta" href="mailto:support@bashibook.app?subject=BashiBook%20help">Email support</a></p>
 </section>
 </main>
 <footer>
