@@ -48,6 +48,21 @@ describe('/whatsapp-payment-reminder static page', () => {
     expect(html).not.toMatch(/fonts\.googleapis|@font-face|<img/);
   });
 
+  it('gives every template a no-JS "Send on WhatsApp" wa.me link with the exact message prefilled', () => {
+    const cards = [...html.matchAll(/<div class="tpl">\s*<h3>[^<]+<\/h3>\s*<p class="msg">([^<]+)<\/p>\s*<a class="wa" href="([^"]+)" target="_blank" rel="noopener">[\s\S]*?<\/a>\s*<\/div>/g)];
+    expect(cards.length).toBe(8);
+    for (const [, msg, href] of cards) {
+      expect(href.startsWith('https://wa.me/?text=')).toBe(true);
+      expect(decodeURIComponent(href.slice('https://wa.me/?text='.length))).toBe(msg.replace(/&amp;/g, '&'));
+    }
+    expect(html).toMatch(/\.wa\{[^}]*min-height:48px/);
+    const label = (lang: string) => (html.split(`<section id="${lang}"`)[1].split('</section>')[0].match(/<\/svg>([^<]+)<\/a>/g) || []).length;
+    expect([label('en'), label('ha'), label('yo')]).toEqual([4, 2, 2]);
+    expect(html).toContain('Aika a WhatsApp');
+    expect(html).toContain('Fi ránṣẹ́ lórí WhatsApp');
+    expect(html).toContain('Nothing is sent until you tap send.');
+  });
+
   it('tags app links src=wr and passes ?src through as wr-<src>', () => {
     const ctas = html.match(/<a class="cta" href="[^"]+">/g) || [];
     expect(ctas.length).toBe(3);

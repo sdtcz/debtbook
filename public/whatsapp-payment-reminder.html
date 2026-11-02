@@ -39,8 +39,14 @@ h2{font-size:1.25rem;line-height:1.25;margin:0 0 6px;color:#134e4a}
 .lead{font-size:1.1rem;font-weight:700;color:#0f766e;margin:0 0 10px}
 ul{padding-left:20px;margin:8px 0 14px}
 li{margin:4px 0}
-/* Message templates: plain text, long-press (or tap) to select and copy. No JS needed. */
-.msg{margin:6px 0 14px;padding:12px 14px;background:#f0fdfa;border:1px dashed #5eead4;border-radius:12px;white-space:pre-wrap;font:inherit;-webkit-user-select:all;user-select:all}
+/* Message templates: a card per message with a big "Send on WhatsApp" bar (wa.me link, no JS); long-press still copies. */
+.tpl{margin:8px 0 18px;border:1px solid #99f6e4;border-radius:14px;background:#fff;overflow:hidden}
+.tpl h3{margin:0;padding:10px 14px 0;font-size:1rem;color:#134e4a}
+.msg{margin:8px 10px 10px;padding:12px 14px;background:#f0fdfa;border-radius:12px 12px 12px 4px;white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;-webkit-user-select:all;user-select:all}
+.wa{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:8px 14px;border-top:1px solid #ccfbf1;color:#0f766e;font-weight:800;text-decoration:none;text-align:center}
+.wa:hover,.wa:active{background:#f0fdfa}
+.wa:focus-visible,.cta:focus-visible,nav a:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+.wa svg{flex:none}
 .cta{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:12px;background:#0f766e;color:#fff;font-weight:800;text-decoration:none}
 .small{font-size:.85rem;color:#475569}
 footer{max-width:720px;margin:0 auto;padding:0 14px 28px;font-size:.85rem;color:#475569}
@@ -56,7 +62,7 @@ body:not(:has(#ha:target,#yo:target)) nav a[href="#en"],body:has(#ha:target) nav
 <header>
   <div class="brand">BashiBook</div>
   <h1>How to remind a customer to pay on WhatsApp (politely)</h1>
-  <div>Ready-to-copy messages for shop owners. Long-press a message to copy it.</div>
+  <div>Ready-to-send messages for shop owners. Tap Send on WhatsApp, or long-press a message to copy it.</div>
   <nav aria-label="Language">
     <a href="#en" hreflang="en">English</a>
     <a href="#ha" hreflang="ha">Hausa</a>
@@ -75,15 +81,27 @@ body:not(:has(#ha:target,#yo:target)) nav a[href="#en"],body:has(#ha:target) nav
     </ul>
 
     <h2>Messages you can copy</h2>
-    <p class="small">Long-press a message to copy it, then change the words in [brackets].</p>
-    <h3>1. Friendly first nudge</h3>
-    <p class="msg">Hello [Name], this is [Shop]. Just a friendly reminder that your balance is [amount]. Please pay when you can. Thank you!</p>
-    <h3>2. After a week</h3>
-    <p class="msg">Hello [Name], I hope you are well. This is [Shop] again about your balance of [amount]. Could you pay all or part of it this week? Thank you.</p>
-    <h3>3. Before the holidays</h3>
-    <p class="msg">Hello [Name], [Shop] here. The holidays are coming and we are getting new stock ready. Please help us by paying your balance of [amount] before then. Thank you, and happy holidays!</p>
-    <h3>4. Thank you after paying</h3>
-    <p class="msg">Hello [Name], thank you for paying [amount]. Your account with [Shop] is now settled. We appreciate you!</p>
+    <p class="small">Tap <b>Send on WhatsApp</b>, pick the customer, then change the words in [brackets] before you send. Nothing is sent until you tap send. Or long-press a message to copy it.</p>
+    <div class="tpl">
+      <h3>1. Friendly first nudge</h3>
+      <p class="msg">Hello [Name], this is [Shop]. Just a friendly reminder that your balance is [amount]. Please pay when you can. Thank you!</p>
+      <a class="wa" href="https://wa.me/?text=Hello%20%5BName%5D%2C%20this%20is%20%5BShop%5D.%20Just%20a%20friendly%20reminder%20that%20your%20balance%20is%20%5Bamount%5D.%20Please%20pay%20when%20you%20can.%20Thank%20you%21" target="_blank" rel="noopener"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>Send on WhatsApp</a>
+    </div>
+    <div class="tpl">
+      <h3>2. After a week</h3>
+      <p class="msg">Hello [Name], I hope you are well. This is [Shop] again about your balance of [amount]. Could you pay all or part of it this week? Thank you.</p>
+      <a class="wa" href="https://wa.me/?text=Hello%20%5BName%5D%2C%20I%20hope%20you%20are%20well.%20This%20is%20%5BShop%5D%20again%20about%20your%20balance%20of%20%5Bamount%5D.%20Could%20you%20pay%20all%20or%20part%20of%20it%20this%20week%3F%20Thank%20you." target="_blank" rel="noopener"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>Send on WhatsApp</a>
+    </div>
+    <div class="tpl">
+      <h3>3. Before the holidays</h3>
+      <p class="msg">Hello [Name], [Shop] here. The holidays are coming and we are getting new stock ready. Please help us by paying your balance of [amount] before then. Thank you, and happy holidays!</p>
+      <a class="wa" href="https://wa.me/?text=Hello%20%5BName%5D%2C%20%5BShop%5D%20here.%20The%20holidays%20are%20coming%20and%20we%20are%20getting%20new%20stock%20ready.%20Please%20help%20us%20by%20paying%20your%20balance%20of%20%5Bamount%5D%20before%20then.%20Thank%20you%2C%20and%20happy%20holidays%21" target="_blank" rel="noopener"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>Send on WhatsApp</a>
+    </div>
+    <div class="tpl">
+      <h3>4. Thank you after paying</h3>
+      <p class="msg">Hello [Name], thank you for paying [amount]. Your account with [Shop] is now settled. We appreciate you!</p>
+      <a class="wa" href="https://wa.me/?text=Hello%20%5BName%5D%2C%20thank%20you%20for%20paying%20%5Bamount%5D.%20Your%20account%20with%20%5BShop%5D%20is%20now%20settled.%20We%20appreciate%20you%21" target="_blank" rel="noopener"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>Send on WhatsApp</a>
+    </div>
 
     <h2>How BashiBook does it for you</h2>
     <ul>
@@ -98,11 +116,17 @@ body:not(:has(#ha:target,#yo:target)) nav a[href="#en"],body:has(#ha:target) nav
   <section id="ha" lang="ha">
     <h2>Yadda za ka tunatar da abokin ciniki a WhatsApp cikin ladabi</h2>
     <p class="lead">Tunatarwa mai ladabi tana kiyaye abokin ciniki, kuma tana taimaka maka ka karɓi kuɗinka.</p>
-    <p class="small">Danna ka riƙe saƙo don ka kwafa, sannan ka canza kalmomin cikin [baka].</p>
-    <h3>Tunatarwa</h3>
-    <p class="msg">Sannu [Suna], wannan tunatarwa ce daga [Shago]. Bashinka da ya rage shine [kuɗi]. Don Allah ka biya lokacin da za ka iya. Na gode.</p>
-    <h3>Bayan an biya</h3>
-    <p class="msg">Sannu [Suna], wannan [Shago] ne. An biya asusun ka. Mun gode da kasuwancinka.</p>
+    <p class="small">Danna <b>Aika a WhatsApp</b>, zaɓi abokin ciniki, sannan ka canza kalmomin cikin [baka] kafin ka aika. Ko ka danna ka riƙe saƙo don ka kwafa.</p>
+    <div class="tpl">
+      <h3>Tunatarwa</h3>
+      <p class="msg">Sannu [Suna], wannan tunatarwa ce daga [Shago]. Bashinka da ya rage shine [kuɗi]. Don Allah ka biya lokacin da za ka iya. Na gode.</p>
+      <a class="wa" href="https://wa.me/?text=Sannu%20%5BSuna%5D%2C%20wannan%20tunatarwa%20ce%20daga%20%5BShago%5D.%20Bashinka%20da%20ya%20rage%20shine%20%5Bku%C9%97i%5D.%20Don%20Allah%20ka%20biya%20lokacin%20da%20za%20ka%20iya.%20Na%20gode." target="_blank" rel="noopener"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>Aika a WhatsApp</a>
+    </div>
+    <div class="tpl">
+      <h3>Bayan an biya</h3>
+      <p class="msg">Sannu [Suna], wannan [Shago] ne. An biya asusun ka. Mun gode da kasuwancinka.</p>
+      <a class="wa" href="https://wa.me/?text=Sannu%20%5BSuna%5D%2C%20wannan%20%5BShago%5D%20ne.%20An%20biya%20asusun%20ka.%20Mun%20gode%20da%20kasuwancinka." target="_blank" rel="noopener"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>Aika a WhatsApp</a>
+    </div>
     <ul>
       <li>Yana nuna wanda ke binka da kwanakin bashin.</li>
       <li>Tunatar da taɓawa ɗaya a WhatsApp.</li>
@@ -115,11 +139,17 @@ body:not(:has(#ha:target,#yo:target)) nav a[href="#en"],body:has(#ha:target) nav
   <section id="yo" lang="yo">
     <h2>Bí o ṣe lè rán oníbàárà létí lórí WhatsApp pẹ̀lú ọ̀wọ̀</h2>
     <p class="lead">Ìránnilétí pẹ̀lú ọ̀wọ̀ ń pa oníbàárà mọ́, ó sì ń ràn ọ́ lọ́wọ́ láti gba owó rẹ.</p>
-    <p class="small">Tẹ ọ̀rọ̀ kan mọ́lẹ̀ láti dàákọ rẹ̀, lẹ́yìn náà yí àwọn ọ̀rọ̀ inú [àkámọ́] padà.</p>
-    <h3>Ìránnilétí</h3>
-    <p class="msg">Ẹ káàbọ̀ [Orúkọ], èyí jẹ́ ìránnilétí láti ọ̀dọ̀ [Ilé ìtajà]. Gbèsè rẹ tó kù ni [iye owó]. Jọ̀wọ́ san nígbà tí o bá lè. O ṣeun.</p>
-    <h3>Lẹ́yìn ìsanwó</h3>
-    <p class="msg">Ẹ káàbọ̀ [Orúkọ], èyí ni [Ilé ìtajà]. A ti san àkọọ́lẹ̀ rẹ. A dúpẹ́ fún òwò rẹ.</p>
+    <p class="small">Tẹ <b>Fi ránṣẹ́ lórí WhatsApp</b>, yan oníbàárà, lẹ́yìn náà yí àwọn ọ̀rọ̀ inú [àkámọ́] padà kí o tó fi ránṣẹ́. Tàbí tẹ ọ̀rọ̀ kan mọ́lẹ̀ láti dàákọ rẹ̀.</p>
+    <div class="tpl">
+      <h3>Ìránnilétí</h3>
+      <p class="msg">Ẹ káàbọ̀ [Orúkọ], èyí jẹ́ ìránnilétí láti ọ̀dọ̀ [Ilé ìtajà]. Gbèsè rẹ tó kù ni [iye owó]. Jọ̀wọ́ san nígbà tí o bá lè. O ṣeun.</p>
+      <a class="wa" href="https://wa.me/?text=%E1%BA%B8%20k%C3%A1%C3%A0b%E1%BB%8D%CC%80%20%5BOr%C3%BAk%E1%BB%8D%5D%2C%20%C3%A8y%C3%AD%20j%E1%BA%B9%CC%81%20%C3%ACr%C3%A1nnil%C3%A9t%C3%AD%20l%C3%A1ti%20%E1%BB%8D%CC%80d%E1%BB%8D%CC%80%20%5BIl%C3%A9%20%C3%ACtaj%C3%A0%5D.%20Gb%C3%A8s%C3%A8%20r%E1%BA%B9%20t%C3%B3%20k%C3%B9%20ni%20%5Biye%20ow%C3%B3%5D.%20J%E1%BB%8D%CC%80w%E1%BB%8D%CC%81%20san%20n%C3%ADgb%C3%A0%20t%C3%AD%20o%20b%C3%A1%20l%C3%A8.%20O%20%E1%B9%A3eun." target="_blank" rel="noopener"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>Fi ránṣẹ́ lórí WhatsApp</a>
+    </div>
+    <div class="tpl">
+      <h3>Lẹ́yìn ìsanwó</h3>
+      <p class="msg">Ẹ káàbọ̀ [Orúkọ], èyí ni [Ilé ìtajà]. A ti san àkọọ́lẹ̀ rẹ. A dúpẹ́ fún òwò rẹ.</p>
+      <a class="wa" href="https://wa.me/?text=%E1%BA%B8%20k%C3%A1%C3%A0b%E1%BB%8D%CC%80%20%5BOr%C3%BAk%E1%BB%8D%5D%2C%20%C3%A8y%C3%AD%20ni%20%5BIl%C3%A9%20%C3%ACtaj%C3%A0%5D.%20A%20ti%20san%20%C3%A0k%E1%BB%8D%E1%BB%8D%CC%81l%E1%BA%B9%CC%80%20r%E1%BA%B9.%20A%20d%C3%BAp%E1%BA%B9%CC%81%20f%C3%BAn%20%C3%B2w%C3%B2%20r%E1%BA%B9." target="_blank" rel="noopener"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>Fi ránṣẹ́ lórí WhatsApp</a>
+    </div>
     <ul>
       <li>Ó ń fi àwọn tó jẹ ọ́ hàn, àti iye ọjọ́ tí wọ́n ti jẹ gbèsè.</li>
       <li>Rán létí lórí WhatsApp pẹ̀lú ìfọwọ́kàn kan.</li>
