@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 // node:fs without @types/node (the app tsconfig type-checks tests in the build).
-type Fs = { existsSync(p: string): boolean; statSync(p: string): { size: number } };
-const { existsSync, statSync } = (await import(/* @vite-ignore */ 'node:' + 'fs')) as Fs;
+type Fs = { existsSync(p: string): boolean; statSync(p: string): { size: number }; readFileSync(p: string, enc: 'utf8'): string };
+const { existsSync, statSync, readFileSync } = (await import(/* @vite-ignore */ 'node:' + 'fs')) as Fs;
 import viteConfig from '../../vite.config.ts?raw';
 import indexHtml from '../../index.html?raw';
 import cbNeutral from '../../public/credit-book-app.html?raw';
@@ -35,6 +35,12 @@ describe('logo pack (speech-bubble B)', () => {
     expect(viteConfig).not.toMatch(/icon-512\.png'[^\n]*maskable/); // the rounded "any" tile is not maskable
     expect(viteConfig).toContain("form_factor: 'narrow'");
     expect(viteConfig).toContain('screenshots/screenshot-${n}.webp');
+    expect(viteConfig).toContain("form_factor: 'wide'");
+    expect(existsSync(pub('screenshots/screenshot-wide-1.webp'))).toBe(true);
+    expect(statSync(pub('screenshots/screenshot-wide-1.webp')).size).toBeLessThan(90e3);
+    const sec = readFileSync(pub('.well-known/security.txt'), 'utf8');
+    expect(sec).toContain('Contact: mailto:support@bashibook.app');
+    expect(sec).toMatch(/Expires: 20\d\d-/);
   });
 
   it('index: 1200×630 share image, svg favicon, root apple-touch-icon', () => {

@@ -69,7 +69,15 @@ export default defineConfig({
           type: 'image/webp',
           form_factor: 'narrow' as const,
           label: label as string,
-        })),
+        })).concat([
+          {
+            src: 'screenshots/screenshot-wide-1.webp',
+            sizes: '1920x1080',
+            type: 'image/webp',
+            form_factor: 'wide' as const,
+            label: 'Know who owes you. Get paid on WhatsApp.',
+          },
+        ]),
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
