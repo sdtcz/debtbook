@@ -767,6 +767,10 @@ export const ha: Record<MessageKey, string> = {
   'pro.trialUsedNote': "Ana iya amfani da gwajin kyauta sau ɗaya a kowace waya.",
   'home.trialUpgrade': "Haɓaka",
   'home.trialEndedSub': "Haɓaka da $1.99/wata ko $15/shekara",
+  'home.trialStakesEnding': "Abokan ciniki {{n}} suna binka {{amount}}. Ci gaba da ajiyar girgije bayan gwaji.",
+  'home.trialStakesEnding1': "Abokin ciniki 1 yana binka {{amount}}. Ci gaba da ajiyar girgije bayan gwaji.",
+  'home.trialStakesEnded': "Ajiye {{amount}} da abokan ciniki {{n}} ke binka a girgije · $1.99/wata ko $15/shekara",
+  'home.trialStakesEnded1': "Ajiye {{amount}} da abokin ciniki 1 ke binka a girgije · $1.99/wata ko $15/shekara",
 
   'entry.receiptStepTitle': "An ajiye bashin {{amount}} na {{name}}",
   'entry.receiptStepWhy': "Aika rasit don su ma su sami bayanin da sabon bashinsu.",

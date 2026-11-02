@@ -765,6 +765,10 @@ export const en = {
   'pro.trialUsedNote': "The free trial can be used once per phone.",
   'home.trialUpgrade': "Upgrade",
   'home.trialEndedSub': "Upgrade for $1.99/mo or $15/yr",
+  'home.trialStakesEnding': "{{amount}} owed by {{n}} customers. Keep it backed up after the trial.",
+  'home.trialStakesEnding1': "{{amount}} owed by 1 customer. Keep it backed up after the trial.",
+  'home.trialStakesEnded': "Back up the {{amount}} owed by {{n}} customers · $1.99/mo or $15/yr",
+  'home.trialStakesEnded1': "Back up the {{amount}} owed by 1 customer · $1.99/mo or $15/yr",
 
   'entry.receiptStepTitle': "{{amount}} credit saved for {{name}}",
   'entry.receiptStepWhy': "Send a receipt so they have the same record and their new balance.",

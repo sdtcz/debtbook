@@ -767,6 +767,10 @@ export const yo: Record<MessageKey, string> = {
   'pro.trialUsedNote': "Ẹ̀ẹ̀kan péré ni a lè lo ìdánwò ọ̀fẹ́ lórí fóònù kan.",
   'home.trialUpgrade': "Ṣe àfikún",
   'home.trialEndedSub': "Ṣe àfikún pẹ̀lú $1.99/oṣù tàbí $15/ọdún",
+  'home.trialStakesEnding': "Oníbàárà {{n}} jẹ́ ọ́ {{amount}}. Máa lo àfípadà àwọsánmà lẹ́yìn ìdánwò.",
+  'home.trialStakesEnding1': "Oníbàárà 1 jẹ́ ọ́ {{amount}}. Máa lo àfípadà àwọsánmà lẹ́yìn ìdánwò.",
+  'home.trialStakesEnded': "Fi {{amount}} tí oníbàárà {{n}} jẹ́ ọ́ sí àfípadà àwọsánmà · $1.99/oṣù tàbí $15/ọdún",
+  'home.trialStakesEnded1': "Fi {{amount}} tí oníbàárà 1 jẹ́ ọ́ sí àfípadà àwọsánmà · $1.99/oṣù tàbí $15/ọdún",
 
   'entry.receiptStepTitle': "A ti fi gbèsè {{amount}} pamọ́ fún {{name}}",
   'entry.receiptStepWhy': "Fi rìsíìtì ránṣẹ́ kí wọ́n lè ní àkọsílẹ̀ kan náà àti iye tí wọ́n jẹ báyìí.",

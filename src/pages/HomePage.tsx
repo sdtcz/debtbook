@@ -36,6 +36,7 @@ import {
 } from '../lib/chaseReminders';
 import { isPro } from '../lib/entitlement';
 import { trialStatus } from '../lib/trial';
+import { trialStakes, trialStakesKey } from '../lib/trialStakes';
 import type { CustomerBalance, ShopProfile } from '../lib/types';
 import { balanceTone, formatMoney, currencySymbol } from '../lib/money';
 import { href, navigate } from '../lib/router';
@@ -206,6 +207,10 @@ export function HomePage({ locked, toast }: Props) {
   const filtered = searchCustomers(filteredByChip, query);
   const pro = isPro(shop);
   const trial = trialStatus(shop);
+  const stakes = locked ? null : trialStakes(trial, total, owesCount);
+  const stakesText = stakes
+    ? t(trialStakesKey(stakes), { amount: formatMoney(stakes.amountKobo), n: stakes.customers })
+    : '';
   const hasCustomers = rows.length > 0;
   const filterActive = filter !== 'all' || Boolean(query.trim());
 
@@ -459,6 +464,7 @@ export function HomePage({ locked, toast }: Props) {
             <span aria-hidden="true">⏳</span>
             <span class="pro-trial-chip-text">
               {trial.daysLeft === 1 ? t('pro.trialOneDayLeft') : t('pro.trialDaysLeft', { n: trial.daysLeft })}
+              {stakes && <span class="pro-trial-stakes">{stakesText}</span>}
             </span>
             <span class="pro-trial-chip-cta">{t('home.trialUpgrade')}</span>
           </a>
@@ -471,7 +477,7 @@ export function HomePage({ locked, toast }: Props) {
             </span>
             <span class="pro-hint-soft-body">
               <span class="pro-hint-soft-title">{t('pro.trialEndedTitle')}</span>
-              <span class="pro-hint-soft-sub">{t('home.trialEndedSub')}</span>
+              <span class="pro-hint-soft-sub">{stakes ? stakesText : t('home.trialEndedSub')}</span>
             </span>
             <span class="chev" aria-hidden="true">
               ›
