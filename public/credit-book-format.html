@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Credit book format for a shop (with a filled-in example): BashiBook</title>
+<meta name="description" content="How to write a shop credit book: one page per customer, the 5 columns, a filled-in example, the running balance rule and a monthly summary page.">
+<link rel="canonical" href="https://bashibook.app/credit-book-format">
+<link rel="alternate" hreflang="x-default" href="https://bashibook.app/credit-book-format">
+<link rel="alternate" hreflang="en" href="https://bashibook.app/credit-book-format">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#0f766e">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Credit book format for a shop (with a filled-in example)">
+<meta property="og:description" content="One page per customer, 5 columns, a running balance and a monthly summary. Copy it on paper, or let a free app do the sums.">
+<meta property="og:url" content="https://bashibook.app/credit-book-format">
+<meta property="og:image" content="https://bashibook.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="BashiBook logo with the tagline “Record it. Remind. Get paid.”">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://bashibook.app/og-image.png">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"BashiBook","applicationCategory":"FinanceApplication","operatingSystem":"Android, iOS, web browser","url":"https://bashibook.app/","description":"Free offline credit book for shops. Works out every customer's balance for you.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"inLanguage":["en","ha","yo"]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"How to write a shop credit book","step":[{"@type":"HowToStep","name":"Give each customer their own page","text":"Write the customer's name, phone number and the credit limit you agreed at the top of the page."},{"@type":"HowToStep","name":"Draw five columns","text":"Date, Details, Credit (what they took), Paid (what they gave you) and Balance (what they owe now)."},{"@type":"HowToStep","name":"Work out the balance on every line","text":"New balance = previous balance + credit - paid. Do it on every line, not at the end of the month."},{"@type":"HowToStep","name":"Keep a summary page","text":"At month end, list every customer with their balance, last payment date and days since they last paid. Remind the longest-quiet customers first."}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What columns should a shop credit book have?","acceptedAnswer":{"@type":"Answer","text":"Five: Date, Details, Credit (what the customer took), Paid (what they gave you) and Balance (what they owe after that line). Put the customer's name, phone and credit limit at the top of their page."}},{"@type":"Question","name":"How do I work out a customer's balance?","acceptedAnswer":{"@type":"Answer","text":"New balance = previous balance + credit - paid. Work it out on every line so a mistake shows up on the next line, not weeks later."}},{"@type":"Question","name":"What if I make a mistake in the book?","acceptedAnswer":{"@type":"Answer","text":"Don't erase or tear out the page. Draw one line through the wrong entry, write the correct one on a new line and initial it, so you and the customer can both see what changed."}},{"@type":"Question","name":"Is there a free app that keeps the credit book for me?","acceptedAnswer":{"@type":"Answer","text":"Yes. BashiBook keeps one page per customer, works out every balance, shows how many days each customer has owed, and sends a polite WhatsApp reminder in one tap. It is free to start and works offline once opened."}}]}</script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.55 system-ui,-apple-system,Roboto,"Segoe UI",sans-serif;color:#0f172a;background:#fffbeb}
+header{background:#0f766e;color:#fff;padding:20px 18px 26px}
+header .brand{font-weight:800;font-size:1.1rem;letter-spacing:.01em}
+header nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+header nav a{color:#fff;background:#115e59;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:10px 14px;min-height:44px;display:inline-flex;align-items:center;text-decoration:none;font-weight:600;font-size:.92rem}
+main{max-width:720px;margin:0 auto;padding:8px 14px 32px}
+section{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px 16px;margin:14px 0}
+h1{font-size:1.6rem;line-height:1.2;margin:14px 0 6px}
+h2{font-size:1.25rem;line-height:1.25;margin:0 0 6px;color:#134e4a}
+h3{font-size:1.05rem;margin:12px 0 2px}
+.lead{font-size:1.1rem;font-weight:700;color:#0f766e;margin:0 0 10px}
+ul,ol{padding-left:20px;margin:8px 0 14px}
+li{margin:4px 0}
+.rule{margin:12px 0;padding:12px 14px;border-radius:12px;background:#f0fdfa;border:1px solid #99f6e4;font-weight:800;color:#134e4a;text-align:center}
+/* Ledger page: looks like a ruled book page; scrolls sideways inside its box on very narrow phones, never the whole page. */
+.page{margin:10px 0 6px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;overflow:hidden}
+.page .top{padding:10px 12px;border-bottom:2px solid #0f766e;font-size:.92rem}
+.page .top b{font-size:1rem}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;min-width:300px;font-size:.92rem}
+th,td{padding:8px 8px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:top}
+th{background:#f8fafc;color:#334155;font-size:.8rem;text-transform:uppercase;letter-spacing:.03em}
+td:first-child{white-space:nowrap}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.bal{font-weight:800}
+tr.paid td{color:#047857}
+tr.zero td.bal{color:#047857}
+tr.over td{background:#fff7ed}
+tr.over td.bal{color:#b45309}
+.tag{display:inline-block;padding:1px 8px;border-radius:999px;background:#fef3c7;color:#92400e;font-size:.75rem;font-weight:700}
+.blank td{height:40px}
+@media (max-width:440px){section{padding:16px 12px}th,td{padding:7px 4px}th:first-child,td:first-child{padding-left:8px}th:last-child,td:last-child{padding-right:8px}table{font-size:.84rem}th{font-size:.68rem;letter-spacing:0}}
+.small{font-size:.85rem;color:#475569}
+.cta{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 20px;border-radius:12px;background:#0f766e;color:#fff;font-weight:800;text-decoration:none}
+.share{display:flex;align-items:center;justify-content:center;gap:8px;min-height:48px;margin-top:10px;padding:8px 14px;border:1px solid #99f6e4;border-radius:12px;color:#0f766e;font-weight:800;text-decoration:none;text-align:center}
+.share:hover,.share:active{background:#f0fdfa}
+.cta:focus-visible,.share:focus-visible,header nav a:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+.map li b{color:#134e4a}
+footer{max-width:720px;margin:0 auto;padding:0 14px 28px;font-size:.85rem;color:#475569}
+footer a{color:#0f766e}
+/* Print: just the blank page and the example, no colours, so a shop can print a few blank pages. */
+@media print{header nav,.cta,.share,footer,#app,#faq{display:none}body,header{background:#fff;color:#000}section{border:0;padding:0}.blank td{height:34px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">BashiBook</div>
+  <h1>Credit book format for a shop (with a filled-in example)</h1>
+  <div>How to write down what customers take on credit, so you always know who owes you and how much.</div>
+  <nav aria-label="On this page">
+    <a href="#format">The format</a>
+    <a href="#example">Example</a>
+    <a href="#summary">Summary page</a>
+    <a href="#words">Hausa &amp; Yorùbá words</a>
+  </nav>
+</header>
+<main>
+  <section id="format">
+    <h2>The rule: one page per customer</h2>
+    <p class="lead">Not one long list for everyone.</p>
+    <p>On a shared list you can see that someone took goods on Tuesday. On their own page you can see that it's the fifth time this month, they haven't paid since the 2nd, and how much they owe now.</p>
+    <h3>At the top of each page</h3>
+    <ul>
+      <li>The customer's name and phone number</li>
+      <li>Where they live or work, so you can find them</li>
+      <li>The credit limit you agreed, so you know when to stop giving</li>
+    </ul>
+    <h3>The 5 columns</h3>
+    <ol>
+      <li><b>Date</b>: the day of the sale or payment.</li>
+      <li><b>Details</b>: what they took (“rice 5 kg, oil 1 L”) or how they paid (“cash”, “transfer”).</li>
+      <li><b>Credit</b>: the value of goods they took and will pay for later.</li>
+      <li><b>Paid</b>: money they gave you.</li>
+      <li><b>Balance</b>: what they owe after this line.</li>
+    </ol>
+    <div class="rule">New balance = previous balance + credit − paid</div>
+    <p class="small">Work it out on every line, not at the end of the month. A mistake then shows up on the next line, not weeks later. For big amounts, ask the customer to initial the line.</p>
+  </section>
+
+  <section id="example">
+    <h2>A filled-in page</h2>
+    <p class="small">Amounts are in your own money. Names are made up.</p>
+    <div class="page">
+      <div class="top"><b>Customer: Mama Joy</b> · Phone: 0800 000 0000 · Credit limit: 20,000</div>
+      <div class="scroll"><table>
+        <thead><tr><th>Date</th><th>Details</th><th class="n">Credit</th><th class="n">Paid</th><th class="n">Balance</th></tr></thead>
+        <tbody>
+          <tr><td>2 Oct</td><td>Milk ×2, sugar, bread</td><td class="n">6,400</td><td class="n"></td><td class="n bal">6,400</td></tr>
+          <tr><td>5 Oct</td><td>Noodles, 1 carton</td><td class="n">3,200</td><td class="n"></td><td class="n bal">9,600</td></tr>
+          <tr class="paid"><td>9 Oct</td><td>Cash</td><td class="n"></td><td class="n">5,000</td><td class="n bal">4,600</td></tr>
+          <tr><td>12 Oct</td><td>Rice 5 kg, oil 1 L</td><td class="n">7,500</td><td class="n"></td><td class="n bal">12,100</td></tr>
+          <tr><td>20 Oct</td><td>Soap, detergent</td><td class="n">4,300</td><td class="n"></td><td class="n bal">16,400</td></tr>
+          <tr class="paid zero"><td>28 Oct</td><td>Transfer · settled</td><td class="n"></td><td class="n">16,400</td><td class="n bal">0</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <p class="small">Check one line: on 9 Oct, 9,600 + 0 − 5,000 = 4,600.</p>
+    <h3>If you make a mistake</h3>
+    <p>Don't erase it or tear out the page. Draw one line through the wrong entry, write the right one on a new line and initial it. You and the customer can both see what changed, and nobody argues later.</p>
+    <h3>A blank page to copy</h3>
+    <p class="small">Draw this in any exercise book, or use your browser's Print to print a few pages.</p>
+    <div class="page">
+      <div class="top"><b>Customer:</b> ____________ · Phone: ____________ · Limit: ________</div>
+      <div class="scroll"><table class="blank">
+        <thead><tr><th>Date</th><th>Details</th><th class="n">Credit</th><th class="n">Paid</th><th class="n">Balance</th></tr></thead>
+        <tbody><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <section id="summary">
+    <h2>The summary page (once a month)</h2>
+    <p>At the front of the book, list every customer on the last day of the month.</p>
+    <div class="page">
+      <div class="scroll"><table>
+        <thead><tr><th>Customer</th><th class="n">Limit</th><th class="n">Balance</th><th>Last paid</th><th class="n">Days</th></tr></thead>
+        <tbody>
+          <tr class="zero"><td>Mama Joy</td><td class="n">20,000</td><td class="n bal">0</td><td>28 Oct</td><td class="n">3</td></tr>
+          <tr><td>Mr Emeka</td><td class="n">15,000</td><td class="n bal">14,200</td><td>30 Sep</td><td class="n">31</td></tr>
+          <tr class="over"><td>Iya Bisi <span class="tag">over limit</span></td><td class="n">10,000</td><td class="n bal">22,500</td><td>14 Aug</td><td class="n">78</td></tr>
+          <tr><td><b>Total owed</b></td><td></td><td class="n bal">36,700</td><td></td><td></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <p>Two numbers matter most:</p>
+    <ul>
+      <li><b>Total owed</b> is your money that is not in your shop. Many owners are surprised how big it is.</li>
+      <li><b>Days since last paid</b> shows who has gone quiet. Remind them first, politely and in private. Need the words? <a href="/whatsapp-payment-reminder">Polite WhatsApp reminder messages</a>.</li>
+    </ul>
+  </section>
+
+  <section id="words">
+    <h2>The same columns in Hausa and Yorùbá</h2>
+    <p class="small">These are the words the BashiBook app uses.</p>
+    <div class="scroll"><table>
+      <thead><tr><th>English</th><th lang="ha">Hausa</th><th lang="yo">Yorùbá</th></tr></thead>
+      <tbody>
+        <tr><td>Customer</td><td lang="ha">Abokin ciniki</td><td lang="yo">Oníbàárà</td></tr>
+        <tr><td>Credit</td><td lang="ha">Bashi</td><td lang="yo">Gbèsè</td></tr>
+        <tr><td>Paid</td><td lang="ha">An biya</td><td lang="yo">Ìsanwó</td></tr>
+        <tr><td>Balance</td><td lang="ha">Ma'auni</td><td lang="yo">Ìwọ̀ntúnwọ̀nsì</td></tr>
+        <tr><td>Note / details</td><td lang="ha">Bayani</td><td lang="yo">Àkọsílẹ̀</td></tr>
+        <tr><td>Credit limit</td><td lang="ha">Iyakar bashi</td><td lang="yo">Òpin gbèsè</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section id="app">
+    <h2>When the paper book gets too much</h2>
+    <p>Paper books get wet, torn and lost, and the sums take time. BashiBook is the same format on your phone:</p>
+    <ul class="map">
+      <li><b>One page per customer</b>, with their phone number and credit limit.</li>
+      <li><b>Credit and Paid</b> in two taps. The <b>balance</b> is worked out for you on every line.</li>
+      <li><b>The summary page is always ready</b>: total owed, and how many days each customer has owed.</li>
+      <li><b>Polite WhatsApp reminder</b> in one tap, with the name and amount filled in.</li>
+      <li>Works offline once opened. Your book stays on your phone. Free to start, in English, Hausa and Yorùbá.</li>
+    </ul>
+    <a class="cta" href="/?app=1&amp;src=cbf">Start my credit book free</a>
+    <a class="share" href="https://wa.me/?text=A%20simple%20credit%20book%20format%20for%20shops%2C%20with%20a%20filled-in%20example%3A%20https%3A%2F%2Fbashibook.app%2Fcredit-book-format%3Fsrc%3Dcbf-share" target="_blank" rel="noopener"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>Share this page with a shop on WhatsApp</a>
+  </section>
+
+  <section id="faq">
+    <h2>Questions</h2>
+    <h3>What columns should a shop credit book have?</h3>
+    <p>Five: Date, Details, Credit (what the customer took), Paid (what they gave you) and Balance (what they owe after that line). Put the customer's name, phone and credit limit at the top of their page.</p>
+    <h3>How do I work out a customer's balance?</h3>
+    <p>New balance = previous balance + credit - paid. Work it out on every line so a mistake shows up on the next line, not weeks later.</p>
+    <h3>What if I make a mistake in the book?</h3>
+    <p>Don't erase or tear out the page. Draw one line through the wrong entry, write the correct one on a new line and initial it, so you and the customer can both see what changed.</p>
+    <h3>Is there a free app that keeps the credit book for me?</h3>
+    <p>Yes. BashiBook keeps one page per customer, works out every balance, shows how many days each customer has owed, and sends a polite WhatsApp reminder in one tap. It is free to start and works offline once opened.</p>
+  </section>
+</main>
+<footer>
+  <p>Looking for an app? <a href="/credit-book-app">Free credit book app for small shops</a> · <a href="/whatsapp-payment-reminder">WhatsApp payment reminder messages</a></p>
+  <p><a href="/">BashiBook home</a> · <a href="/help">Help &amp; FAQ</a></p>
+</footer>
+<script>
+/* Pass the visitor's ?src= through to the app link as cbf-<src>; the static href is the fallback. */
+(function () {
+  try {
+    var m = /[?&]src=([^&#]*)/.exec(location.search);
+    if (!m) return;
+    var x = decodeURIComponent(m[1].replace(/\+/g, ' ')).toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 20);
+    if (!x) return;
+    if (x.indexOf('cbf-') === 0) x = x.slice(4);
+    if (!x) return;
+    var links = document.querySelectorAll('a.cta');
+    for (var i = 0; i < links.length; i++) links[i].setAttribute('href', '/?app=1&src=cbf-' + x);
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

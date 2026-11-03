@@ -351,6 +351,7 @@ export function LandingPage({ onUseAppHere }: Props) {
           <a href={`${seo}/credit-book-app`}>Free credit book app for {enShops}</a>
           <a href={`${seo}/kippa-alternative`}>Looking for a Kippa alternative?</a>
           <a href="/whatsapp-payment-reminder">WhatsApp payment reminder messages</a>
+          <a href="/credit-book-format">Credit book format (with example)</a>
           <a href="/help">Help &amp; FAQ</a>
           <span>Bashi = credit (Hausa). Not affiliated with US DebtBook SaaS.</span>
         </div>
