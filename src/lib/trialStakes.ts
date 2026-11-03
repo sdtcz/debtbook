@@ -30,3 +30,21 @@ export function trialStakesKey(s: TrialStakes): MessageKey {
   if (s.phase === 'ended') return s.customers === 1 ? 'home.trialStakesEnded1' : 'home.trialStakesEnded';
   return s.customers === 1 ? 'home.trialStakesEnding1' : 'home.trialStakesEnding';
 }
+
+/**
+ * Split a rendered stakes line so the ₦ amount can be shown bold and the
+ * trailing price (after " · ") kept on one line. Pure string work; falls back
+ * to the whole text as `before` when the amount isn't found.
+ */
+export function stakesParts(text: string, amount: string): { before: string; amount: string; after: string; price: string } {
+  let body = text;
+  let price = '';
+  const dot = body.lastIndexOf(' · ');
+  if (dot > -1 && /\$/.test(body.slice(dot))) {
+    price = body.slice(dot + 3);
+    body = body.slice(0, dot);
+  }
+  const i = amount ? body.indexOf(amount) : -1;
+  if (i < 0) return { before: body, amount: '', after: '', price };
+  return { before: body.slice(0, i), amount, after: body.slice(i + amount.length), price };
+}

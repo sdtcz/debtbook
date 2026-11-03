@@ -4858,4 +4858,10 @@ a.settings-row {
 .growth-card.week{flex-direction:column;align-items:stretch}
 .week p{margin:4px 0 0;font-size:.95rem;color:var(--text)}
 .week-names{display:flex;align-items:center;gap:8px;min-height:44px;font-size:.85rem;color:var(--muted)}
-.pro-trial-stakes { display: block; margin-top: 2px; font-weight: 500; font-size: 0.88rem; color: #115e59; }
+/* Last trial days: countdown + Upgrade on one row, the shop's own ₦ stakes full width below (no squeezed column in HA/YO). */
+.pro-trial-chip.has-stakes { flex-wrap: wrap; row-gap: 6px; padding: 10px 12px; }
+.pro-trial-chip.has-stakes .pro-trial-chip-cta { order: 2; min-height: 36px; display: inline-flex; align-items: center; }
+.pro-trial-stakes { order: 3; flex: 1 0 100%; min-width: 0; padding: 8px 0 0 30px; border-top: 1px solid rgba(15, 118, 110, 0.18); font-weight: 500; font-size: 0.88rem; line-height: 1.35; color: #115e59; overflow-wrap: anywhere; }
+.pro-trial-stakes-amt { font-weight: 800; color: #134e4a; }
+.pro-hint-soft-sub .pro-trial-stakes-amt { color: #0f172a; }
+.pro-trial-stakes-price { white-space: nowrap; }
