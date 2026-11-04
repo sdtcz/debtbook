@@ -87,6 +87,23 @@ describe('/credit-book-format static page', () => {
     expect(decodeURIComponent(share![1])).toContain(`${B}/credit-book-format?src=cbf-share`);
   });
 
+  it('ledger tables read cleanly on a 375px phone and the header sits on the page column on desktop', () => {
+    // Dates, phone and limit never split mid-value; units stay with their quantity.
+    expect(html).toContain('td:first-child,td.d{white-space:nowrap}');
+    const sum = html.split('id="summary"')[1].split('</table>')[0];
+    expect(sum).toContain('<table class="sum">');
+    expect(html).toContain('.sum td:first-child{white-space:normal}'); // the over-limit tag wraps under the name
+    expect([...sum.matchAll(/<td class="d">\d{1,2} [A-Z][a-z]{2}<\/td>/g)].length).toBe(3);
+    expect(html).toContain('<span class="f">Phone: 0800 000 0000</span>');
+    expect(html).toContain('Rice 5&nbsp;kg, oil 1&nbsp;L');
+    // Blank page: ruled fill-in lines, not underscores.
+    const blank = html.split('A blank page to copy')[1].split('</table>')[0];
+    expect(blank).toContain('<div class="top fill"><span><b>Customer</b><i></i></span><span>Phone<i></i></span><span>Limit<i></i></span></div>');
+    expect(blank).not.toContain('____');
+    expect(html).toContain('header>*{max-width:692px;margin-left:auto;margin-right:auto}');
+    expect(html).toMatch(/\nh1\{[^}]*margin:14px auto 6px\}/);
+  });
+
   it('is in the sitemap, served before the SPA catch-all, kept out of the PWA fallback, CSP allows its script, and linked', async () => {
     expect(sitemap).toContain(`<loc>${B}/credit-book-format</loc>`);
     const v = JSON.parse(vercelJson) as { rewrites: { source: string; destination: string }[]; headers: { source: string; headers: { key: string; value: string }[] }[] };

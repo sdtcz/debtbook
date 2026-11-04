@@ -29,12 +29,13 @@
 *{box-sizing:border-box}
 body{margin:0;font:16px/1.55 system-ui,-apple-system,Roboto,"Segoe UI",sans-serif;color:#0f172a;background:#fffbeb}
 header{background:#0f766e;color:#fff;padding:20px 18px 26px}
+header>*{max-width:692px;margin-left:auto;margin-right:auto}
 header .brand{font-weight:800;font-size:1.1rem;letter-spacing:.01em}
 header nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 header nav a{color:#fff;background:#115e59;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:10px 14px;min-height:44px;display:inline-flex;align-items:center;text-decoration:none;font-weight:600;font-size:.92rem}
 main{max-width:720px;margin:0 auto;padding:8px 14px 32px}
 section{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px 16px;margin:14px 0}
-h1{font-size:1.6rem;line-height:1.2;margin:14px 0 6px}
+h1{font-size:1.6rem;line-height:1.2;margin:14px auto 6px}
 h2{font-size:1.25rem;line-height:1.25;margin:0 0 6px;color:#134e4a}
 h3{font-size:1.05rem;margin:12px 0 2px}
 .lead{font-size:1.1rem;font-weight:700;color:#0f766e;margin:0 0 10px}
@@ -45,11 +46,16 @@ li{margin:4px 0}
 .page{margin:10px 0 6px;border:1px solid #cbd5e1;border-radius:12px;background:#fff;overflow:hidden}
 .page .top{padding:10px 12px;border-bottom:2px solid #0f766e;font-size:.92rem}
 .page .top b{font-size:1rem}
+.page .top .f{white-space:nowrap}
+/* Blank page: label + a ruled line to write on, one field per row on phones, in a row on wider screens. */
+.fill{display:flex;flex-wrap:wrap;gap:6px 16px}.fill span{display:flex;align-items:flex-end;gap:6px;flex:1 1 100%;min-height:30px}.fill i{flex:1;border-bottom:1px solid #94a3b8;min-width:60px}
+@media (min-width:560px){.fill span{flex:1 1 0}.fill span:first-child{flex-grow:2}}
 .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{border-collapse:collapse;width:100%;min-width:300px;font-size:.92rem}
 th,td{padding:8px 8px;border-bottom:1px solid #e2e8f0;text-align:left;vertical-align:top}
 th{background:#f8fafc;color:#334155;font-size:.8rem;text-transform:uppercase;letter-spacing:.03em}
-td:first-child{white-space:nowrap}
+td:first-child,td.d{white-space:nowrap}
+.sum td:first-child{white-space:normal}
 td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 td.bal{font-weight:800}
 tr.paid td{color:#047857}
@@ -110,14 +116,14 @@ footer a{color:#0f766e}
     <h2>A filled-in page</h2>
     <p class="small">Amounts are in your own money. Names are made up.</p>
     <div class="page">
-      <div class="top"><b>Customer: Mama Joy</b> · Phone: 0800 000 0000 · Credit limit: 20,000</div>
+      <div class="top"><b class="f">Customer: Mama Joy</b> · <span class="f">Phone: 0800 000 0000</span> · <span class="f">Credit limit: 20,000</span></div>
       <div class="scroll"><table>
         <thead><tr><th>Date</th><th>Details</th><th class="n">Credit</th><th class="n">Paid</th><th class="n">Balance</th></tr></thead>
         <tbody>
-          <tr><td>2 Oct</td><td>Milk ×2, sugar, bread</td><td class="n">6,400</td><td class="n"></td><td class="n bal">6,400</td></tr>
-          <tr><td>5 Oct</td><td>Noodles, 1 carton</td><td class="n">3,200</td><td class="n"></td><td class="n bal">9,600</td></tr>
+          <tr><td>2 Oct</td><td>Milk&nbsp;×2, sugar, bread</td><td class="n">6,400</td><td class="n"></td><td class="n bal">6,400</td></tr>
+          <tr><td>5 Oct</td><td>Noodles, 1&nbsp;carton</td><td class="n">3,200</td><td class="n"></td><td class="n bal">9,600</td></tr>
           <tr class="paid"><td>9 Oct</td><td>Cash</td><td class="n"></td><td class="n">5,000</td><td class="n bal">4,600</td></tr>
-          <tr><td>12 Oct</td><td>Rice 5 kg, oil 1 L</td><td class="n">7,500</td><td class="n"></td><td class="n bal">12,100</td></tr>
+          <tr><td>12 Oct</td><td>Rice 5&nbsp;kg, oil 1&nbsp;L</td><td class="n">7,500</td><td class="n"></td><td class="n bal">12,100</td></tr>
           <tr><td>20 Oct</td><td>Soap, detergent</td><td class="n">4,300</td><td class="n"></td><td class="n bal">16,400</td></tr>
           <tr class="paid zero"><td>28 Oct</td><td>Transfer · settled</td><td class="n"></td><td class="n">16,400</td><td class="n bal">0</td></tr>
         </tbody>
@@ -129,7 +135,7 @@ footer a{color:#0f766e}
     <h3>A blank page to copy</h3>
     <p class="small">Draw this in any exercise book, or use your browser's Print to print a few pages.</p>
     <div class="page">
-      <div class="top"><b>Customer:</b> ____________ · Phone: ____________ · Limit: ________</div>
+      <div class="top fill"><span><b>Customer</b><i></i></span><span>Phone<i></i></span><span>Limit<i></i></span></div>
       <div class="scroll"><table class="blank">
         <thead><tr><th>Date</th><th>Details</th><th class="n">Credit</th><th class="n">Paid</th><th class="n">Balance</th></tr></thead>
         <tbody><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr></tbody>
@@ -141,12 +147,12 @@ footer a{color:#0f766e}
     <h2>The summary page (once a month)</h2>
     <p>At the front of the book, list every customer on the last day of the month.</p>
     <div class="page">
-      <div class="scroll"><table>
+      <div class="scroll"><table class="sum">
         <thead><tr><th>Customer</th><th class="n">Limit</th><th class="n">Balance</th><th>Last paid</th><th class="n">Days</th></tr></thead>
         <tbody>
-          <tr class="zero"><td>Mama Joy</td><td class="n">20,000</td><td class="n bal">0</td><td>28 Oct</td><td class="n">3</td></tr>
-          <tr><td>Mr Emeka</td><td class="n">15,000</td><td class="n bal">14,200</td><td>30 Sep</td><td class="n">31</td></tr>
-          <tr class="over"><td>Iya Bisi <span class="tag">over limit</span></td><td class="n">10,000</td><td class="n bal">22,500</td><td>14 Aug</td><td class="n">78</td></tr>
+          <tr class="zero"><td>Mama Joy</td><td class="n">20,000</td><td class="n bal">0</td><td class="d">28 Oct</td><td class="n">3</td></tr>
+          <tr><td>Mr Emeka</td><td class="n">15,000</td><td class="n bal">14,200</td><td class="d">30 Sep</td><td class="n">31</td></tr>
+          <tr class="over"><td>Iya Bisi <span class="tag">over limit</span></td><td class="n">10,000</td><td class="n bal">22,500</td><td class="d">14 Aug</td><td class="n">78</td></tr>
           <tr><td><b>Total owed</b></td><td></td><td class="n bal">36,700</td><td></td><td></td></tr>
         </tbody>
       </table></div>
