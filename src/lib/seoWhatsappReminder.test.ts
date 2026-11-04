@@ -65,7 +65,7 @@ describe('/whatsapp-payment-reminder static page', () => {
 
   it('tags app links src=wr and passes ?src through as wr-<src>', () => {
     const ctas = html.match(/<a class="cta" href="[^"]+">/g) || [];
-    expect(ctas.length).toBe(3);
+    expect(ctas.length).toBe(4);
     for (const a of ctas) expect(a).toContain('href="/?app=1&amp;src=wr"');
     const run = (search: string) => {
       const links = [{ href: '/?app=1&src=wr', setAttribute(_: string, v: string) { this.href = v; } }];

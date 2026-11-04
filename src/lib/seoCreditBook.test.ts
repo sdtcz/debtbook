@@ -26,7 +26,7 @@ describe('/credit-book-app static page', () => {
   });
   it('tags app links src=cb and passes ?src through as cb-<src>', () => {
     const ctas = html.match(/<a class="cta" href="[^"]+">/g) || [];
-    expect(ctas.length).toBe(3);
+    expect(ctas.length).toBe(4);
     for (const a of ctas) expect(a).toContain('href="/?app=1&amp;src=cb"');
     const code = html.match(/<script>\n([\s\S]*?)<\/script>/)![1];
     const run = (search: string) => {

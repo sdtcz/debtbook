@@ -72,7 +72,7 @@ describe('/credit-book-format static page', () => {
 
   it('tags the app link src=cbf, passes ?src through as cbf-<src>, and has a WhatsApp share link', () => {
     const ctas = html.match(/<a class="cta" href="[^"]+">/g) || [];
-    expect(ctas).toEqual(['<a class="cta" href="/?app=1&amp;src=cbf">']);
+    expect(ctas).toEqual(['<a class="cta" href="/?app=1&amp;src=cbf">', '<a class="cta" href="/?app=1&amp;src=cbf">']);
     const run = (search: string) => {
       const links = [{ href: '/?app=1&src=cbf', setAttribute(_: string, v: string) { this.href = v; } }];
       new Function('location', 'document', scripts()[0])({ search }, { querySelectorAll: () => links });
