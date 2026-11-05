@@ -9,6 +9,7 @@ import kaNeutral from '../../public/kippa-alternative.html?raw';
 import cbNg from '../../public/ng/credit-book-app.html?raw';
 import kaNg from '../../public/ng/kippa-alternative.html?raw';
 import { brandTagline, TAGLINE, TAGLINE_NG } from '../components/BrandLockup';
+import { SUPPORT_EMAIL } from '../config';
 import { setRegionNigeria } from '../i18n';
 
 const pub = (f: string) => new URL(`../../public/${f}`, import.meta.url).pathname;
@@ -59,6 +60,10 @@ describe('logo pack (speech-bubble B)', () => {
       expect(h).not.toContain('Write am');
     }
     for (const h of [cbNg, kaNg]) expect(h).toContain('/og-image-ng.png"');
+  });
+
+  it('SUPPORT_EMAIL is the live support inbox', () => {
+    expect(SUPPORT_EMAIL).toBe('support@bashibook.app');
   });
 
   it('lockup tagline: neutral English by default, Pidgin only in Nigeria', () => {

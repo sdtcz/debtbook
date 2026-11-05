@@ -30,11 +30,12 @@ export const APP_VERSION: string =
 export const APP_BUILD: string =
   typeof __APP_BUILD__ !== 'undefined' ? __APP_BUILD__ : '';
 
-/** Support contact — leave empty until the owner provides a public WhatsApp/email. */
+/** Optional public WhatsApp Business number (digits only). Empty = no WhatsApp support CTA. */
 export const SUPPORT_WHATSAPP = '';
 /** Stripe customer portal: subscribers manage or cancel Pro there (sign in by email). */
 export const STRIPE_BILLING_PORTAL_URL = 'https://billing.stripe.com/p/login/7sY3cwbWocB79sH9x13Ru00';
-export const SUPPORT_EMAIL = '';
+/** Public support inbox (forwards to the shared bot inbox). */
+export const SUPPORT_EMAIL = 'support@bashibook.app';
 
 /** Build an absolute public URL for a hash route, e.g. publicUrl('/payme?x=1'). */
 export function publicUrl(hashPath = '/'): string {

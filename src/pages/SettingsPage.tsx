@@ -4,7 +4,7 @@ import { BackButton } from '../components/BackButton';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { LogoutSheet } from '../components/LogoutSheet';
 import { notifyChanged, StatusBadge } from '../components/StatusBadge';
-import { APP_BUILD, APP_VERSION, STRIPE_BILLING_PORTAL_URL } from '../config';
+import { APP_BUILD, APP_VERSION, STRIPE_BILLING_PORTAL_URL, SUPPORT_EMAIL } from '../config';
 import {
   clearPin,
   getDashboardBalances,
@@ -1512,13 +1512,13 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
 
         <div class="settings-group-label">{t('settings.about')}</div>
         <div class="settings-group card settings-list">
-          <a class="settings-row" href="mailto:support@bashibook.app?subject=BashiBook%20help">
+          <a class="settings-row" href={`mailto:${SUPPORT_EMAIL}?subject=BashiBook%20help`}>
             <span class="settings-row-icon" aria-hidden="true">
               ?
             </span>
             <span class="settings-row-body">
               <span class="settings-row-title">{t('settings.help')}</span>
-              <span class="settings-row-sub">support@bashibook.app</span>
+              <span class="settings-row-sub">{SUPPORT_EMAIL}</span>
             </span>
             <span class="settings-row-trail">
               <span class="chev" aria-hidden="true">
