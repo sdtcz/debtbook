@@ -369,6 +369,13 @@ export const en = {
   'customerForm.creditLimitHint': 'Soft warn when a credit sale would go past this — you can still record',
   'customerForm.creditLimitInvalid': 'Enter a valid credit limit (or leave blank)',
 
+  'customerForm.duplicatePhoneTitle': 'Customer already exists',
+  'customerForm.duplicatePhoneBody': 'You already have {{name}} with this phone number.',
+  'customerForm.duplicateNameTitle': 'Similar name found',
+  'customerForm.duplicateNameBody': 'You already have a customer named {{name}}.',
+  'customerForm.duplicateOpen': 'Open existing',
+  'customerForm.duplicateAddAnyway': 'Add anyway',
+
   'entry.creditSale': 'Credit sale',
   'entry.payment': 'Payment',
   'entry.type': 'Entry type',

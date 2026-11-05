@@ -371,6 +371,13 @@ export const yo: Record<MessageKey, string> = {
   'customerForm.creditLimitHint': 'Yóò kìlọ̀ nígbà tí tita bá ju èyí lọ — o ṣì le kọ ọ́',
   'customerForm.creditLimitInvalid': 'Tẹ òpin gbèsè tó tọ́ (tàbí fi sílẹ̀)',
 
+  'customerForm.duplicatePhoneTitle': 'Oníbàárà ti wà tẹ́lẹ̀',
+  'customerForm.duplicatePhoneBody': 'O ti ní {{name}} pẹ̀lú nọ́ńbà fóònù yìí.',
+  'customerForm.duplicateNameTitle': 'Orúkọ tó jọra ti wà',
+  'customerForm.duplicateNameBody': 'O ti ní oníbàárà tó ń jẹ́ {{name}}.',
+  'customerForm.duplicateOpen': 'Ṣí èyí tó wà',
+  'customerForm.duplicateAddAnyway': 'Ṣàfikún síbẹ̀',
+
   'entry.creditSale': 'Tita gbèsè',
   'entry.payment': 'Ìsanwó',
   'entry.type': 'Irú àkọsílẹ̀',
