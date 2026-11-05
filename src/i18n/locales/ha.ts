@@ -371,6 +371,13 @@ export const ha: Record<MessageKey, string> = {
   'customerForm.creditLimitHint': 'Zai yi gargaɗi idan sayarwa ta wuce wannan — har yanzu za ka iya rubutawa',
   'customerForm.creditLimitInvalid': 'Shigar da iyakar bashi mai kyau (ko barshi babu)',
 
+  'customerForm.duplicatePhoneTitle': 'Abokin ciniki ya riga ya kasance',
+  'customerForm.duplicatePhoneBody': 'Ka riga kana da {{name}} da wannan lambar waya.',
+  'customerForm.duplicateNameTitle': 'An sami suna iri ɗaya',
+  'customerForm.duplicateNameBody': 'Ka riga kana da abokin ciniki mai suna {{name}}.',
+  'customerForm.duplicateOpen': 'Buɗe na da',
+  'customerForm.duplicateAddAnyway': 'Ƙara duk da haka',
+
   'entry.creditSale': 'Sayarwa bashi',
   'entry.payment': 'Biya',
   'entry.type': 'Nau\'in shigarwa',

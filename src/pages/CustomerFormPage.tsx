@@ -1,9 +1,10 @@
 import { BackButton } from '../components/BackButton';
-import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { MoneyInput } from '../components/MoneyInput';
 import { notifyChanged } from '../components/StatusBadge';
 import { getCustomer, getShop, listCustomers, softDeleteCustomer, upsertCustomer } from '../db/repo';
 import { hit } from '../lib/hit';
+import type { Customer } from '../lib/types';
 
 /** Anonymous count when the shop goes from 0 to 1 customer (once per device). */
 async function firstCustomerHit(): Promise<void> {
@@ -24,6 +25,11 @@ import { parseAmount, currencySymbol } from '../lib/money';
 import { goBack, goHome, navigate } from '../lib/router';
 import { looksTooShort, needsCountryCode, normalizeWhatsAppDigits, isNigeriaShop } from '../lib/phone';
 import type { ToastAction } from '../hooks/useToast';
+
+interface DuplicateMatch {
+  customer: Customer;
+  matchType: 'phone' | 'name';
+}
 
 interface Props {
   id?: string;
@@ -83,6 +89,20 @@ export function CustomerFormPage({ id, toast }: Props) {
   const [contactsSupported] = useState(() => isContactPickerSupported());
   // Soft Start: collapsed on new; expanded when editing so existing fields aren't hidden
   const [moreOpen, setMoreOpen] = useState(editing);
+  // Duplicate detection: show sheet when a match is found
+  const [duplicateMatch, setDuplicateMatch] = useState<DuplicateMatch | null>(null);
+  const duplicateOpenRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (duplicateMatch) {
+      duplicateOpenRef.current?.focus();
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setDuplicateMatch(null);
+      };
+      document.addEventListener('keydown', onKey);
+      return () => document.removeEventListener('keydown', onKey);
+    }
+  }, [duplicateMatch]);
 
   useEffect(() => {
     if (!id) return;
@@ -190,25 +210,35 @@ export function CustomerFormPage({ id, toast }: Props) {
     }
   };
 
-  const submit = async (e: Event) => {
-    e.preventDefault();
-    if (!name.trim()) {
-      setError(t('customerForm.nameRequired'));
-      return;
+  const findDuplicate = async (): Promise<DuplicateMatch | null> => {
+    const existing = await listCustomers();
+    const inputPhoneKey = phoneDedupeKey(phone);
+    const inputNameLower = name.trim().toLowerCase();
+
+    for (const c of existing) {
+      if (c.id === id) continue;
+      const existingPhoneKey = phoneDedupeKey(c.phone);
+      if (inputPhoneKey && existingPhoneKey && inputPhoneKey === existingPhoneKey) {
+        return { customer: c, matchType: 'phone' };
+      }
     }
+    for (const c of existing) {
+      if (c.id === id) continue;
+      if (c.name.trim().toLowerCase() === inputNameLower) {
+        return { customer: c, matchType: 'name' };
+      }
+    }
+    return null;
+  };
+
+  const doSave = async () => {
     const dueAt = fromDateDisplay(dueDate);
-    if (dueAt === undefined) {
-      setError(t('customerForm.dueDateInvalid'));
-      return;
-    }
     let creditLimitKobo: number | null = null;
     if (creditLimit.trim()) {
       const parsed = parseAmount(creditLimit);
-      if (parsed === null || parsed <= 0) {
-        setError(t('customerForm.creditLimitInvalid'));
-        return;
+      if (parsed !== null && parsed > 0) {
+        creditLimitKobo = parsed;
       }
-      creditLimitKobo = parsed;
     }
     setBusy(true);
     setError(null);
@@ -231,6 +261,51 @@ export function CustomerFormPage({ id, toast }: Props) {
     } finally {
       setBusy(false);
     }
+  };
+
+  const submit = async (e: Event) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      setError(t('customerForm.nameRequired'));
+      return;
+    }
+    const dueAt = fromDateDisplay(dueDate);
+    if (dueAt === undefined) {
+      setError(t('customerForm.dueDateInvalid'));
+      return;
+    }
+    if (creditLimit.trim()) {
+      const parsed = parseAmount(creditLimit);
+      if (parsed === null || parsed <= 0) {
+        setError(t('customerForm.creditLimitInvalid'));
+        return;
+      }
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const dup = await findDuplicate();
+      if (dup) {
+        setDuplicateMatch(dup);
+        setBusy(false);
+        return;
+      }
+      await doSave();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('customerForm.saveFailed'));
+      setBusy(false);
+    }
+  };
+
+  const handleDuplicateOpen = () => {
+    if (!duplicateMatch) return;
+    setDuplicateMatch(null);
+    navigate(`/customers/${duplicateMatch.customer.id}`, { replace: true });
+  };
+
+  const handleDuplicateAddAnyway = async () => {
+    setDuplicateMatch(null);
+    await doSave();
   };
 
   const remove = async () => {
@@ -451,6 +526,58 @@ export function CustomerFormPage({ id, toast }: Props) {
           )}
         </form>
       </main>
+      {duplicateMatch && (
+        <div
+          class="bb-sheet-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setDuplicateMatch(null);
+          }}
+        >
+          <div
+            class="bb-sheet"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="dup-title"
+            aria-describedby="dup-body"
+          >
+            <h2 id="dup-title" class="bb-sheet-title">
+              {duplicateMatch.matchType === 'phone'
+                ? t('customerForm.duplicatePhoneTitle')
+                : t('customerForm.duplicateNameTitle')}
+            </h2>
+            <p id="dup-body" class="bb-sheet-body">
+              {duplicateMatch.matchType === 'phone'
+                ? t('customerForm.duplicatePhoneBody', { name: duplicateMatch.customer.name })
+                : t('customerForm.duplicateNameBody', { name: duplicateMatch.customer.name })}
+            </p>
+            <button
+              ref={duplicateOpenRef}
+              type="button"
+              class="bb-choice"
+              onClick={handleDuplicateOpen}
+            >
+              <span class="bb-choice-title">{t('customerForm.duplicateOpen')}</span>
+            </button>
+            <button
+              type="button"
+              class="bb-choice"
+              disabled={busy}
+              onClick={handleDuplicateAddAnyway}
+            >
+              <span class="bb-choice-title">
+                {busy ? t('common.saving') : t('customerForm.duplicateAddAnyway')}
+              </span>
+            </button>
+            <button
+              type="button"
+              class="btn btn-ghost"
+              onClick={() => setDuplicateMatch(null)}
+            >
+              {t('common.cancel')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
