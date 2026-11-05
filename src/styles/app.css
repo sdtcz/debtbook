@@ -4467,13 +4467,16 @@ a.btn.payme-cta-btn {
 .reports-main .report-seg .chip {
   min-width: 0;
   min-height: 44px;
-  padding: 6px 2px;
+  padding: 6px 4px;
   border: 0;
   border-radius: 10px;
   background: transparent;
   font-size: 0.86rem;
   line-height: 1.15;
-  white-space: nowrap;
+  /* HA/YO labels ("Wannan wata", "Gbogbo àkókò") wrap to two lines inside their own segment instead of spilling into the next one. */
+  white-space: normal;
+  text-wrap: balance;
+  overflow-wrap: break-word;
   text-align: center;
 }
 .reports-main .report-seg .chip.on {
