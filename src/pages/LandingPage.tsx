@@ -187,7 +187,14 @@ export function LandingPage({ onUseAppHere }: Props) {
                   </div>
                 </div>
                 <div class="lp-cw">
-                  <div class="lp-rb f1">💬 Remind Sam on WhatsApp</div>
+                  <div class="lp-rec">
+                    <div class="lp-just">
+                      <div class="h"><i>✓</i> Credit recorded</div>
+                      <b>Sam · 2 bags of rice</b>
+                      <small>$25 · just now</small>
+                    </div>
+                    <div class="lp-rb">💬 Remind Sam on WhatsApp</div>
+                  </div>
                   <div class="lp-chat">
                     <div class="h">
                       <span>WhatsApp · Sam</span>

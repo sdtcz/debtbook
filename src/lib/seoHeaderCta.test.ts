@@ -28,6 +28,8 @@ describe('desktop landing demo', () => {
   it('keeps the balance and row values on screen during the Remind step', () => {
     const css = readFileSync('src/styles/landing.css', 'utf8');
     expect(css).toContain('@keyframes lp-a2{0%,63%{opacity:1}69%,94%{opacity:0}100%{opacity:1}}');
-    expect(css).toContain('.lp .f1{animation:lp-a2 9s infinite}.lp .lp-rb{animation-name:lp-a1}');
+    expect(css).toContain('.lp-rec{position:absolute;left:0;right:0;top:14px;display:grid;gap:8px;animation:lp-a1 9s infinite}');
+    expect(css).toContain('.lp-just{background:var(--okS);');
+    expect(css).toContain('.lp .f1{animation:lp-a2 9s infinite}.lp .f3{animation:lp-a3 9s infinite;opacity:0}');
   });
 });
