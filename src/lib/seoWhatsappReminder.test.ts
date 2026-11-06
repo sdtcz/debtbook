@@ -57,13 +57,13 @@ describe('/whatsapp-payment-reminder static page', () => {
     }
     expect(html).toMatch(/\.wa\{[^}]*min-height:48px/);
     const label = (lang: string) => (html.split(`<section id="${lang}"`)[1].split('</section>')[0].match(/<\/svg>([^<]+)<\/a>/g) || []).length;
-    expect([label('en'), label('ha'), label('yo')]).toEqual([4, 2, 2]);
+    expect([label('en'), label('ha'), label('yo')]).toEqual([5, 2, 2]);
     expect(html).toContain('Aika a WhatsApp');
     expect(html).toContain('Fi ránṣẹ́ lórí WhatsApp');
     expect(html).toContain('Nothing is sent until you tap send.');
   });
 
-  it('tags app links src=wr and passes ?src through as wr-<src>', () => {
+  it('tags app links src=wr, passes ?src through as wr-<src>, and has a WhatsApp share link', () => {
     const ctas = html.match(/<a class="cta" href="[^"]+">/g) || [];
     expect(ctas.length).toBe(4);
     for (const a of ctas) expect(a).toContain('href="/?app=1&amp;src=wr"');
@@ -76,6 +76,9 @@ describe('/whatsapp-payment-reminder static page', () => {
     expect(run('?src=WhatsApp')).toBe('/?app=1&src=wr-whatsapp');
     expect(run('?src=%3Cscript%3E"')).toBe('/?app=1&src=wr-script');
     expect(run('?src=' + 'a'.repeat(40))).toBe(`/?app=1&src=wr-${'a'.repeat(20)}`);
+    const share = /<a class="share" href="https:\/\/wa\.me\/\?text=([^"]+)"/.exec(html);
+    expect(share).not.toBeNull();
+    expect(decodeURIComponent(share![1])).toContain(`${B}/whatsapp-payment-reminder?src=wr-share`);
   });
 
   it('is in the sitemap, served before the SPA catch-all, kept out of the PWA fallback and linked from the landing footer', () => {
