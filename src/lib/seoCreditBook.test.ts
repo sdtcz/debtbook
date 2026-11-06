@@ -24,7 +24,7 @@ describe('/credit-book-app static page', () => {
     const kippa = html.split('\n').filter((l: string) => /kippa/i.test(l));
     expect(kippa).toEqual([expect.stringContaining('href="/kippa-alternative"')]);
   });
-  it('tags app links src=cb and passes ?src through as cb-<src>', () => {
+  it('tags app links src=cb, passes ?src through as cb-<src>, and has a WhatsApp share link', () => {
     const ctas = html.match(/<a class="cta" href="[^"]+">/g) || [];
     expect(ctas.length).toBe(4);
     for (const a of ctas) expect(a).toContain('href="/?app=1&amp;src=cb"');
@@ -37,6 +37,9 @@ describe('/credit-book-app static page', () => {
     expect(run('')).toBe('/?app=1&src=cb');
     expect(run('?src=Nairaland')).toBe('/?app=1&src=cb-nairaland');
     expect(run('?src=%3Cscript%3E"')).toBe('/?app=1&src=cb-script');
+    const share = /<a class="share" href="https:\/\/wa\.me\/\?text=([^"]+)"/.exec(html);
+    expect(share).not.toBeNull();
+    expect(decodeURIComponent(share![1])).toContain(`${PUBLIC_APP_URL}/credit-book-app?src=cb-share`);
   });
   it('is in the sitemap, served before the SPA catch-all, and kept out of the PWA fallback', () => {
     expect(sitemap).toContain(`<loc>${PUBLIC_APP_URL}/credit-book-app</loc>`);
