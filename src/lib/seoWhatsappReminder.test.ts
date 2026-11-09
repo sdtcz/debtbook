@@ -57,7 +57,7 @@ describe('/whatsapp-payment-reminder static page', () => {
     }
     expect(html).toMatch(/\.wa\{[^}]*min-height:48px/);
     const label = (lang: string) => (html.split(`<section id="${lang}"`)[1].split('</section>')[0].match(/<\/svg>([^<]+)<\/a>/g) || []).length;
-    expect([label('en'), label('ha'), label('yo')]).toEqual([5, 2, 2]);
+    expect([label('en'), label('ha'), label('yo')]).toEqual([4, 2, 2]);
     expect(html).toContain('Aika a WhatsApp');
     expect(html).toContain('Fi ránṣẹ́ lórí WhatsApp');
     expect(html).toContain('Nothing is sent until you tap send.');
@@ -92,5 +92,10 @@ describe('/whatsapp-payment-reminder static page', () => {
     expect(viteConfig).toContain('/^\\/whatsapp-payment-reminder/');
     expect(viteConfig).toContain("'**/whatsapp-payment-reminder.html'");
     expect(landing).toContain('<a href="/whatsapp-payment-reminder">');
+  });
+  it('share link reads as one left-aligned row: icon badge, label, chevron', () => {
+    expect(html).toMatch(/<a class="share" [^>]*><span class="ic"><svg aria-hidden="true"[\s\S]*?<\/svg><\/span><span class="t">Share this page with a shop on WhatsApp<\/span><span class="chev" aria-hidden="true">&rsaquo;<\/span><\/a>/);
+    expect(html).toMatch(/\.share\{[^}]*min-height:56px[^}]*text-align:left/);
+    expect(html).toMatch(/@media \(max-width:559px\)\{section \.cta\{display:flex;width:100%\}\}/);
   });
 });

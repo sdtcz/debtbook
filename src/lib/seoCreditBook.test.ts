@@ -51,4 +51,9 @@ describe('/credit-book-app static page', () => {
     expect(viteConfig).toContain('/^\\/credit-book-app/');
     expect(viteConfig).toContain("'**/credit-book-app.html'");
   });
+  it('share link reads as one left-aligned row: icon badge, label, chevron', () => {
+    expect(html).toMatch(/<a class="share" [^>]*><span class="ic"><svg aria-hidden="true"[\s\S]*?<\/svg><\/span><span class="t">Share this page with a shop on WhatsApp<\/span><span class="chev" aria-hidden="true">&rsaquo;<\/span><\/a>/);
+    expect(html).toMatch(/\.share\{[^}]*min-height:56px[^}]*text-align:left/);
+    expect(html).toMatch(/@media \(max-width:559px\)\{section \.cta\{display:flex;width:100%\}\}/);
+  });
 });
