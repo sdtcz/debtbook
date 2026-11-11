@@ -34,7 +34,7 @@ describe('/kippa-alternative static page', () => {
   });
   it('passes ?src= through to the app link, sanitised, with the static href as fallback', () => {
     const ctas = html.match(/<a class="cta" href="[^"]+">/g) || [];
-    expect(ctas.length).toBe(3);
+    expect(ctas.length).toBe(4);
     for (const a of ctas) expect(a).toContain('href="/?app=1&amp;src=kippa"');
     const code = html.match(/<script>\n([\s\S]*?)<\/script>/)![1];
     const run = (search: string) => {

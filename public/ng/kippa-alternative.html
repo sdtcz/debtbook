@@ -28,12 +28,17 @@
 *{box-sizing:border-box}
 body{margin:0;font:16px/1.55 system-ui,-apple-system,Roboto,"Segoe UI",sans-serif;color:#0f172a;background:#fffbeb}
 header{background:#0f766e;color:#fff;padding:20px 18px 26px}
-header .brand{font-weight:800;font-size:1.1rem;letter-spacing:.01em}
+header>*{max-width:692px;margin-left:auto;margin-right:auto}
+header .bar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+header .brand{color:#fff;font-weight:800;font-size:1.1rem;letter-spacing:.01em;text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+/* Header app link: same a.cta as the in-page button (so ?src passthrough covers it), as a white pill so phones see it above the fold. */
+header .cta{min-height:44px;padding:0 16px;border-radius:999px;background:#fff;color:#0f766e;font-size:.95rem}
+header a:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
 nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 nav a{color:#fff;background:#115e59;border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:10px 14px;min-height:44px;display:inline-flex;align-items:center;text-decoration:none;font-weight:600;font-size:.92rem}
 main{max-width:720px;margin:0 auto;padding:8px 14px 32px}
 section{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px 16px;margin:14px 0}
-h1{font-size:1.6rem;line-height:1.2;margin:14px 0 6px}
+h1{font-size:1.6rem;line-height:1.2;margin:14px auto 6px}
 h2{font-size:1.25rem;line-height:1.25;margin:0 0 6px;color:#134e4a}
 .lead{font-size:1.1rem;font-weight:700;color:#0f766e;margin:0 0 10px}
 ul{padding-left:20px;margin:8px 0 14px}
@@ -49,7 +54,7 @@ footer a{color:#0f766e}
 </head>
 <body>
 <header>
-  <div class="brand">BashiBook</div>
+  <div class="bar"><a class="brand" href="/">BashiBook</a><a class="cta" href="/?app=1&amp;src=kippa-ng">Start free</a></div>
   <h1>Looking for a Kippa alternative?</h1>
   <div>Made for Nigerian shops: amounts in Naira (₦), app in English, Hausa and Yoruba.</div>
   <div>Your book stays on your phone, works offline once opened, free.</div>

@@ -67,7 +67,7 @@ describe('region-neutral SEO pages + /ng/ variants', () => {
     });
     it(`${p.name}: /ng/ CTAs are tagged ${p.src}-ng and pass ?src through`, () => {
       const ctas = p.ng.match(/<a class="cta" href="[^"]+">/g) || [];
-      expect(ctas.length).toBe(4);
+      expect(ctas.length).toBe(5);
       for (const a of ctas) expect(a).toContain(`href="/?app=1&amp;src=${p.src}-ng"`);
       const base = `/?app=1&src=${p.src}-ng`;
       expect(runPassthrough(p.ng, '', base)).toBe(base);
