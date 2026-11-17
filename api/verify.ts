@@ -18,10 +18,10 @@ import Stripe from 'stripe';
 
 type ProPlan = 'monthly' | 'yearly';
 
-/** Keep in sync with api/checkout.ts (server-side price list, USD cents). */
-const PLAN_AMOUNT_CENTS: Record<ProPlan, number> = {
-  monthly: 199,
-  yearly: 1500,
+/** Keep in sync with api/checkout.ts: what Stripe charges per currency (minor units, VAT included). */
+const PLAN_AMOUNT_TOTAL: Record<'usd' | 'ngn', Record<ProPlan, number>> = {
+  usd: { monthly: 199, yearly: 1500 },
+  ngn: { monthly: 161250, yearly: 1290000 }, // ₦1,500 / ₦12,000 + 7.5% VAT
 };
 
 const PLAN_DAYS: Record<ProPlan, number> = { monthly: 30, yearly: 365 };
@@ -72,9 +72,11 @@ export function evaluateStripeSession(
       message: `Payment not successful (${s.payment_status || s.status || 'unknown'})`,
     };
   }
-  if ((s.currency || '').toLowerCase() !== 'usd') {
+  const currency = (s.currency || '').toLowerCase();
+  if (currency !== 'usd' && currency !== 'ngn') {
     return { ok: false, code: 'bad_currency', message: 'Unexpected currency' };
   }
+  const PLAN_AMOUNT_CENTS = PLAN_AMOUNT_TOTAL[currency];
   const claimed = s.metadata?.plan;
   const plan: ProPlan | undefined =
     claimed === 'monthly' || claimed === 'yearly'
