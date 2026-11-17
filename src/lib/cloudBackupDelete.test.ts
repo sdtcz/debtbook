@@ -94,7 +94,7 @@ describe('/help privacy text', () => {
     );
     expect(section).toContain('from your Pro receipt address to delete your purchase records; we handle requests within 30 days.');
     expect(section).not.toContain('If you lost your recovery code, or want a purchase record');
-    expect(section).not.toMatch(/auto-?delet|automatically delet/i);
+    expect(section).toContain("Cloud backups that haven't synced for 90 days are deleted automatically.");
   });
   it('has the new PIN reset text, not the stale one', () => {
     expect(html).toContain(
