@@ -147,3 +147,29 @@ export async function fetchCloudBackupMeta(
     meta: body.meta ?? null,
   };
 }
+
+/** Erase the server copy for this backupId. Idempotent: a missing backup is still ok. */
+export async function deleteCloudBackup(backupId: string): Promise<{ ok: true }> {
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    throw new CloudBackupApiError('You are offline — connect to delete your cloud backup', 0);
+  }
+  let res: Response;
+  try {
+    res = await fetch(`/api/cloud-backup?id=${encodeURIComponent(backupId)}`, {
+      method: 'DELETE',
+    });
+  } catch {
+    throw new CloudBackupApiError('Network error — could not reach cloud backup', 0);
+  }
+  const body = (await res.json().catch(() => ({}))) as { ok?: boolean; message?: string };
+  if (!res.ok || body.ok === false) {
+    throw new CloudBackupApiError(
+      body.message ||
+        (res.status === 501
+          ? 'Cloud backup storage is not configured on the server'
+          : 'Could not delete cloud backup'),
+      res.status,
+    );
+  }
+  return { ok: true };
+}

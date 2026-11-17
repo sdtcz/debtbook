@@ -257,6 +257,17 @@ export const ha: Record<MessageKey, string> = {
   'settings.recoveryMismatch':
     'Lambar farfadowa ba ta dace da ajiyar gajimare ta wannan na’ura ba',
   'settings.cloudUploaded': 'An ɗora ajiyar gajimare',
+  // TODO(native-speaker check): Hausa for cloud-backup delete — English placeholder until checked.
+  'settings.cloudDelete': "Delete my cloud backup",
+  'settings.cloudDeleteSub': "Erase the encrypted copy on our server",
+  'settings.cloudDeleteBody': "This erases your encrypted cloud backup from our server for good and turns off cloud backup and sync on this phone. The book on this phone is not touched.",
+  'settings.cloudDeleteNeedCode': "Enter the recovery code for the cloud backup you want to delete.",
+  'settings.cloudDeleteConfirm': "DELETE YOUR CLOUD BACKUP?\n\nThe encrypted copy on our server will be erased. You will not be able to restore from it on another phone. The book on this phone stays.\n\nThis cannot be undone.",
+  'settings.cloudDeleteButton': "Delete cloud backup",
+  'settings.cloudDeleting': "Deleting…",
+  'settings.cloudDeleted': "Cloud backup deleted",
+  'settings.cloudDeleteFailed': "Could not delete cloud backup. Try again.",
+  'settings.offlineDeleteCloud': "You are offline — connect to delete your cloud backup",
   'settings.restoreCloudConfirm':
     'Maido daga gajimare zai maye duk shago, abokan ciniki, da shigarwa na gida. Ci gaba?',
   'settings.restored': 'An maido abokan ciniki {{customers}}, shigarwa {{entries}}',

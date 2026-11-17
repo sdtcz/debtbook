@@ -3,6 +3,7 @@
   "framework": null,
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "regions": ["iad1"],
   "redirects": [
     {
       "source": "/((?!api/|assets/|icons/|brand/|screenshots/|app\\.js$|sw\\.js$|workbox-|manifest\\.webmanifest$|favicon\\.|apple-touch-icon\\.png$|index\\.html$).+)",

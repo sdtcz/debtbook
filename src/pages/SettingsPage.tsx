@@ -51,6 +51,11 @@ import {
   unlockDeviceForSync,
 } from '../lib/deviceSync';
 import { unlockSyncOnDevice } from '../lib/syncUnlock';
+import {
+  deleteMyCloudBackup,
+  NeedRecoveryCodeError,
+  unlockedCodeForThisBackup,
+} from '../lib/cloudBackupDelete';
 import { buildCsvExport, downloadCsv } from '../lib/csv';
 import { getEntitlement, isPro } from '../lib/entitlement';
 import { trialStatus, type TrialStatus } from '../lib/trial';
@@ -118,6 +123,9 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
   const [showCloudRestore, setShowCloudRestore] = useState(false);
   const [restoreCode, setRestoreCode] = useState('');
   const [cloudBusy, setCloudBusy] = useState(false);
+  const [showCloudDelete, setShowCloudDelete] = useState(false);
+  const [deleteCode, setDeleteCode] = useState('');
+  const [deleteHasCode, setDeleteHasCode] = useState(false);
   const [chaseEnabled, setChaseEnabled] = useState(false);
   const [chaseTime, setChaseTime] = useState('09:00');
   const [payConfigured, setPayConfigured] = useState(false);
@@ -519,6 +527,56 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
             ? err.message
             : t('settings.cloudRestoreFailed');
       toast(msg);
+    } finally {
+      setCloudBusy(false);
+    }
+  };
+
+  const openCloudDelete = async () => {
+    if (showCloudDelete) {
+      setShowCloudDelete(false);
+      setDeleteCode('');
+      return;
+    }
+    if (!online) {
+      toast(t('settings.offlineDeleteCloud'));
+      return;
+    }
+    setDeleteHasCode(Boolean(await unlockedCodeForThisBackup()));
+    setShowCloudDelete(true);
+    setShowCloudEnable(false);
+    setShowCloudRestore(false);
+  };
+
+  const doCloudDelete = async () => {
+    if (!online) {
+      toast(t('settings.offlineDeleteCloud'));
+      return;
+    }
+    if (!deleteHasCode && !isValidRecoveryCode(deleteCode)) {
+      toast(t('settings.invalidRecoveryFormat'));
+      return;
+    }
+    if (!confirm(t('settings.cloudDeleteConfirm'))) return;
+    setCloudBusy(true);
+    try {
+      await deleteMyCloudBackup(deleteHasCode ? undefined : deleteCode);
+      setShowCloudDelete(false);
+      setDeleteCode('');
+      notifyChanged();
+      await refresh();
+      toast(t('settings.cloudDeleted'));
+    } catch (err) {
+      if (err instanceof NeedRecoveryCodeError) {
+        setDeleteHasCode(false);
+        toast(t('settings.cloudDeleteNeedCode'));
+        return;
+      }
+      toast(
+        err instanceof CloudBackupApiError && err.status === 0
+          ? t('settings.offlineDeleteCloud')
+          : t('settings.cloudDeleteFailed'),
+      );
     } finally {
       setCloudBusy(false);
     }
@@ -1273,6 +1331,67 @@ export function SettingsPage({ toast, onPinChanged, onLoggedOut }: Props) {
                   onClick={() => {
                     setShowCloudRestore(false);
                     setRestoreCode('');
+                  }}
+                >
+                  {t('common.cancel')}
+                </button>
+              </div>
+            </div>
+          )}
+          <button
+            type="button"
+            class="settings-row"
+            disabled={cloudBusy}
+            onClick={openCloudDelete}
+          >
+            <span class="settings-row-icon" aria-hidden="true">
+              🗑
+            </span>
+            <span class="settings-row-body">
+              <span class="settings-row-title">{t('settings.cloudDelete')}</span>
+              <span class="settings-row-sub">{t('settings.cloudDeleteSub')}</span>
+            </span>
+            <span class="settings-row-trail">
+              <span class="chev" aria-hidden="true">
+                {showCloudDelete ? '˅' : '›'}
+              </span>
+            </span>
+          </button>
+          {showCloudDelete && (
+            <div class="settings-row-panel">
+              <p class="muted" style={{ marginTop: 0, fontSize: '0.85rem' }}>
+                {t('settings.cloudDeleteBody')}
+              </p>
+              {!deleteHasCode && (
+                <div class="field">
+                  <label for="delete-recovery">{t('settings.recoveryCode')}</label>
+                  <input
+                    id="delete-recovery"
+                    class="input"
+                    value={deleteCode}
+                    placeholder="XXXX-XXXX-XXXX-XXXX-…"
+                    autocomplete="off"
+                    autocapitalize="characters"
+                    onInput={(e) => setDeleteCode((e.target as HTMLInputElement).value)}
+                  />
+                </div>
+              )}
+              <div class="btn-row" style={{ marginTop: 0 }}>
+                <button
+                  class="btn btn-danger"
+                  type="button"
+                  disabled={cloudBusy}
+                  onClick={doCloudDelete}
+                >
+                  {cloudBusy ? t('settings.cloudDeleting') : t('settings.cloudDeleteButton')}
+                </button>
+                <button
+                  class="btn btn-ghost"
+                  type="button"
+                  disabled={cloudBusy}
+                  onClick={() => {
+                    setShowCloudDelete(false);
+                    setDeleteCode('');
                   }}
                 >
                   {t('common.cancel')}

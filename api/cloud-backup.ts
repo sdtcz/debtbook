@@ -6,6 +6,8 @@ declare const process: { env: Record<string, string | undefined> };
  * POST — store ciphertext blob keyed by opaque backupId
  * GET  ?id= — retrieve ciphertext + iv + salt + meta + storedAt
  * GET  ?id=&meta=1 — meta + storedAt only (no ciphertext)
+ * DELETE ?id= (or JSON body { backupId }) — erase the backup for that opaque id.
+ *        Idempotent: a missing backup still returns { ok: true }.
  *
  * Never stores recovery code or plaintext ledger.
  * Requires process.env.BLOB_READ_WRITE_TOKEN (@vercel/blob); else 501.
@@ -226,5 +228,41 @@ export default async function handler(req: Req, res: Res) {
     return;
   }
 
+  if (req.method === 'DELETE') {
+    const id = (queryId(req) ?? req.body?.backupId)?.trim();
+    if (!id || !isHexId(id)) {
+      res.status(400).json({ ok: false, message: 'Valid id required' });
+      return;
+    }
+    try {
+      const { del, list } = await import('@vercel/blob');
+      const pathname = blobPath(id);
+      // Exact object plus any suffixed copies under the same id (defensive).
+      const targets = new Set<string>([pathname]);
+      try {
+        const listed = await list({ prefix: pathname.replace(/\.json$/, ''), token, limit: 100 });
+        for (const b of listed.blobs ?? []) targets.add(b.url || b.pathname);
+      } catch (err) {
+        if (!isNotFound(err)) throw err;
+      }
+      try {
+        await del([...targets], { token });
+      } catch (err) {
+        if (!isNotFound(err)) throw err;
+      }
+      res.status(200).json({ ok: true, backupId: id.toLowerCase(), deleted: true });
+    } catch (err) {
+      res.status(500).json({
+        ok: false,
+        message: err instanceof Error ? err.message : 'Failed to delete cloud backup',
+      });
+    }
+    return;
+  }
+
   res.status(405).json({ ok: false, message: 'Method not allowed' });
+}
+
+function isNotFound(err: unknown): boolean {
+  return /not ?found/i.test(err instanceof Error ? err.message : '');
 }

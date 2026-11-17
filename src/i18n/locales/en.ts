@@ -255,6 +255,16 @@ export const en = {
   'settings.recoveryMismatch':
     'Recovery code does not match this device’s cloud backup',
   'settings.cloudUploaded': 'Cloud backup uploaded',
+  'settings.cloudDelete': "Delete my cloud backup",
+  'settings.cloudDeleteSub': "Erase the encrypted copy on our server",
+  'settings.cloudDeleteBody': "This erases your encrypted cloud backup from our server for good and turns off cloud backup and sync on this phone. The book on this phone is not touched.",
+  'settings.cloudDeleteNeedCode': "Enter the recovery code for the cloud backup you want to delete.",
+  'settings.cloudDeleteConfirm': "DELETE YOUR CLOUD BACKUP?\n\nThe encrypted copy on our server will be erased. You will not be able to restore from it on another phone. The book on this phone stays.\n\nThis cannot be undone.",
+  'settings.cloudDeleteButton': "Delete cloud backup",
+  'settings.cloudDeleting': "Deleting…",
+  'settings.cloudDeleted': "Cloud backup deleted",
+  'settings.cloudDeleteFailed': "Could not delete cloud backup. Try again.",
+  'settings.offlineDeleteCloud': "You are offline — connect to delete your cloud backup",
   'settings.restoreCloudConfirm':
     'Restore from cloud will replace all local shop, customers, and entries. Continue?',
   'settings.restored': 'Restored {{customers}} customers, {{entries}} entries',

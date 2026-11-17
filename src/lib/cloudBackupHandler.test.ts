@@ -19,6 +19,16 @@ vi.mock('@vercel/blob', () => ({
     if (v == null) return null;
     return { statusCode: 200, stream: new Response(v).body };
   },
+  list: async (opts: { prefix: string }) => ({
+    blobs: [...store.keys()]
+      .filter((k) => k.startsWith(opts.prefix))
+      .map((k) => ({ pathname: k, url: `https://blob.test/${k}` })),
+  }),
+  del: async (targets: string | string[]) => {
+    for (const t of Array.isArray(targets) ? targets : [targets]) {
+      store.delete(t.replace('https://blob.test/', ''));
+    }
+  },
 }));
 
 import handler from '../../api/cloud-backup';
@@ -71,5 +81,28 @@ describe('/api/cloud-backup with private and public Blob stores', () => {
     expect((await call('GET', { query: { id: 'b'.repeat(64) } })).status).toBe(404);
     delete env.BLOB_READ_WRITE_TOKEN;
     expect((await call('GET', { query: { id } })).status).toBe(501);
+  });
+
+  it('DELETE erases the backup, is idempotent, and validates the id', async () => {
+    storeAccess = 'private';
+    await call('POST', { body: blob });
+    const other = 'c'.repeat(64);
+    await call('POST', { body: { ...blob, backupId: other } });
+    const first = await call('DELETE', { query: { id } });
+    expect(first).toMatchObject({ status: 200, body: { ok: true, backupId: id } });
+    expect((await call('GET', { query: { id } })).status).toBe(404);
+    // other backups untouched
+    expect((await call('GET', { query: { id: other } })).status).toBe(200);
+    // missing backup → still success
+    expect((await call('DELETE', { query: { id } })).status).toBe(200);
+    expect((await call('DELETE', { query: { id: 'd'.repeat(64) } })).body).toMatchObject({ ok: true });
+    // body id works too
+    expect((await call('DELETE', { body: { backupId: other } })).status).toBe(200);
+    expect((await call('GET', { query: { id: other } })).status).toBe(404);
+    // validation
+    expect((await call('DELETE', { query: { id: 'nope' } })).status).toBe(400);
+    expect((await call('DELETE')).status).toBe(400);
+    delete env.BLOB_READ_WRITE_TOKEN;
+    expect((await call('DELETE', { query: { id } })).status).toBe(501);
   });
 });
