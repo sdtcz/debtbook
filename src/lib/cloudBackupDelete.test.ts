@@ -89,7 +89,12 @@ describe('/help privacy text', () => {
     const section = html.slice(html.indexOf('<section id="delete-data">'), html.indexOf('<section id="contact"'));
     expect(section).toContain('Settings → Delete my cloud backup');
     expect(section).toContain('support@bashibook.app');
-    expect(section).toContain('lost your recovery code');
+    expect(section).toContain(
+      "Lost your recovery code? Your cloud backup is stored under an anonymous ID, so we can't look it up or read it, and nobody can open it without the code.",
+    );
+    expect(section).toContain('from your Pro receipt address to delete your purchase records; we handle requests within 30 days.');
+    expect(section).not.toContain('If you lost your recovery code, or want a purchase record');
+    expect(section).not.toMatch(/auto-?delet|automatically delet/i);
   });
   it('has the new PIN reset text, not the stale one', () => {
     expect(html).toContain(
