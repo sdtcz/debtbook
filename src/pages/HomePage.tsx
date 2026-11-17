@@ -37,6 +37,8 @@ import {
 import { isPro } from '../lib/entitlement';
 import { trialStatus } from '../lib/trial';
 import { trialStakes, trialStakesKey, stakesParts } from '../lib/trialStakes';
+import { proCurrency } from '../lib/proPricing';
+import { getCountry } from '../lib/region';
 import type { CustomerBalance, ShopProfile } from '../lib/types';
 import { balanceTone, formatMoney, currencySymbol } from '../lib/money';
 import { href, navigate } from '../lib/router';
@@ -209,7 +211,9 @@ export function HomePage({ locked, toast }: Props) {
   const trial = trialStatus(shop);
   const stakes = locked ? null : trialStakes(trial, total, owesCount);
   const stakesAmount = stakes ? formatMoney(stakes.amountKobo) : '';
-  const stakesText = stakes ? t(trialStakesKey(stakes), { amount: stakesAmount, n: stakes.customers }) : '';
+  /** Same currency the Pro page will show (USD unless naira pricing is on and chosen / in Nigeria). */
+  const naira = proCurrency(getCountry()) === 'NGN';
+  const stakesText = stakes ? t(trialStakesKey(stakes, naira), { amount: stakesAmount, n: stakes.customers }) : '';
   const sp = stakesParts(stakesText, stakesAmount);
   const stakesNode = stakes ? (
     <>
@@ -490,7 +494,7 @@ export function HomePage({ locked, toast }: Props) {
             </span>
             <span class="pro-hint-soft-body">
               <span class="pro-hint-soft-title">{t('pro.trialEndedTitle')}</span>
-              <span class="pro-hint-soft-sub">{stakes ? stakesNode : t('home.trialEndedSub')}</span>
+              <span class="pro-hint-soft-sub">{stakes ? stakesNode : t(naira ? 'home.trialEndedSubNgn' : 'home.trialEndedSub')}</span>
             </span>
             <span class="chev" aria-hidden="true">
               ›

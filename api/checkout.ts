@@ -5,13 +5,18 @@ import Stripe from 'stripe';
 /**
  * BashiBook Pro checkout (Vercel serverless) — Stripe Checkout, subscription mode.
  *
- * POST { plan: 'monthly' | 'yearly', email }
- *   → stripe.checkout.sessions.create (USD inline price_data, customer_email,
+ * POST { plan: 'monthly' | 'yearly', email, currency?: 'usd' | 'ngn' }
+ *   → stripe.checkout.sessions.create (inline price_data, customer_email,
  *     metadata {plan}, success_url ?session_id={CHECKOUT_SESSION_ID})
  *   → { ok: true, provider: 'stripe', plan, authorization_url, url, reference }
  *
  * Secret stays server-side (STRIPE_SECRET_KEY). Never sent to the client.
  * No key → 501. (Previous Paystack flow: see git history, commit f805ac5.)
+ *
+ * Naira (NGN_PRICING=1 only, else 400 currency_unavailable): ₦1,500/mo or ₦12,000/yr with
+ * 7.5% Nigerian VAT added on top, so Stripe charges ₦1,612.50 / ₦12,900, the total the Pro
+ * screen shows. VAT is a Stripe tax rate when STRIPE_NGN_VAT_TAX_RATE_ID is set (exclusive,
+ * 7.5%); otherwise a second recurring line item "VAT (7.5%)" of ₦112.50 / ₦900. Same total.
  */
 
 export type ProPlan = 'monthly' | 'yearly';
@@ -28,6 +33,34 @@ export const PLAN_INTERVAL: Record<ProPlan, 'month' | 'year'> = {
 };
 
 export const PLAN_CURRENCY = 'usd';
+
+export type ProCurrency = 'usd' | 'ngn';
+
+/** Naira price list (kobo), VAT not included. Keep in sync with src/lib/proPricing.ts. */
+export const NGN_PLAN_AMOUNT_KOBO: Record<ProPlan, number> = {
+  monthly: 150000, // ₦1,500 / month
+  yearly: 1200000, // ₦12,000 / year
+};
+/** Nigerian VAT, added on top (exclusive). */
+export const NGN_VAT_PERCENT = 7.5;
+
+export function ngnVatKobo(plan: ProPlan): number {
+  return Math.round((NGN_PLAN_AMOUNT_KOBO[plan] * NGN_VAT_PERCENT) / 100);
+}
+
+/** What Stripe charges for a plan, in minor units (cents / kobo), VAT included. */
+export function chargeTotalMinor(plan: ProPlan, currency: ProCurrency): number {
+  return currency === 'ngn' ? NGN_PLAN_AMOUNT_KOBO[plan] + ngnVatKobo(plan) : PLAN_AMOUNT_CENTS[plan];
+}
+
+export function isProCurrency(v: unknown): v is ProCurrency {
+  return v === 'usd' || v === 'ngn';
+}
+
+/** Naira checkout is off unless NGN_PRICING=1 (the same var builds the naira UI). */
+export function ngnCheckoutEnabled(env: Record<string, string | undefined> = process.env): boolean {
+  return env.NGN_PRICING === '1';
+}
 export const PRODUCT_NAME = 'BashiBook Pro';
 /** Dashboard label for this Checkout flow (8-letter random suffix). */
 export const INTEGRATION_IDENTIFIER = 'bashibook_pro_qkzvmtrw';
@@ -80,22 +113,57 @@ export function buildSessionParams(
   plan: ProPlan,
   email: string,
   origin: string,
+  currency: ProCurrency = 'usd',
+  vatTaxRateId?: string,
 ): Stripe.Checkout.SessionCreateParams {
-  const metadata = { plan, product: 'bashibook-pro' };
-  return {
-    mode: 'subscription',
-    customer_email: email,
-    line_items: [
+  const metadata: Record<string, string> = { plan, product: 'bashibook-pro' };
+  const recurring = { interval: PLAN_INTERVAL[plan] };
+  let line_items: Stripe.Checkout.SessionCreateParams.LineItem[];
+  if (currency === 'ngn') {
+    metadata.currency = 'ngn';
+    metadata.vat = `${NGN_VAT_PERCENT}%`;
+    const pro: Stripe.Checkout.SessionCreateParams.LineItem = {
+      quantity: 1,
+      price_data: {
+        currency: 'ngn',
+        unit_amount: NGN_PLAN_AMOUNT_KOBO[plan],
+        recurring,
+        product_data: { name: PRODUCT_NAME },
+      },
+    };
+    if (vatTaxRateId) {
+      line_items = [{ ...pro, tax_rates: [vatTaxRateId] }];
+    } else {
+      line_items = [
+        pro,
+        {
+          quantity: 1,
+          price_data: {
+            currency: 'ngn',
+            unit_amount: ngnVatKobo(plan),
+            recurring,
+            product_data: { name: `VAT (${NGN_VAT_PERCENT}%)` },
+          },
+        },
+      ];
+    }
+  } else {
+    line_items = [
       {
         quantity: 1,
         price_data: {
           currency: PLAN_CURRENCY,
           unit_amount: PLAN_AMOUNT_CENTS[plan],
-          recurring: { interval: PLAN_INTERVAL[plan] },
+          recurring,
           product_data: { name: PRODUCT_NAME },
         },
       },
-    ],
+    ];
+  }
+  return {
+    mode: 'subscription',
+    customer_email: email,
+    line_items,
     metadata,
     subscription_data: { metadata },
     success_url: successUrl(origin),
@@ -115,16 +183,17 @@ type Res = {
   setHeader?: (name: string, value: string) => void;
 };
 
-function parseBody(body: unknown): { plan?: unknown; email?: unknown } {
+type Body = { plan?: unknown; email?: unknown; currency?: unknown };
+function parseBody(body: unknown): Body {
   if (!body) return {};
   if (typeof body === 'string') {
     try {
-      return JSON.parse(body) as { plan?: unknown; email?: unknown };
+      return JSON.parse(body) as Body;
     } catch {
       return {};
     }
   }
-  return typeof body === 'object' ? (body as { plan?: unknown; email?: unknown }) : {};
+  return typeof body === 'object' ? (body as Body) : {};
 }
 
 export const NOT_CONFIGURED_MESSAGE =
@@ -158,11 +227,27 @@ export default async function handler(req: Req, res: Res) {
     return;
   }
   const email = body.email.trim().toLowerCase();
+  const currency = body.currency ?? 'usd';
+  if (!isProCurrency(currency) || (currency === 'ngn' && !ngnCheckoutEnabled())) {
+    res.status(400).json({
+      ok: false,
+      code: 'currency_unavailable',
+      message: 'This currency is not available. Pay in USD.',
+    });
+    return;
+  }
+  const vatTaxRateId = (process.env.STRIPE_NGN_VAT_TAX_RATE_ID || '').trim();
 
   try {
     const stripe = new Stripe(stripeKey);
     const session = await stripe.checkout.sessions.create(
-      buildSessionParams(plan, email, callbackOrigin(req.headers)),
+      buildSessionParams(
+        plan,
+        email,
+        callbackOrigin(req.headers),
+        currency,
+        /^txr_[A-Za-z0-9]+$/.test(vatTaxRateId) ? vatTaxRateId : undefined,
+      ),
     );
     if (!session.url) {
       res.status(502).json({ ok: false, code: 'provider_error', message: 'Could not start checkout. Try again.' });
@@ -172,6 +257,8 @@ export default async function handler(req: Req, res: Res) {
       ok: true,
       provider: 'stripe',
       plan,
+      currency,
+      amount_total: session.amount_total ?? chargeTotalMinor(plan, currency),
       authorization_url: session.url,
       url: session.url,
       reference: session.id,

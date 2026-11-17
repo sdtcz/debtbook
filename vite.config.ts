@@ -9,6 +9,8 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
     __APP_BUILD__: JSON.stringify(new Date().toISOString().slice(0, 10)),
+    // Naira Pro pricing: on only when checkout can charge it (same env var gates api/checkout.ts).
+    __NGN_PRICING__: JSON.stringify(process.env.NGN_PRICING === '1'),
   },
   plugins: [
     preact(),
