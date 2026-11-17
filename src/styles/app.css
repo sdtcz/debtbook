@@ -4727,6 +4727,17 @@ a.btn.payme-cta-btn {
   padding: 2px 9px; border-radius: 999px; background: var(--primary); color: #fff;
   font-size: 0.75rem; font-weight: 800; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+/* Currency switch (naira pricing): one currency at a time, the choice replaces every price. */
+.pro-cur { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+.pro-cur-label { font-weight: 700; font-size: 0.9rem; color: #334155; margin-inline-end: 4px; }
+.pro-cur-opt {
+  min-height: 40px; padding: 6px 14px; border: 2px solid #e2e8f0; border-radius: 999px;
+  background: #fff; color: #0f172a; font: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer;
+}
+.pro-cur-opt.on { border-color: var(--primary); background: #f0fdfa; color: #134e4a; }
+.pro-cur-opt:focus-visible { outline: 3px solid #99f6e4; outline-offset: 2px; }
+.pro-plan-vat { display: block; margin-top: 2px; font-weight: 600; font-size: 0.78rem; color: #475569; }
+.pro-total { margin: 0 0 14px; padding: 10px 12px; border-radius: 12px; background: #f8fafc; font-weight: 700; font-size: 0.92rem; color: #0f172a; line-height: 1.35; }
 .pro-pay-cta { width: 100%; min-height: 52px; white-space: normal; overflow-wrap: anywhere; line-height: 1.25; }
 .pro-trial-nocard { margin-top: 8px; text-align: center; }
 

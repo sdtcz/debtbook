@@ -1,3 +1,4 @@
+import type { ComponentChildren } from 'preact';
 import { BackButton } from '../components/BackButton';
 import { STRIPE_BILLING_PORTAL_URL } from '../config';
 import { hit } from '../lib/hit';
@@ -23,6 +24,8 @@ import type { ToastAction } from '../hooks/useToast';
 import { deviceLocale } from '../lib/dates';
 import { mayHavePlayBilling, playAppHint } from '../lib/playEnv';
 import type { PlayPlan } from '../lib/playBilling';
+import { getCountry } from '../lib/region';
+import { ngnPricingEnabled, proCurrency, proPriceView, saveProCurrency, type ProCurrency } from '../lib/proPricing';
 
 /** Which checkout this page shows. Inside the Play app it's Google Play Billing only, never Stripe. */
 type StoreState = 'checking' | 'web' | 'play' | 'play-unavailable';
@@ -198,7 +201,7 @@ export function ProPage({ toast }: Props) {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan, email: addr }),
+        body: JSON.stringify({ plan, email: addr, currency: webCur === 'NGN' ? 'ngn' : 'usd' }),
       });
       const body = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
@@ -210,6 +213,10 @@ export function ProPage({ toast }: Props) {
         if (body.code === 'email_required') {
           setEmailError(true);
           toast(t('pro.emailRequired'));
+          return;
+        }
+        if (body.code === 'currency_unavailable') {
+          toast(t('pro.currencyUnavailable'), { ms: 6000 });
           return;
         }
         toast(
@@ -248,7 +255,38 @@ export function ProPage({ toast }: Props) {
 
   const [plan, setPlan] = useState<ProBillingPlan>('yearly');
   const usd = (p: ProBillingPlan) => (p === 'yearly' ? '$15' : '$1.99');
-  const planPicker = (price: (p: ProBillingPlan) => string) => (
+  /** Web (Stripe) checkout currency: one at a time, the switch replaces every price on screen. */
+  const [cur, setCur] = useState<ProCurrency>(() => proCurrency(getCountry()));
+  const webCur: ProCurrency = store === 'web' ? cur : 'USD';
+  const ngn = webCur === 'NGN';
+  const pickCur = (c: ProCurrency) => {
+    setCur(c);
+    saveProCurrency(c);
+  };
+  const currencySwitch = ngnPricingEnabled() ? (
+    <div class="pro-cur" role="radiogroup" aria-label={t('pro.currencyLabel')}>
+      <span class="pro-cur-label">{t('pro.currencyLabel')}</span>
+      {(['NGN', 'USD'] as ProCurrency[]).map((c) => (
+        <button
+          key={c}
+          type="button"
+          role="radio"
+          aria-checked={cur === c}
+          class={`pro-cur-opt${cur === c ? ' on' : ''}`}
+          onClick={() => pickCur(c)}
+        >
+          {t(c === 'NGN' ? 'pro.currencyNgn' : 'pro.currencyUsd')}
+        </button>
+      ))}
+    </div>
+  ) : null;
+  const ngnPlanPrice = (p: ProBillingPlan) => (
+    <>
+      {t(p === 'yearly' ? 'pro.perYearNgnBase' : 'pro.perMonthNgnBase')}
+      <span class="pro-plan-vat">{t('pro.vatLine', { total: proPriceView('NGN', p).total })}</span>
+    </>
+  );
+  const planPicker = (price: (p: ProBillingPlan) => ComponentChildren) => (
     <div class="pro-plans" role="radiogroup" aria-label={t('pro.planTitle')}>
       {(['yearly', 'monthly'] as ProBillingPlan[]).map((p) => (
         <button
@@ -259,11 +297,13 @@ export function ProPage({ toast }: Props) {
           class={`pro-plan${plan === p ? ' on' : ''}`}
           onClick={() => setPlan(p)}
         >
-          {p === 'yearly' && <span class="pro-plan-tag">{t('pro.planBest')}</span>}
+          {p === 'yearly' && <span class="pro-plan-tag">{t(ngn ? 'pro.planBestNgn' : 'pro.planBest')}</span>}
           <span class="pro-plan-dot" aria-hidden="true" />
           <span class="pro-plan-text">
             <span class="pro-plan-name">{t(p === 'yearly' ? 'pro.planYearly' : 'pro.planMonthly')}</span>
-            <span class="pro-plan-meta">{t(p === 'yearly' ? 'pro.planYearlyMeta' : 'pro.planMonthlyMeta')}</span>
+            <span class="pro-plan-meta">
+              {t(p === 'yearly' ? (ngn ? 'pro.planYearlyMetaNgn' : 'pro.planYearlyMeta') : 'pro.planMonthlyMeta')}
+            </span>
           </span>
           <span class="pro-plan-price">{price(p)}</span>
         </button>
@@ -298,11 +338,22 @@ export function ProPage({ toast }: Props) {
       {!pro && !trialEndedPrompt && <p class="pro-soft-note">{t('pro.demoNote')}</p>}
     </div>
   );
+  const payView = proPriceView(webCur, plan);
   /** One place to pick a plan, type the receipt email and pay (email sits right above the button). */
   const stripeBlock = (
     <div class={`pro-pay${trialEndedPrompt ? ' in-alert' : ''}`}>
       {!trialEndedPrompt && <h2 class="pro-plan-title">{t('pro.planTitle')}</h2>}
-      {planPicker((p) => t(p === 'yearly' ? 'pro.perYear' : 'pro.perMonth'))}
+      {currencySwitch}
+      {planPicker((p) => (ngn ? ngnPlanPrice(p) : t(p === 'yearly' ? 'pro.perYear' : 'pro.perMonth')))}
+      {ngn && (
+        <p class="pro-total" role="status">
+          {t(plan === 'yearly' ? 'pro.totalYearly' : 'pro.totalMonthly', {
+            total: payView.total,
+            price: payView.price,
+            vat: payView.vat,
+          })}
+        </p>
+      )}
       <div class="field">
         <label for="pro-pay-email">{t('pro.emailLabel')}</label>
         <input
@@ -328,9 +379,9 @@ export function ProPage({ toast }: Props) {
         disabled={busy || verifying}
         onClick={() => tryCheckout(plan)}
       >
-        {t('pro.continuePay', { price: usd(plan) })}
+        {t('pro.continuePay', { price: ngn ? payView.total : usd(plan) })}
       </button>
-      <p class="pro-soft-note">🔒 {t('pro.securedBy')}</p>
+      <p class="pro-soft-note">🔒 {t(ngn ? 'pro.securedByNgn' : 'pro.securedBy')}</p>
       {!pro && !trialEndedPrompt && <p class="pro-soft-note">{t('pro.demoNote')}</p>}
     </div>
   );
@@ -361,8 +412,8 @@ export function ProPage({ toast }: Props) {
             </div>
             <div class="pro-soft-text">
               <div class="pro-soft-kicker">{t('pro.nigeriaPricing')}</div>
-              <div class="pro-soft-amount">{t('pro.perMonth')}</div>
-              <p class="pro-soft-meta">{t('pro.orYear')}</p>
+              <div class="pro-soft-amount">{t(ngn ? 'pro.perMonthNgnBase' : 'pro.perMonth')}</div>
+              <p class="pro-soft-meta">{t(ngn ? 'pro.orYearNgn' : 'pro.orYear')}</p>
             </div>
           </div>
           {trial.state === 'active' ? (
@@ -392,7 +443,7 @@ export function ProPage({ toast }: Props) {
         {trialEndedPrompt && (
           <section class="card pro-trial-ended" role="alert" aria-labelledby="pro-trial-ended-title">
             <h2 id="pro-trial-ended-title">{t('pro.trialEndedTitle')}</h2>
-            <p>{t('pro.trialEndedBody')}</p>
+            <p>{t(ngn ? 'pro.trialEndedBodyNgn' : 'pro.trialEndedBody')}</p>
             {payBlock}
           </section>
         )}

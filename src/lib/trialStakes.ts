@@ -25,9 +25,12 @@ export function trialStakes(trial: TrialStatus, totalOwedKobo: number, owingCust
   return null;
 }
 
-/** i18n key for the stakes line (singular for one customer). */
-export function trialStakesKey(s: TrialStakes): MessageKey {
-  if (s.phase === 'ended') return s.customers === 1 ? 'home.trialStakesEnded1' : 'home.trialStakesEnded';
+/** i18n key for the stakes line (singular for one customer). naira = price shown in ₦ (+ VAT). */
+export function trialStakesKey(s: TrialStakes, naira = false): MessageKey {
+  if (s.phase === 'ended') {
+    if (naira) return s.customers === 1 ? 'home.trialStakesEnded1Ngn' : 'home.trialStakesEndedNgn';
+    return s.customers === 1 ? 'home.trialStakesEnded1' : 'home.trialStakesEnded';
+  }
   return s.customers === 1 ? 'home.trialStakesEnding1' : 'home.trialStakesEnding';
 }
 

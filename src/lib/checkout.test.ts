@@ -123,6 +123,16 @@ describe('stripe verify', () => {
     if (y.ok) expect(y.expiresAt - y.paidAt).toBe(365 * DAY);
   });
 
+  it('accepts naira only at the VAT-inclusive totals (₦1,612.50 / ₦12,900)', () => {
+    const n = { ...base, currency: 'ngn' };
+    expect(evaluateStripeSession({ ...n, amount_total: 161250, metadata: { plan: 'monthly' } })).toMatchObject({ ok: true, plan: 'monthly' });
+    expect(evaluateStripeSession({ ...n, amount_total: 1290000, metadata: { plan: 'yearly' } })).toMatchObject({ ok: true, plan: 'yearly' });
+    expect(evaluateStripeSession({ ...n, amount_total: 150000, metadata: { plan: 'monthly' } }).ok).toBe(false); // VAT missing
+    expect(evaluateStripeSession({ ...n, amount_total: 1290000, metadata: { plan: 'monthly' } }).ok).toBe(false);
+    expect(evaluateStripeSession({ ...n, amount_total: 1290000 })).toMatchObject({ ok: true, plan: 'yearly' });
+    expect(evaluateStripeSession({ ...n, currency: 'eur', amount_total: 161250, metadata: { plan: 'monthly' } }).ok).toBe(false);
+  });
+
   it('rejects unpaid, inactive, wrong amount/currency/mode, or missing subscription', () => {
     const ok = { ...base, amount_total: 199, metadata: { plan: 'monthly' } };
     expect(evaluateStripeSession({ ...ok, payment_status: 'unpaid' }).ok).toBe(false);
