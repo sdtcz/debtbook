@@ -23,7 +23,7 @@ describe('/whatsapp-payment-reminder static page', () => {
     for (const lang of ['en', 'ha', 'yo']) expect(html).toContain(`<section id="${lang}" lang="${lang}">`);
     expect(html).toContain('#ha,#yo{display:none}'); // one language at a time, English default
     const blocks = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
-    expect(blocks.map((b) => b['@type']).sort()).toEqual(['FAQPage', 'SoftwareApplication']);
+    expect(blocks.map((b) => b['@type']).sort()).toEqual(['BreadcrumbList', 'FAQPage', 'SoftwareApplication']);
     const faq = blocks.find((b) => b['@type'] === 'FAQPage');
     expect(faq.mainEntity.length).toBe(4);
     for (const q of faq.mainEntity) expect(html).toContain(`<h3>${q.name}</h3>`);

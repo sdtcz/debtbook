@@ -13,7 +13,7 @@ describe('/credit-book-app static page', () => {
     for (const lang of ['en', 'ha', 'yo']) expect(html).toContain(`<section id="${lang}" lang="${lang}">`);
     expect(html).not.toMatch(/lang="pcm"|Pidgin/); // Pidgin only on /ng/*
     const blocks = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
-    expect(blocks.map((b) => b['@type']).sort()).toEqual(['FAQPage', 'SoftwareApplication']);
+    expect(blocks.map((b) => b['@type']).sort()).toEqual(['BreadcrumbList', 'FAQPage', 'SoftwareApplication']);
     const faq = blocks.find((b) => b['@type'] === 'FAQPage');
     expect(faq.mainEntity.length).toBe(4);
   });

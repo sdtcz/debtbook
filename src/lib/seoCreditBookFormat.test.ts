@@ -19,7 +19,7 @@ describe('/credit-book-format static page', () => {
     expect(html).toContain(`<link rel="canonical" href="${B}/credit-book-format">`);
     expect(html).toContain(`<meta property="og:url" content="${B}/credit-book-format">`);
     const blocks = [...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
-    expect(blocks.map((b) => b['@type']).sort()).toEqual(['FAQPage', 'HowTo', 'SoftwareApplication']);
+    expect(blocks.map((b) => b['@type']).sort()).toEqual(['BreadcrumbList', 'FAQPage', 'HowTo', 'SoftwareApplication']);
     const faq = blocks.find((b) => b['@type'] === 'FAQPage');
     expect(faq.mainEntity.length).toBe(4);
     for (const q of faq.mainEntity) {
