@@ -789,6 +789,8 @@ export const en = {
 
   'entry.receiptStepTitle': "{{amount}} credit saved for {{name}}",
   'entry.receiptStepWhy': "Send a receipt so they have the same record and their new balance.",
+  'entry.receiptStepTitlePayment': "{{amount}} payment saved for {{name}}",
+  'entry.receiptStepWhyPayment': "Send a receipt so they know you got it and see their new balance.",
   'entry.receiptSend': "Send receipt to {{name}}",
   'entry.receiptVia': "WhatsApp · {{phone}}",
   'entry.receiptNoPhone': "No phone saved, so you can share or copy it instead",

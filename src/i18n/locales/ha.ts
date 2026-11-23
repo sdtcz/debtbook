@@ -792,6 +792,9 @@ export const ha: Record<MessageKey, string> = {
 
   'entry.receiptStepTitle': "An ajiye bashin {{amount}} na {{name}}",
   'entry.receiptStepWhy': "Aika rasit don su ma su sami bayanin da sabon bashinsu.",
+  // TODO(native-speaker check): payment receipt step — English placeholder until checked.
+  'entry.receiptStepTitlePayment': "{{amount}} payment saved for {{name}}",
+  'entry.receiptStepWhyPayment': "Send a receipt so they know you got it and see their new balance.",
   'entry.receiptSend': "Aika rasit ga {{name}}",
   'entry.receiptVia': "WhatsApp · {{phone}}",
   'entry.receiptNoPhone': "Babu lambar waya, za ka iya rabawa ko kwafa",

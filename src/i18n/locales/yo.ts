@@ -792,6 +792,9 @@ export const yo: Record<MessageKey, string> = {
 
   'entry.receiptStepTitle': "A ti fi gbèsè {{amount}} pamọ́ fún {{name}}",
   'entry.receiptStepWhy': "Fi rìsíìtì ránṣẹ́ kí wọ́n lè ní àkọsílẹ̀ kan náà àti iye tí wọ́n jẹ báyìí.",
+  // TODO(native-speaker check): payment receipt step — English placeholder until checked.
+  'entry.receiptStepTitlePayment': "{{amount}} payment saved for {{name}}",
+  'entry.receiptStepWhyPayment': "Send a receipt so they know you got it and see their new balance.",
   'entry.receiptSend': "Fi rìsíìtì ránṣẹ́ sí {{name}}",
   'entry.receiptVia': "WhatsApp · {{phone}}",
   'entry.receiptNoPhone': "Kò sí nọ́ńbà fóònù, o lè pín in tàbí dà á kọ",
