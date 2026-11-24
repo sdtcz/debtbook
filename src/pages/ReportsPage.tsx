@@ -5,6 +5,7 @@ import { getShop, listAllEntries, listCustomers } from '../db/repo';
 import { listAllSupplierEntries, listSuppliers } from '../db/suppliers';
 import { useLocale } from '../hooks/useLocale';
 import type { MessageKey } from '../i18n';
+import { reportShareText } from '../lib/growth';
 import { formatMoney, currencySymbol } from '../lib/money';
 import { buildReport, buildSupplierReport, type ReportPeriod } from '../lib/reports';
 import { href, navigate } from '../lib/router';
@@ -97,9 +98,8 @@ export function ReportsPage({ locked, toast }: Props) {
       ...(suppliers.length
         ? [t('reports.messageIOwe', { amount: formatMoney(supReport.iOweKobo) })]
         : []),
-      '— BashiBook',
     ];
-    const r = await shareOrCopyText(lines.join('\n'), t('reports.title'));
+    const r = await shareOrCopyText(reportShareText(lines), t('reports.title'));
     if (r === 'share') toast(t('reports.shared'));
     else if (r === 'clipboard') toast(t('reports.copied'));
     else toast(t('reports.shareFailed'));

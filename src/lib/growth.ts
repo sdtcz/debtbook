@@ -75,6 +75,16 @@ export function withBrandFooter(message: string, src: LinkSource = 'rem'): strin
   return lines.length ? `${message}\n${lines.join('\n')}` : message;
 }
 
+/**
+ * Shared Reports text: the owner's summary ends with the same toggleable brand
+ * line + link as reminders and receipts (anyone it is forwarded to can start a
+ * free book). With the toggle off it keeps the plain "— BashiBook" sign-off.
+ */
+export function reportShareText(lines: string[]): string {
+  const footer = brandFooterLines('rem');
+  return [...lines, ...(footer.length ? footer : ['— BashiBook'])].join('\n');
+}
+
 /* ── Attribution (P7) ─────────────────────────────────────────────────── */
 
 export interface Attribution {
