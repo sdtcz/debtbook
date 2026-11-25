@@ -1,5 +1,6 @@
 /** Spec 4: the week in plain sentences (Home card on Sundays, Reports → 7 days, share picture). */
 import { daysOverdue, daysSince, openCycle } from '../db/repo';
+import { reportShareText } from './growth';
 import { buildReport, type ReportSummary } from './reports';
 import type { Customer, Entry } from './types';
 
@@ -120,6 +121,8 @@ export function weekShareParts(
     footer: tr('week.footer'),
   };
   const [ta, tb] = names ? weekSentences(f, tr, money, false) : [a, b];
-  const text = [tr('week.textTitle', { shop: shop || 'BashiBook', range }), ...ta, ...tb, '— BashiBook · bashibook.app'].join('\n');
+  // Same toggleable brand line + tagged app link as reminders, receipts and Reports;
+  // with 'Add BashiBook line to messages' off it ends on the plain '— BashiBook' sign-off.
+  const text = reportShareText([tr('week.textTitle', { shop: shop || 'BashiBook', range }), ...ta, ...tb]);
   return { picture, text, title: tr('week.share') };
 }

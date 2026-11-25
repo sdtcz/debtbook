@@ -74,7 +74,7 @@ describe('weekly summary sentences (Spec 4)', () => {
     const off = weekShareParts(f, 'Sunrise Corner Store', tr, ngn, false, 'en-US');
     const on = weekShareParts(f, 'Sunrise Corner Store', tr, ngn, true, 'en-US');
     expect(off.text.split('\n')[0]).toMatch(/^Sunrise Corner Store, my week \(Oct 26\s*–\s*Nov 1\)$/);
-    expect(off.text).toContain('— BashiBook · bashibook.app');
+    expect(off.text).toContain('Recorded in BashiBook');
     expect(on.text).not.toContain('Ngozi');
     expect(JSON.stringify(off.picture)).not.toContain('Ngozi');
     expect(JSON.stringify(on.picture)).toContain('Ngozi');
