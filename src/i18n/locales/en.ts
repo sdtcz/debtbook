@@ -74,7 +74,13 @@ export const en = {
   'home.metaOldestOne': "oldest: {{name}}, 1 day",
   'home.oldestFirst': "oldest debt first",
   'home.dueInDays': 'due in {{n}} days',
+  'home.dueInDay': 'due tomorrow',
   'home.dueToday': 'due today',
+  'home.datePassed': 'date passed',
+  'home.chipPaysOn': 'Pays on {{day}}',
+  'home.willPay': 'will pay {{date}}',
+  'home.remindRow': '💬 Remind {{name}} on WhatsApp',
+  'home.remindSentToday': 'Reminder sent today',
   'home.lastPaid': 'last paid {{date}}',
   'home.digestTitle': "Today's chase",
   'home.digestMeta': '{{n}} overdue · {{amount}}',
@@ -407,6 +413,11 @@ export const en = {
   'entry.tallyNow': 'Balance now',
   'entry.tallyAfter': 'After this',
   'entry.tallyAria': 'Balance before and after this entry',
+  'entry.willPayOn': 'Will pay on',
+  'entry.dueTomorrow': 'Tomorrow',
+  'entry.dueIn3Days': 'In 3 days',
+  'entry.dueInWeek': 'In a week',
+  'entry.duePickDate': 'Pick date',
 
   'money.placeholder': '0.00 or 3k',
   'money.placeholderWhole': '0 or 3k',
@@ -506,6 +517,10 @@ export const en = {
 
   'remind.owes':
     'Hello {{customer}}, this is a reminder from {{shop}}. Your outstanding balance is {{amount}}. Please settle when you can. Thank you.',
+  'remind.dueToday':
+    'Hello {{customer}}, this is a reminder from {{shop}}. Your balance of {{amount}} is due today. Thank you.',
+  'remind.datePassed':
+    'Hello {{customer}}, this is a reminder from {{shop}}. Your balance of {{amount}} is now overdue. Please settle soon. Thank you.',
   'remind.youOwe':
     'Hello {{customer}}, this is {{shop}}. We owe you {{amount}}. Please collect at your convenience. Thank you.',
   'remind.settled':
@@ -913,6 +928,9 @@ export const en = {
   "setup.introRemind": "💬 Remind {{name}} on WhatsApp",
   "setup.introBubble": "Hello {{name}}, this is Grace's Corner Shop. Your balance is {{amount}} (2 bags of rice). Thank you!",
   "setup.check3Kb": "Free. About {{kb}} kB of data to open",
+  "setup.proLine": "Pro adds backup to the cloud",
+  "setup.proPrice": "· $1.99/mo",
+  "setup.proPriceNgn": "· ₦1,500/mo",
 
   "week.title": "Your week · {{range}}",
   "week.credit": "You recorded {{amount}} of credit for {{n}} customers.",

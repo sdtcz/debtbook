@@ -76,7 +76,13 @@ export const ha: Record<MessageKey, string> = {
   'home.metaOldestOne': "mafi daɗewa: {{name}}, kwana 1",
   'home.oldestFirst': "bashi mafi daɗewa a farko",
   'home.dueInDays': 'za a biya cikin kwanaki {{n}}',
+  'home.dueInDay': 'za a biya gobe',
   'home.dueToday': 'za a biya yau',
+  'home.datePassed': 'lokaci ya wuce',
+  'home.chipPaysOn': 'Za a biya {{day}}',
+  'home.willPay': 'za a biya {{date}}',
+  'home.remindRow': '💬 Tuna {{name}} a WhatsApp',
+  'home.remindSentToday': 'An aika tuna a yau',
   'home.lastPaid': 'biya ta ƙarshe {{date}}',
   'home.digestTitle': 'Bibiyar yau',
   'home.digestMeta': '{{n}} sun wuce lokaci · {{amount}}',
@@ -410,6 +416,11 @@ export const ha: Record<MessageKey, string> = {
   'entry.tallyNow': 'Saura yanzu',
   'entry.tallyAfter': 'Bayan wannan',
   'entry.tallyAria': 'Saura kafin da bayan wannan shigarwa',
+  'entry.willPayOn': 'Za a biya',
+  'entry.dueTomorrow': 'Gobe',
+  'entry.dueIn3Days': 'Cikin kwana 3',
+  'entry.dueInWeek': 'Cikin mako',
+  'entry.duePickDate': 'Zaɓi ranar',
 
   'money.placeholder': '0.00 ko 3k',
   'money.placeholderWhole': '0 ko 3k',
@@ -509,6 +520,10 @@ export const ha: Record<MessageKey, string> = {
 
   'remind.owes':
     'Sannu {{customer}}, wannan tunatarwa ce daga {{shop}}. Bashinka da ya rage shine {{amount}}. Don Allah ka biya lokacin da za ka iya. Na gode.',
+  'remind.dueToday':
+    'Sannu {{customer}}, wannan tunatarwa ce daga {{shop}}. Bashinka na {{amount}} za a biya yau. Na gode.',
+  'remind.datePassed':
+    'Sannu {{customer}}, wannan tunatarwa ce daga {{shop}}. Bashinka na {{amount}} ya wuce lokaci. Don Allah ka biya nan ba da daɗewa ba. Na gode.',
   'remind.youOwe':
     'Sannu {{customer}}, wannan {{shop}} ne. Muna bin ka {{amount}}. Don Allah ka ɗauka lokacin da ya dace. Na gode.',
   'remind.settled':
@@ -917,6 +932,9 @@ export const ha: Record<MessageKey, string> = {
   "setup.introRemind": "💬 Tunatar da {{name}} ta WhatsApp",
   "setup.introBubble": "Sannu {{name}}, wannan shagon Grace ne. Bashinka {{amount}} ne (buhun shinkafa 2). Na gode!",
   "setup.check3Kb": "Kyauta. Kusan {{kb}} kB na data don buɗewa",
+  "setup.proLine": "Pro yana da ajiya a gajimare",
+  "setup.proPrice": "· $1.99/wata",
+  "setup.proPriceNgn": "· ₦1,500/wata",
 
   "week.title": "Makonka · {{range}}",
   "week.credit": "Ka rubuta bashin {{amount}} ga kwastomomi {{n}}.",

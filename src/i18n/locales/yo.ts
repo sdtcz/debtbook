@@ -76,7 +76,13 @@ export const yo: Record<MessageKey, string> = {
   'home.metaOldestOne': "tó pẹ́ jù: {{name}}, ọjọ́ 1",
   'home.oldestFirst': "gbèsè tó pẹ́ jù ló kọ́kọ́",
   'home.dueInDays': 'yóò tó ní ọjọ́ {{n}}',
+  'home.dueInDay': 'yóò tó ní ọ̀la',
   'home.dueToday': 'yóò tó lónìí',
+  'home.datePassed': 'àkókò ti kọjá',
+  'home.chipPaysOn': 'Yóò san ní {{day}}',
+  'home.willPay': 'yóò san ní {{date}}',
+  'home.remindRow': '💬 Ranti {{name}} lórí WhatsApp',
+  'home.remindSentToday': 'Ìránrántí ti ránṣẹ́ lónìí',
   'home.lastPaid': 'ìsanwó ìgbẹ̀yìn {{date}}',
   'home.digestTitle': 'Ìlépa òní',
   'home.digestMeta': '{{n}} ti pẹ́ · {{amount}}',
@@ -410,6 +416,11 @@ export const yo: Record<MessageKey, string> = {
   'entry.tallyNow': 'Iyokù báyìí',
   'entry.tallyAfter': 'Lẹ́yìn èyí',
   'entry.tallyAria': 'Iyokù ṣáájú àti lẹ́yìn àkọsílẹ̀ yìí',
+  'entry.willPayOn': 'Yóò san lọ́jọ́',
+  'entry.dueTomorrow': 'Ọ̀la',
+  'entry.dueIn3Days': 'Láàárín ọjọ́ 3',
+  'entry.dueInWeek': 'Láàárín ọ̀sẹ̀ kan',
+  'entry.duePickDate': 'Yan ọjọ́',
 
   'money.placeholder': '0.00 tàbí 3k',
   'money.placeholderWhole': '0 tàbí 3k',
@@ -509,6 +520,10 @@ export const yo: Record<MessageKey, string> = {
 
   'remind.owes':
     'Ẹ káàbọ̀ {{customer}}, èyí jẹ́ ìránnilétí láti ọ̀dọ̀ {{shop}}. Gbèsè rẹ tó kù ni {{amount}}. Jọ̀wọ́ san nígbà tí o bá lè. O ṣeun.',
+  'remind.dueToday':
+    'Ẹ káàbọ̀ {{customer}}, èyí jẹ́ ìránnilétí láti ọ̀dọ̀ {{shop}}. Gbèsè rẹ tó jẹ́ {{amount}} yóò tó lónìí. O ṣeun.',
+  'remind.datePassed':
+    'Ẹ káàbọ̀ {{customer}}, èyí jẹ́ ìránnilétí láti ọ̀dọ̀ {{shop}}. Gbèsè rẹ tó jẹ́ {{amount}} ti pẹ́. Jọ̀wọ́ san láìpẹ́. O ṣeun.',
   'remind.youOwe':
     'Ẹ káàbọ̀ {{customer}}, èyí ni {{shop}}. A jẹ́ ọ́ {{amount}}. Jọ̀wọ́ gba nígbà tí ó bá rọrùn. O ṣeun.',
   'remind.settled':
@@ -917,6 +932,9 @@ export const yo: Record<MessageKey, string> = {
   "setup.introRemind": "💬 Rán {{name}} létí lórí WhatsApp",
   "setup.introBubble": "Ẹ n lẹ́ {{name}}, ṣọ́ọ̀bù Grace nìyí. Gbèsè rẹ jẹ́ {{amount}} (àpò ìrẹsì 2). A dúpẹ́!",
   "setup.check3Kb": "Ọ̀fẹ́. Nǹkan bí {{kb}} kB dátà láti ṣí i",
+  "setup.proLine": "Pro ń fi àfípadà sórí ayélujára kún un",
+  "setup.proPrice": "· $1.99/oṣù",
+  "setup.proPriceNgn": "· ₦1,500/oṣù",
 
   "week.title": "Ọ̀sẹ̀ rẹ · {{range}}",
   "week.credit": "O kọ gbèsè {{amount}} sílẹ̀ fún oníbàárà {{n}}.",

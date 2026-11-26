@@ -363,25 +363,47 @@ export async function getCustomerBalance(customerId: string): Promise<{
   return { ...computeBalance(entries), entries };
 }
 
-export function isOverdue(customer: Customer, balanceKobo: number, now = Date.now()): boolean {
-  return Boolean(customer.dueAt && customer.dueAt < now && balanceKobo > 0);
-}
-
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** Whole days past due when overdue; otherwise null. */
+/** Start of day (local midnight) for a timestamp. */
+function dayStart(t: number): number {
+  const d = new Date(t);
+  d.setHours(0, 0, 0, 0);
+  return d.getTime();
+}
+
+/** Whole local days from today to the due day: <0 passed, 0 today, >0 upcoming. */
+export function dueDayDiff(dueAt: number, now = Date.now()): number {
+  return Math.round((dayStart(dueAt) - dayStart(now)) / DAY_MS);
+}
+
+export type DueState = 'none' | 'upcoming' | 'today' | 'passed';
+
+/** Calendar-day due state: 'passed' if past the due day, 'today' on the due day, 'upcoming' before. */
+export function dueState(c: Customer, balanceKobo: number, now = Date.now()): DueState {
+  if (!c.dueAt || balanceKobo <= 0) return 'none';
+  const d = dueDayDiff(c.dueAt, now);
+  return d < 0 ? 'passed' : d === 0 ? 'today' : 'upcoming';
+}
+
+export function isOverdue(customer: Customer, balanceKobo: number, now = Date.now()): boolean {
+  return dueState(customer, balanceKobo, now) === 'passed';
+}
+
+/** Whole days past due when overdue (calendar-day correct); otherwise null. */
 export function daysOverdue(
   customer: Customer,
   balanceKobo: number,
   now = Date.now(),
 ): number | null {
-  if (!isOverdue(customer, balanceKobo, now) || !customer.dueAt) return null;
-  return Math.max(1, Math.floor((now - customer.dueAt) / DAY_MS));
+  const state = dueState(customer, balanceKobo, now);
+  if (state !== 'passed' || !customer.dueAt) return null;
+  return Math.max(1, -dueDayDiff(customer.dueAt, now));
 }
 
 /**
  * Days until due when balance > 0 and due within `withinDays` (default 7).
- * Returns 0 if due today (not yet overdue). Null if not applicable.
+ * Returns 0 if due today. Null if not applicable or past due.
  */
 export function daysUntilDue(
   customer: Customer,
@@ -390,10 +412,10 @@ export function daysUntilDue(
   withinDays = 7,
 ): number | null {
   if (!customer.dueAt || balanceKobo <= 0) return null;
-  if (customer.dueAt < now) return null;
-  const days = Math.ceil((customer.dueAt - now) / DAY_MS);
-  if (days > withinDays) return null;
-  return Math.max(0, days);
+  const diff = dueDayDiff(customer.dueAt, now);
+  if (diff < 0) return null;
+  if (diff > withinDays) return null;
+  return diff;
 }
 
 /** Latest payment occurredAt from entries (newest-first or any order). */

@@ -16,14 +16,19 @@ import { formatMoney } from './money';
 import { normalizeWhatsAppDigits } from './phone';
 import { deviceLocale } from './dates';
 
+import type { DueState } from '../db/repo';
+
 export function buildRemindMessage(
   shopName: string,
   customerName: string,
   balanceKobo: number,
+  dueState?: DueState,
 ): string {
   const amount = formatMoney(Math.abs(balanceKobo));
   const vars = { customer: customerName, shop: shopName, amount };
   if (balanceKobo > 0) {
+    if (dueState === 'today') return withBrandFooter(t('remind.dueToday', vars), 'rem');
+    if (dueState === 'passed') return withBrandFooter(t('remind.datePassed', vars), 'rem');
     return withBrandFooter(t('remind.owes', vars), 'rem');
   }
   if (balanceKobo < 0) {
