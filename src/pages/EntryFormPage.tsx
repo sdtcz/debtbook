@@ -26,6 +26,7 @@ import {
   shouldShowPaidInvite,
 } from '../lib/growth';
 import type { ToastAction } from '../hooks/useToast';
+import { fromLocalDateInput, toLocalDateInput } from '../lib/localDate';
 
 const fmtDayName = (d: Date): string =>
   d.toLocaleDateString(undefined, { weekday: 'short' });
@@ -361,17 +362,11 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
                   ref={dateRef}
                   type="date"
                   class="input due-date-input"
-                  min={new Date().toISOString().slice(0, 10)}
-                  value={dueAt ? new Date(dueAt).toISOString().slice(0, 10) : ''}
+                  min={toLocalDateInput(Date.now())}
+                  value={dueAt ? toLocalDateInput(dueAt) : ''}
                   onChange={(e) => {
                     const val = (e.target as HTMLInputElement).value;
-                    if (val) {
-                      const d = new Date(val);
-                      d.setHours(0, 0, 0, 0);
-                      setDueAt(d.getTime());
-                    } else {
-                      setDueAt(null);
-                    }
+                    setDueAt(fromLocalDateInput(val));
                   }}
                 />
               )}
