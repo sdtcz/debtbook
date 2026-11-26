@@ -9,6 +9,7 @@ import {
   getShop,
   isOverdue,
   softDeleteEntry,
+  upsertCustomer,
 } from '../db/repo';
 import { useLocale } from '../hooks/useLocale';
 import type { Customer, Entry, EntryType } from '../lib/types';
@@ -25,6 +26,11 @@ import {
   shouldShowPaidInvite,
 } from '../lib/growth';
 import type { ToastAction } from '../hooks/useToast';
+
+const fmtDayName = (d: Date): string =>
+  d.toLocaleDateString(undefined, { weekday: 'short' });
+const fmtDateOnly = (d: Date): string =>
+  d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
 interface Props {
   customerId: string;
@@ -49,6 +55,9 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
   const [paidStep, setPaidStep] = useState<Entry | null>(null);
   const sendRef = useRef<HTMLButtonElement>(null);
   const shareRef = useRef<HTMLButtonElement>(null);
+  const dateRef = useRef<HTMLInputElement>(null);
+  const [dueAt, setDueAt] = useState<number | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     getCustomer(customerId).then((c) => {
@@ -103,6 +112,9 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
       });
       notifyChanged();
       if (type === 'credit') {
+        if (dueAt && customer) {
+          await upsertCustomer({ id: customer.id, name: customer.name, dueAt });
+        }
         const [bal, shop] = await Promise.all([getCustomerBalance(customerId), getShop()]);
         setReceiptStep({ entry, balanceKobo: bal.balanceKobo, shopName: shop?.name || '' });
         return;
@@ -298,6 +310,78 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
               onInput={(e) => setNote((e.target as HTMLInputElement).value)}
             />
           </div>
+
+          {type === 'credit' && (
+            <fieldset class="field due-picker">
+              <legend>{t('entry.willPayOn')}</legend>
+              <div class="due-chips">
+                {(() => {
+                  const now = new Date();
+                  const chips: { days: number; label: string }[] = [
+                    { days: 1, label: t('entry.dueTomorrow') },
+                    { days: 3, label: t('entry.dueIn3Days') },
+                    { days: 7, label: t('entry.dueInWeek') },
+                  ];
+                  return chips.map(({ days, label }) => {
+                    const d = new Date(now);
+                    d.setDate(d.getDate() + days);
+                    d.setHours(0, 0, 0, 0);
+                    const ts = d.getTime();
+                    const active = dueAt === ts;
+                    return (
+                      <button
+                        key={days}
+                        type="button"
+                        class={`due-chip${active ? ' active' : ''}`}
+                        onClick={() => setDueAt(active ? null : ts)}
+                      >
+                        {label}
+                      </button>
+                    );
+                  });
+                })()}
+                <button
+                  type="button"
+                  class={`due-chip${showDatePicker || (dueAt && ![1, 3, 7].map((n) => {
+                    const d = new Date();
+                    d.setDate(d.getDate() + n);
+                    d.setHours(0, 0, 0, 0);
+                    return d.getTime();
+                  }).includes(dueAt)) ? ' active' : ''}`}
+                  onClick={() => {
+                    setShowDatePicker((p) => !p);
+                    setTimeout(() => dateRef.current?.showPicker?.(), 50);
+                  }}
+                >
+                  {t('entry.duePickDate')}
+                </button>
+              </div>
+              {showDatePicker && (
+                <input
+                  ref={dateRef}
+                  type="date"
+                  class="input due-date-input"
+                  min={new Date().toISOString().slice(0, 10)}
+                  value={dueAt ? new Date(dueAt).toISOString().slice(0, 10) : ''}
+                  onChange={(e) => {
+                    const val = (e.target as HTMLInputElement).value;
+                    if (val) {
+                      const d = new Date(val);
+                      d.setHours(0, 0, 0, 0);
+                      setDueAt(d.getTime());
+                    } else {
+                      setDueAt(null);
+                    }
+                  }}
+                />
+              )}
+              {dueAt && (
+                <p class="due-preview">
+                  📅 {t('home.chipPaysOn', { day: `${fmtDayName(new Date(dueAt))}, ${fmtDateOnly(new Date(dueAt))}` })}
+                </p>
+              )}
+            </fieldset>
+          )}
 
           {error && (
             <p style={{ color: 'var(--danger)', marginTop: 0 }}>{error}</p>

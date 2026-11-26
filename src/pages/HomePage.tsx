@@ -18,6 +18,7 @@ import {
   daysOverdue,
   daysSince,
   daysUntilDue,
+  dueState,
   getDashboardBalances,
   getOverdueDigest,
   getShop,
@@ -75,25 +76,30 @@ function nameInitial(name: string): string {
 /** Hero meta: long names would wrap the hero to 4 lines (QA P3-4). */
 export const shortName = (name: string): string => (name.length > 18 ? `${name.slice(0, 17)}…` : name);
 
+import type { DueState } from '../db/repo';
+
 /** Row line A: debt age / due date, overdue, settled or paid extra (no amounts, safe when locked). */
 export function rowAgeLine(
   row: CustomerBalance,
   t: (key: MessageKey, vars?: Record<string, string | number>) => string,
   now = Date.now(),
-): { text: string; overdue: boolean } {
+): { text: string; overdue: boolean; dueState: DueState } {
+  const state = dueState(row.customer, row.balanceKobo, now);
   const od = daysOverdue(row.customer, row.balanceKobo, now);
-  if (od != null) return { text: od === 1 ? t('home.dayOverdue') : t('home.daysOverdue', { n: od }), overdue: true };
-  if (row.entryCount === 0) return { text: t('home.noEntriesYet'), overdue: false };
+  if (od != null) return { text: od === 1 ? t('home.dayOverdue') : t('home.daysOverdue', { n: od }), overdue: true, dueState: state };
+  if (row.entryCount === 0) return { text: t('home.noEntriesYet'), overdue: false, dueState: state };
   if (row.balanceKobo < 0) {
     return {
       text: t('home.paidExtra', { name: row.customer.name, date: row.lastPaymentAt ? fmtShortDate(row.lastPaymentAt) : '' }),
       overdue: false,
+      dueState: state,
     };
   }
   if (row.balanceKobo === 0) {
     return {
       text: row.lastPaymentAt ? t('home.settledLastPaid', { date: fmtShortDate(row.lastPaymentAt) }) : t('home.settled'),
       overdue: false,
+      dueState: state,
     };
   }
   const days = row.oldestUnpaidAt != null ? daysSince(row.oldestUnpaidAt, now) : 0;
@@ -106,8 +112,12 @@ export function rowAgeLine(
           ? t('home.ageDays', { n: days })
           : t('home.ageMonths', { n: Math.floor(days / 30) });
   const until = daysUntilDue(row.customer, row.balanceKobo, now, Infinity);
-  if (until != null) text += ` · ${until === 0 ? t('home.dueToday') : t('home.dueInDays', { n: until })}`;
-  return { text, overdue: false };
+  if (until != null) {
+    text += ` · ${until === 0 ? t('home.dueToday') : until === 1 ? t('home.dueInDay') : t('home.dueInDays', { n: until })}`;
+  } else if (state === 'upcoming' && row.customer.dueAt) {
+    text += ` · ${t('home.willPay', { date: fmtShortDate(row.customer.dueAt) })}`;
+  }
+  return { text, overdue: false, dueState: state };
 }
 
 export function HomePage({ locked, toast }: Props) {
@@ -618,13 +628,16 @@ export function HomePage({ locked, toast }: Props) {
                 row.customer.creditLimitKobo,
               );
               const age = rowAgeLine(row, t);
+              const isDueToday = age.dueState === 'today';
+              const isDatePassed = age.dueState === 'passed';
+              const reminded = chasedIds.has(row.customer.id);
               const part =
                 !locked && row.balanceKobo > 0 && (row.cyclePaidKobo ?? 0) > 0 && (row.cycleCreditKobo ?? 0) > 0
                   ? { paid: row.cyclePaidKobo!, total: row.cycleCreditKobo! }
                   : null;
               return (
                 <div
-                  class={`list-item-wrap soft-list-row ${tone}${overdue ? ' overdue' : ''}`}
+                  class={`list-item-wrap soft-list-row ${tone}${overdue ? ' overdue' : ''}${isDueToday ? ' due-today' : ''}`}
                   key={row.customer.id}
                 >
                   <a
@@ -637,8 +650,11 @@ export function HomePage({ locked, toast }: Props) {
                     <div class="meta soft-list-meta">
                       <div class="name">
                         <span class="nt">{row.customer.name}</span>
-                        {overdue && (
-                          <span class="overdue-badge">{t('common.overdue')}</span>
+                        {isDueToday && (
+                          <span class="overdue-badge today">{t('home.dueToday').toUpperCase()}</span>
+                        )}
+                        {isDatePassed && (
+                          <span class="overdue-badge">{t('home.datePassed').toUpperCase()}</span>
                         )}
                         {limit === 'at' && (
                           <span class="limit-badge at">{t('home.atLimit')}</span>
@@ -665,6 +681,15 @@ export function HomePage({ locked, toast }: Props) {
                         : formatMoney(Math.abs(row.balanceKobo))}
                     </div>
                   </a>
+                  {!locked && isDueToday && (
+                    <button
+                      type="button"
+                      class={`row-wa${reminded ? ' done' : ''}`}
+                      onClick={() => chaseOne(row)}
+                    >
+                      {reminded ? `✓ ${t('home.remindSentToday')}` : t('home.remindRow', { name: shortName(row.customer.name) })}
+                    </button>
+                  )}
                   {!locked && (
                     <div class="quick-actions soft-list-qa">
                       <button

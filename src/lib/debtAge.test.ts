@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { compareCustomerRows, daysSince, openCycle } from '../db/repo';
+import { compareCustomerRows, daysSince, dueDayDiff, dueState, openCycle } from '../db/repo';
 import { rowAgeLine } from '../pages/HomePage';
 import type { Customer, CustomerBalance, Entry } from './types';
 
@@ -70,9 +70,9 @@ describe('Home row order (oldest debt first)', () => {
 
 describe('Row line A: red only for overdue', () => {
   it('overdue → "N days overdue" flagged red; plain owing never red', () => {
-    expect(rowAgeLine(row('a', 100, {}, { dueAt: NOW - 6 * DAY }), t, NOW)).toEqual({ text: 'home.daysOverdue{"n":6}', overdue: true });
+    expect(rowAgeLine(row('a', 100, {}, { dueAt: NOW - 6 * DAY }), t, NOW)).toEqual({ text: 'home.daysOverdue{"n":6}', overdue: true, dueState: 'passed' });
     expect(rowAgeLine(row('a', 100, {}, { dueAt: NOW - DAY - 1 }), t, NOW).text).toBe('home.dayOverdue');
-    expect(rowAgeLine(row('b', 100, { oldestUnpaidAt: NOW - 97 * DAY }), t, NOW)).toEqual({ text: 'home.ageMonths{"n":3}', overdue: false });
+    expect(rowAgeLine(row('b', 100, { oldestUnpaidAt: NOW - 97 * DAY }), t, NOW)).toEqual({ text: 'home.ageMonths{"n":3}', overdue: false, dueState: 'none' });
     expect(rowAgeLine(row('b', 100, { oldestUnpaidAt: NOW - 14 * DAY }), t, NOW).text).toBe('home.ageDays{"n":14}');
     expect(rowAgeLine(row('b', 100, { oldestUnpaidAt: NOW - DAY }), t, NOW).text).toBe('home.ageDay');
     expect(rowAgeLine(row('b', 100, { oldestUnpaidAt: NOW }), t, NOW).text).toBe('home.ageToday');
@@ -80,9 +80,51 @@ describe('Row line A: red only for overdue', () => {
   it('adds the due date when one is set and not passed', () => {
     expect(rowAgeLine(row('b', 100, { oldestUnpaidAt: NOW - 4 * DAY }, { dueAt: NOW + 3 * DAY }), t, NOW).text).toBe('home.ageDays{"n":4} · home.dueInDays{"n":3}');
   });
+  it('dueState: today badge', () => {
+    const r = rowAgeLine(row('t', 100, { oldestUnpaidAt: NOW - DAY }, { dueAt: NOW }), t, NOW);
+    expect(r.dueState).toBe('today');
+    expect(r.overdue).toBe(false);
+    expect(r.text).toContain('home.dueToday');
+  });
   it('settled, paid extra and no entries', () => {
     expect(rowAgeLine(row('s', 0, { lastPaymentAt: NOW - DAY }), t, NOW).text).toMatch(/^home.settledLastPaid/);
     expect(rowAgeLine(row('x', -100, { lastPaymentAt: NOW - DAY }), t, NOW).text).toMatch(/^home.paidExtra/);
     expect(rowAgeLine(row('z', 0, { entryCount: 0 }), t, NOW).text).toBe('home.noEntriesYet');
+  });
+});
+
+describe('dueDayDiff (calendar-day math)', () => {
+  it('same calendar day = 0, regardless of hours', () => {
+    const now = Date.UTC(2026, 9, 28, 20);
+    const dueAt = Date.UTC(2026, 9, 28, 8);
+    expect(dueDayDiff(dueAt, now)).toBe(0);
+  });
+  it('yesterday = -1, tomorrow = +1', () => {
+    const now = Date.UTC(2026, 9, 28, 12);
+    expect(dueDayDiff(Date.UTC(2026, 9, 27, 12), now)).toBe(-1);
+    expect(dueDayDiff(Date.UTC(2026, 9, 29, 12), now)).toBe(1);
+  });
+  it('time zone boundary: 11pm local is still day N', () => {
+    const now = new Date(2026, 9, 28, 23, 0).getTime();
+    const dueAt = new Date(2026, 9, 28, 8, 0).getTime();
+    expect(dueDayDiff(dueAt, now)).toBe(0);
+  });
+});
+
+describe('dueState', () => {
+  it('none when no dueAt', () => {
+    expect(dueState(cust('a'), 100)).toBe('none');
+  });
+  it('none when balance is zero', () => {
+    expect(dueState(cust('a', { dueAt: NOW - DAY }), 0)).toBe('none');
+  });
+  it('today when dueAt is today', () => {
+    expect(dueState(cust('a', { dueAt: NOW }), 100, NOW)).toBe('today');
+  });
+  it('upcoming when dueAt is in the future', () => {
+    expect(dueState(cust('a', { dueAt: NOW + 3 * DAY }), 100, NOW)).toBe('upcoming');
+  });
+  it('passed when dueAt is in the past', () => {
+    expect(dueState(cust('a', { dueAt: NOW - DAY }), 100, NOW)).toBe('passed');
   });
 });

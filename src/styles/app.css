@@ -743,6 +743,37 @@ button:active:not(:disabled),
   vertical-align: middle;
 }
 
+.overdue-badge.today {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.row-wa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  border: none;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0 0 var(--radius) var(--radius);
+  margin-top: -4px;
+}
+
+.row-wa:active {
+  background: var(--accent);
+}
+
+.row-wa.done {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
 .pro-badge {
   display: inline-flex;
   align-items: center;
@@ -2362,6 +2393,57 @@ button:active:not(:disabled),
 
 .entry-soft .entry-soft-save.btn-ok {
   box-shadow: 0 8px 20px rgba(21, 128, 61, 0.28);
+}
+
+/* Due-date picker */
+.due-picker {
+  border: none;
+  padding: 0;
+  margin: 12px 0 0;
+}
+
+.due-picker legend {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.due-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.due-chip {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.due-chip:active {
+  background: var(--bg);
+}
+
+.due-chip.active {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.due-date-input {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.due-preview {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  color: var(--muted);
 }
 
 /* —— Soft Balance: customer detail crest —— */

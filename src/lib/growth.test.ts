@@ -64,6 +64,21 @@ describe('brand footer', () => {
   });
 });
 
+describe('buildRemindMessage with dueState', () => {
+  it('uses dueToday wording when dueState is today', () => {
+    const msg = buildRemindMessage('Shop', 'Ada', 5000, 'today');
+    expect(msg).toContain('due today');
+  });
+  it('uses datePassed wording when dueState is passed', () => {
+    const msg = buildRemindMessage('Shop', 'Ada', 5000, 'passed');
+    expect(msg).toContain('overdue');
+  });
+  it('uses standard owes wording when no dueState', () => {
+    const msg = buildRemindMessage('Shop', 'Ada', 5000);
+    expect(msg).toContain('outstanding balance');
+  });
+});
+
 describe('attribution', () => {
   it('stores first touch from the query string only', () => {
     expect(captureAttribution('https://x.test/?app=1&src=rem&ref=bb-zz9#/')).toMatchObject({
