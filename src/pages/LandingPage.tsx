@@ -116,6 +116,9 @@ export function LandingPage({ onUseAppHere }: Props) {
             <button type="button" class="lp-hide" onClick={scrollTo('lp-faq')}>
               Questions
             </button>
+            <a class="lp-hide" href="/pricing">
+              Pricing
+            </a>
             <button type="button" class="lp-btn lp-sm" onClick={openAppHome}>
               Start free
             </button>
@@ -359,6 +362,7 @@ export function LandingPage({ onUseAppHere }: Props) {
           <a href={`${seo}/kippa-alternative`}>Looking for a Kippa alternative?</a>
           <a href="/whatsapp-payment-reminder">WhatsApp payment reminder messages</a>
           <a href="/credit-book-format">Credit book format (with example)</a>
+          <a href="/pricing">Pricing</a>
           <a href="/help">Help &amp; FAQ</a>
           <span>Bashi = credit (Hausa). Not affiliated with US DebtBook SaaS.</span>
         </div>

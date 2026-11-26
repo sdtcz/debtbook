@@ -4868,6 +4868,36 @@ a.settings-row {
 .intro-top{display:flex;align-items:center;gap:8px;color:var(--ink)}.intro-top .setup-lang{margin-left:auto}
 .intro-wa{padding:10px 12px;font-weight:700;color:var(--primary);border-top:1px solid var(--border)}
 .intro-cta .btn-primary{min-height:56px}.intro-top .setup-lang-pill{padding:0 12px}
+.intro-pro{margin:12px 0 0;font-size:.88rem;text-align:center;color:var(--muted)}.intro-pro a{color:var(--primary);font-weight:600;text-decoration:none}.intro-pro a:hover{text-decoration:underline}
+/* Spec 5: 390px phone-frame hero */
+.intro-kick{flex:none;margin:8px 0 0;font-size:.8rem;font-weight:750;letter-spacing:.02em;color:var(--ink);line-height:1.25;overflow-wrap:anywhere}
+.intro-screen .setup-title{margin:4px 0 6px;font-size:1.75rem;line-height:1.15}
+.stage{flex:1 1 auto;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;margin:8px 0 4px}
+.stage-blob{position:absolute;width:78%;height:72%;border-radius:40px;background:var(--accent-soft);transform:rotate(-5deg);z-index:0;pointer-events:none}
+.phone-frame{position:relative;z-index:1;width:min(292px,100%);border-radius:36px;background:#0f2e2c;padding:9px 9px 10px;box-shadow:0 28px 48px -22px #134e4a99}
+.phone-ear{position:absolute;left:50%;top:6px;transform:translateX(-50%);width:68px;height:8px;border-radius:999px;background:#071716;z-index:2}
+.phone-scr{background:var(--bg);border-radius:28px;overflow:hidden;display:flex;flex-direction:column}
+.phone-status{display:flex;align-items:center;justify-content:space-between;padding:8px 14px 2px;font-size:.62rem;font-weight:700;color:var(--ink);letter-spacing:.02em}
+.phone-icons{display:flex;gap:5px;align-items:center;opacity:.85}
+.phone-topbar{background:var(--primary);color:#fff;padding:8px 8px 8px 6px;display:flex;align-items:center;gap:6px;min-height:48px}
+.phone-back{flex:none;width:36px;height:36px;border:0;background:rgba(255,255,255,.14);border-radius:50%;display:grid;place-items:center}
+.phone-who{flex:1;min-width:0}
+.phone-name{margin:0;font-size:1.02rem;font-weight:700;letter-spacing:.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.phone-sub{font-size:.68rem;font-weight:500;opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.phone-body{padding:10px 10px 12px;display:flex;flex-direction:column;gap:10px}
+.phone-balance{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px 12px 10px}
+.phone-bal-row{display:flex;align-items:flex-start;gap:10px}
+.phone-av{width:40px;height:40px;border-radius:12px;flex:none;background:var(--accent-soft);color:var(--accent-ink);font-weight:800;font-size:1.05rem;display:grid;place-items:center}
+.phone-bal-text{min-width:0;flex:1}
+.phone-kicker{font-weight:800;font-size:.8rem;color:var(--muted);line-height:1.2}
+.phone-amt{font-size:1.7rem;font-weight:800;letter-spacing:-.03em;line-height:1.1;color:var(--ink);margin-top:1px}
+.phone-label{margin:3px 0 0;font-size:.8rem;font-weight:600;color:var(--muted);line-height:1.3;overflow-wrap:anywhere}
+.phone-pays{display:inline-block;margin-top:8px;font-size:.72rem;font-weight:800;letter-spacing:.02em;padding:3px 8px;border-radius:999px;line-height:1.2;background:var(--primary-soft);color:var(--ink);overflow-wrap:anywhere;max-width:100%}
+.phone-remind{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;padding:8px 10px;border:0;border-radius:12px;background:var(--primary);color:#fff;font-weight:800;font-size:.88rem;line-height:1.2;text-align:center;overflow-wrap:anywhere}
+.phone-home-ind{height:4px;width:86px;margin:6px auto 2px;border-radius:999px;background:#0a1f1e}
+@media(max-width:360px){.phone-frame{width:min(276px,100%);border-radius:32px;padding:8px 8px 9px}.phone-scr{border-radius:24px}.phone-amt{font-size:1.55rem}}
+@media(max-height:700px){.intro-pro{display:none}.intro-kick{margin-top:4px}}
+@media(max-height:600px){.intro-kick{display:none}.phone-status{display:none}.phone-amt{font-size:1.4rem}}
 /* Spec 4: Sunday week card */
 .growth-card.week{flex-direction:column;align-items:stretch}
 .week p{margin:4px 0 0;font-size:.95rem;color:var(--text)}

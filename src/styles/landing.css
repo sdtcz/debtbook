@@ -8,7 +8,7 @@
 .lp-brand img{border-radius:9px}
 .lp-brand b{display:block;font-size:1.15rem;color:var(--ink);letter-spacing:-.01em}.lp-brand small{display:block;font-size:.78rem;color:var(--m);font-weight:600;margin-top:-2px}
 .lp-nl{margin-left:auto;display:flex;gap:26px;align-items:center}
-.lp-nl .lp-hide{background:none;border:0;padding:8px 0;font-weight:650;font-size:.95rem;color:var(--m)}.lp-nl .lp-hide:hover{color:var(--ink)}
+.lp-nl .lp-hide{background:none;border:0;padding:8px 0;font-weight:650;font-size:.95rem;color:var(--m);text-decoration:none;display:inline-flex;align-items:center;min-height:44px}.lp-nl .lp-hide:hover{color:var(--ink)}
 .lp-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:54px;padding:0 24px;border-radius:14px;font-weight:800;font-size:1.02rem;border:0;background:var(--p);color:#fff;box-shadow:0 8px 22px -6px #0f766e73}.lp-btn:hover{background:var(--pd)}
 .lp-sm{min-height:42px;padding:0 18px;font-size:.92rem;box-shadow:none;background:var(--s);color:var(--ink);border:1.5px solid var(--ink)}.lp-sm:hover{background:var(--as)}
 .lp-tl{font-weight:750;color:var(--ink);background:none;border:0;display:inline-flex;align-items:center;min-height:54px;padding:0 6px}.lp-tl:hover{text-decoration:underline}

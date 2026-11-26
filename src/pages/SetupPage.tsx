@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { isRegionNigeria } from '../i18n';
-import { formatMoneyWhole, setCurrency } from '../lib/money';
+import { formatMoneyWhole, setCurrency, currencySymbol } from '../lib/money';
 import { defaultCurrency } from '../lib/currency';
 import { CurrencyOptions } from '../components/CurrencyOptions';
-import { BrandLockup } from '../components/BrandLockup';
+import { BrandLockup, brandTagline } from '../components/BrandLockup';
 import { saveShop, setShopLocale } from '../db/repo';
 import { notifyChanged } from '../components/StatusBadge';
 import { useLocale } from '../hooks/useLocale';
@@ -145,7 +145,9 @@ export function SetupPage({ onDone, fresh = false }: Props) {
 
   if (step === 'intro') {
     const amount = formatMoneyWhole(currency === 'NGN' ? 1250000 : 2500, currency);
+    const sym = currencySymbol(currency);
     const name = t('setup.introDemoName');
+    const noteText = t('setup.introDemoNote').replace(/^Owes you · /, '');
     return (
       <main class="setup-screen intro-screen">
         <div class="intro-top">
@@ -153,29 +155,66 @@ export function SetupPage({ onDone, fresh = false }: Props) {
           <b>BashiBook</b>
           {langPills(true)}
         </div>
+        <div class="intro-kick">{brandTagline(ng)}</div>
         <h1 class="setup-title">{t('setup.title')}</h1>
         <p class="setup-lede">{t('setup.lede')}</p>
-        <div class="intro-demo" role="img" aria-label={t('setup.introDemoLabel')}>
-          <div class="list-item-wrap soft-list-row debt">
-            <div class="list-item soft-list-link">
-              <div class="soft-list-avatar" aria-hidden="true">
-                {name.charAt(0)}
+
+        <div class="stage" role="img" aria-label={t('setup.introDemoLabel')}>
+          <div class="stage-blob" aria-hidden="true" />
+          <div class="phone-frame">
+            <div class="phone-ear" aria-hidden="true" />
+            <div class="phone-scr">
+              <div class="phone-status" aria-hidden="true">
+                <span>9:41</span>
+                <span class="phone-icons">
+                  <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor" aria-hidden="true"><rect x="0" y="6" width="2" height="4" rx=".4"/><rect x="3.5" y="4" width="2" height="6" rx=".4"/><rect x="7" y="2" width="2" height="8" rx=".4"/><rect x="10.5" y="0" width="2" height="10" rx=".4"/></svg>
+                  <svg width="14" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M2 8.5a11 11 0 0 1 20 0"/><path d="M6 12a6.5 6.5 0 0 1 12 0"/><path d="M12 16.5h.01" strokeWidth="3"/></svg>
+                  <svg width="18" height="10" viewBox="0 0 22 12" aria-hidden="true"><rect x=".7" y=".7" width="18" height="10.6" rx="2.2" fill="none" stroke="currentColor" strokeWidth="1.4"/><rect x="2.2" y="2.2" width="13.4" height="7.6" rx="1" fill="currentColor"/><rect x="19.4" y="3.6" width="1.6" height="4.8" rx=".6" fill="currentColor"/></svg>
+                </span>
               </div>
-              <div class="meta soft-list-meta">
-                <div class="name">{name}</div>
-                <div class="hint soft-list-hint">{t('setup.introDemoNote')}</div>
+              <header class="phone-topbar">
+                <span class="phone-back" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M15 19l-8-7 8-7"/></svg>
+                </span>
+                <div class="phone-who">
+                  <div class="phone-name">{name}</div>
+                  <div class="phone-sub">{noteText}</div>
+                </div>
+              </header>
+              <div class="phone-body">
+                <section class="phone-balance">
+                  <div class="phone-bal-row">
+                    <div class="phone-av" aria-hidden="true">{sym}</div>
+                    <div class="phone-bal-text">
+                      <div class="phone-kicker">{t('customer.balanceTitle')}</div>
+                      <div class="phone-amt">{amount}</div>
+                      <p class="phone-label">{t('balance.owesYou')}</p>
+                      <span class="phone-pays">{t('home.chipPaysOn', { day: 'Fri' })}</span>
+                    </div>
+                  </div>
+                </section>
+                <div class="phone-remind">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>
+                  </svg>
+                  {t('customer.remindOnWhatsApp', { name })}
+                </div>
               </div>
-              <div class="amount-pill soft-list-pill debt">{amount}</div>
             </div>
-            <div class="intro-wa">{t('setup.introRemind', { name })}</div>
-            <div class="intro-bub">{t('setup.introBubble', { name, amount })}</div>
+            <div class="phone-home-ind" aria-hidden="true" />
           </div>
         </div>
+
         <ul class="setup-checks">
           <li>{t('setup.check1')}</li>
           <li>{t('setup.check2')}</li>
           <li>{t('setup.check3Kb', { kb: KB_OPEN })}</li>
         </ul>
+        <p class="intro-pro">
+          <a href="/pricing">
+            {t('setup.proLine')} {ng ? t('setup.proPriceNgn') : t('setup.proPrice')}
+          </a>
+        </p>
         <div class="intro-cta">
           <button type="button" class="btn btn-primary btn-block" onClick={toForm}>
             {t('setup.introCta')}
