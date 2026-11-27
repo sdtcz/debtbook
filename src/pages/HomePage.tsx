@@ -315,6 +315,7 @@ export function HomePage({ locked, toast }: Props) {
       customerName: row.customer.name,
       phone: row.customer.phone,
       balanceKobo: row.balanceKobo,
+      dueState: dueState(row.customer, row.balanceKobo),
     });
     if (result === 'whatsapp') notify(t('customer.openingWhatsApp'));
     else if (result === 'sms') notify(t('customer.openingSms'));

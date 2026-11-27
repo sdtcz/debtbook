@@ -32,7 +32,7 @@ function loadPdfModules() {
   });
   return pdfModules;
 }
-import { isOverdue, lastPaymentAt } from '../db/repo';
+import { dueState, isOverdue, lastPaymentAt } from '../db/repo';
 import type { ToastAction } from '../hooks/useToast';
 import { deviceLocale } from '../lib/dates';
 
@@ -107,6 +107,7 @@ export function CustomerDetailPage({ id, toast }: Props) {
       customerName: customer.name,
       phone: customer.phone,
       balanceKobo,
+      dueState: dueState(customer, balanceKobo),
     });
     if (result === 'whatsapp') toast(t('customer.openingWhatsApp'));
     else if (result === 'sms') toast(t('customer.openingSms'));

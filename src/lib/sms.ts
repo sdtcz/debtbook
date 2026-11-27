@@ -10,7 +10,7 @@
  * ---------------------------------------------------------------------------
  */
 
-import { t } from '../i18n';
+import { getLocale, t } from '../i18n';
 import { appLink, withBrandFooter } from './growth';
 import { formatMoney } from './money';
 import { normalizeWhatsAppDigits } from './phone';
@@ -27,6 +27,10 @@ export function buildRemindMessage(
   const amount = formatMoney(Math.abs(balanceKobo));
   const vars = { customer: customerName, shop: shopName, amount };
   if (balanceKobo > 0) {
+    // 'Will pay on' wording. en only for now: the ha/yo dueToday/datePassed
+    // strings go to customers and still need a native-speaker check, so ha/yo
+    // keep the existing remind.owes wording until that check clears.
+    if (getLocale() !== 'en') dueState = undefined;
     if (dueState === 'today') return withBrandFooter(t('remind.dueToday', vars), 'rem');
     if (dueState === 'passed') return withBrandFooter(t('remind.datePassed', vars), 'rem');
     return withBrandFooter(t('remind.owes', vars), 'rem');
@@ -58,11 +62,14 @@ export async function remindCustomer(opts: {
   customerName: string;
   phone?: string;
   balanceKobo: number;
+  /** From repo.dueState(): picks the 'due today' / 'now overdue' wording. */
+  dueState?: DueState;
 }): Promise<'whatsapp' | 'sms' | 'share' | 'clipboard' | 'none'> {
   const message = buildRemindMessage(
     opts.shopName,
     opts.customerName,
     opts.balanceKobo,
+    opts.dueState,
   );
 
   // Prefer WhatsApp when we have a phone number (Nigeria-first)

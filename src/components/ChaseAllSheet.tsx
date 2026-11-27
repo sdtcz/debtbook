@@ -3,6 +3,7 @@ import { useLocale } from '../hooks/useLocale';
 import type { CustomerBalance } from '../lib/types';
 import { formatMoney, currencySymbol } from '../lib/money';
 import { remindCustomer } from '../lib/sms';
+import { dueState } from '../db/repo';
 
 interface Props {
   shopName: string;
@@ -52,6 +53,7 @@ export function ChaseAllSheet({ shopName, overdue, onClose, onToast }: Props) {
         customerName: row.customer.name,
         phone: row.customer.phone,
         balanceKobo: row.balanceKobo,
+        dueState: dueState(row.customer, row.balanceKobo),
       });
       if (result === 'whatsapp') onToast(t('customer.openingWhatsApp'));
       else if (result === 'sms') onToast(t('customer.openingSms'));
