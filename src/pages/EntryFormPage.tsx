@@ -334,6 +334,7 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
                         key={days}
                         type="button"
                         class={`due-chip${active ? ' active' : ''}`}
+                        aria-pressed={active}
                         onClick={() => setDueAt(active ? null : ts)}
                       >
                         {label}
@@ -341,21 +342,27 @@ export function EntryFormPage({ customerId, initialType, toast }: Props) {
                     );
                   });
                 })()}
-                <button
-                  type="button"
-                  class={`due-chip${showDatePicker || (dueAt && ![1, 3, 7].map((n) => {
+                {(() => {
+                  const pickActive = !!(showDatePicker || (dueAt && ![1, 3, 7].map((n) => {
                     const d = new Date();
                     d.setDate(d.getDate() + n);
                     d.setHours(0, 0, 0, 0);
                     return d.getTime();
-                  }).includes(dueAt)) ? ' active' : ''}`}
-                  onClick={() => {
-                    setShowDatePicker((p) => !p);
-                    setTimeout(() => dateRef.current?.showPicker?.(), 50);
-                  }}
-                >
-                  {t('entry.duePickDate')}
-                </button>
+                  }).includes(dueAt)));
+                  return (
+                    <button
+                      type="button"
+                      class={`due-chip${pickActive ? ' active' : ''}`}
+                      aria-pressed={pickActive}
+                      onClick={() => {
+                        setShowDatePicker((p) => !p);
+                        setTimeout(() => dateRef.current?.showPicker?.(), 50);
+                      }}
+                    >
+                      {t('entry.duePickDate')}
+                    </button>
+                  );
+                })()}
               </div>
               {showDatePicker && (
                 <input

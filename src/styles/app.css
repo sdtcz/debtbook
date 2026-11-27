@@ -2403,36 +2403,53 @@ button:active:not(:disabled),
 }
 
 .due-picker legend {
+  padding: 0;
   font-size: 0.85rem;
+  font-weight: 600;
   color: var(--muted);
   margin-bottom: 8px;
 }
 
+/* 'Will pay on' chips: same look and 44px tap as the .chip system, even 2x2
+   grid so long Hausa/Yoruba labels wrap inside the chip instead of leaving a
+   ragged row under the 5-column quick-amount chips. */
 .due-chips {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 
 .due-chip {
-  padding: 8px 14px;
-  border: 1px solid var(--border);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: var(--tap-min, 44px);
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
   border-radius: 999px;
-  background: var(--surface);
+  background: #fff;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: break-word;
   color: var(--text);
   cursor: pointer;
 }
 
 .due-chip:active {
-  background: var(--bg);
+  transform: scale(0.97);
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .due-chip.active {
   border-color: var(--primary);
   background: var(--primary-soft);
-  color: var(--primary-dark);
+  color: var(--primary);
 }
 
 .due-date-input {
@@ -2441,9 +2458,14 @@ button:active:not(:disabled),
 }
 
 .due-preview {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #f0fdfa;
   font-size: 0.9rem;
-  color: var(--muted);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--primary-dark);
 }
 
 /* —— Soft Balance: customer detail crest —— */
